@@ -1,0 +1,53 @@
+{
+  "name": "hardhat-project",
+  "scripts": {
+    "forge": "forge",
+    "build": "forge build",
+    "clean": "forge clean",
+    "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/gnosis --fork-block-number 19592773 --match-contract TheBadgeTest",
+    "test:all": "yarn forge test -vv --fork-url https://eth-goerli.alchemyapi.io/v2/QUuY7K6TSAGYCMXLBQiKwO43O9lLyrEE --fork-block-number 5744491",
+    "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
+    "lint:sol": "solhint --config ./.solhint.json \"src/**/*.sol\"",
+    "lint:ts": "eslint --config ./.eslintrc.js --ignore-path ./.eslintignore --ext .js,.ts .",
+    "prettier": "prettier --config ./.prettierrc.yaml --write \"**/*.{js,json,md,sol,ts,yaml,yml}\"",
+    "prettier:check": "prettier --check --config ./.prettierrc.yaml \"**/*.{js,json,md,sol,ts,yaml,yml}\"",
+    "deploy:goerli": "hardhat run --network goerli ./scripts/deploy.ts",
+    "deploy:gnosis": "hardhat run --network gnosis ./scripts/deploy.ts"
+  },
+  "dependencies": {
+    "@kleros/erc-792": "^8.0.0",
+    "@kleros/kathari": "^0.25.0",
+    "@openzeppelin/contracts": "^4.7.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.6",
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
+    "@nomiclabs/hardhat-etherscan": "^3.1.0",
+    "@typechain/hardhat": "^6.1.3",
+    "@typechain/ethers-v5": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.38.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "chai": "^4.3.6",
+    "dotenv": "^16.0.2",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "hardhat": "^2.10.1",
+    "hardhat-gas-reporter": "^1.0.9",
+    "hardhat-deploy": "^0.11.10",
+    "prettier": "^2.6.2",
+    "prettier-plugin-solidity": "^1.0.0-beta.19",
+    "solhint": "^3.3.7",
+    "solhint-plugin-prettier": "^0.0.5",
+    "solidity-coverage": "^0.8.2",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.0.0",
+    "typescript": "^4.7.4"
+  }
+}
