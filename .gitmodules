@@ -6,3 +6,7 @@
 	path = lib/openzeppelin-contracts-upgradeable
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
 	branch = v4.8.0
+[submodule "lib/erc-792"]
+	path = lib/erc-792
+	url = https://github.com/kleros/erc-792
+	branch = v8.0.0
