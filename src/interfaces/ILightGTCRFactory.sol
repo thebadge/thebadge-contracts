@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import { ILightGeneralizedTCR } from "./ILightGeneralizedTCR.sol";
 
-import { IArbitrator } from "@kleros/erc-792/contracts/IArbitrator.sol";
+import { IArbitrator } from "../../lib/erc-792/contracts/IArbitrator.sol";
 
 /**
  *  @title LightGTCRFactory

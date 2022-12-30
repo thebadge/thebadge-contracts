@@ -3,23 +3,11 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 
-import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/StringsUpgradeable.sol";
 
 import { TheBadge } from "../../src/TheBadge.sol";
-import { KlerosBadgeTypeController } from "../../src/badgeTypes/kleros.sol";
+import { KlerosBadgeTypeController } from "../../src/badgeTypeControllers/kleros.sol";
 import { BadgeStatus } from "../../src/utils.sol";
-
-// import { DelegationGuard } from "../../src/DelegationGuard.sol";
-// import { RentalsController } from "../../src/RentalsController.sol";
-// import { DelegationWalletFactory } from "../../src/DelegationWalletFactory.sol";
-// import { DelegationRecipes } from "../../src/DelegationRecipes.sol";
-// import { TestNft } from "../../src/test/TestNft.sol";
-// import { TestNftPlatform } from "../../src/test/TestNftPlatform.sol";
-
-// import { GnosisSafe } from "@gnosis.pm/safe-contracts/contracts/GnosisSafe.sol";
-// import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
-// import { UpgradeableBeacon } from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
-// import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract Config is Test {
     address public deployer;
@@ -43,6 +31,14 @@ contract Config is Test {
     TheBadge public theBadge;
     KlerosBadgeTypeController public klerosController;
 
+    // GBC:
+    address lightGTCRFactory = 0x08e58Bc26CFB0d346bABD253A1799866F269805a;
+    address klerosArbitror = 0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002;
+
+    // Goerli
+    //address lightGTCRFactory = 0x55A3d9Bd99F286F1817CAFAAB124ddDDFCb0F314;
+    //address klerosArbitror = 0x1128eD55ab2d796fa92D2F8E1f336d745354a77A;
+
     constructor() {
         vm.deal(admin, 100 ether);
         vm.deal(admin, 100 ether);
@@ -50,23 +46,14 @@ contract Config is Test {
         vm.deal(goku, 100 ether);
         vm.deal(feeCollector, 100 ether);
 
-        theBadge = new TheBadge(admin, feeCollector);
+        theBadge = new TheBadge();
+        theBadge.initialize(admin, feeCollector);
 
-        klerosController = new KlerosBadgeTypeController(
-            address(theBadge),
-            0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002,
-            0x08e58Bc26CFB0d346bABD253A1799866F269805a
-        );
+        klerosController = new KlerosBadgeTypeController();
+        klerosController.initialize(address(theBadge), klerosArbitror, lightGTCRFactory);
 
         vm.prank(admin);
         theBadge.setBadgeTypeController("kleros", address(klerosController));
-
-        // GBC:
-        // theBadge.setTrustedAddress("lightGTCRFactory", 0x08e58Bc26CFB0d346bABD253A1799866F269805a);
-        // theBadge.setTrustedAddress("klerosArbitror", 0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002);
-        // Goerli
-        // trustedAddresses["lightGTCRFactory"] = 0x55A3d9Bd99F286F1817CAFAAB124ddDDFCb0F314;
-        // trustedAddresses["klerosArbitror"] = 0x1128eD55ab2d796fa92D2F8E1f336d745354a77A;
     }
 
     function getBaseBadgeType() public view returns (TheBadge.CreateBadgeType memory) {
