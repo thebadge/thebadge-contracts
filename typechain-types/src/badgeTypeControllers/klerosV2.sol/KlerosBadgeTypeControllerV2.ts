@@ -28,7 +28,7 @@ import type {
   PromiseOrValue,
 } from "../../../common";
 
-export interface KlerosBadgeTypeControllerInterface extends utils.Interface {
+export interface KlerosBadgeTypeControllerV2Interface extends utils.Interface {
   functions: {
     "arbitrator()": FunctionFragment;
     "badgeRequestValue(uint256)": FunctionFragment;
@@ -190,12 +190,12 @@ export type NewKlerosStrategyEvent = TypedEvent<
 export type NewKlerosStrategyEventFilter =
   TypedEventFilter<NewKlerosStrategyEvent>;
 
-export interface KlerosBadgeTypeController extends BaseContract {
+export interface KlerosBadgeTypeControllerV2 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: KlerosBadgeTypeControllerInterface;
+  interface: KlerosBadgeTypeControllerV2Interface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,

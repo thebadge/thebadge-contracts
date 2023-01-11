@@ -2,6 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as badgeTypeControllers from "./badgeTypeControllers";
-export * as badgeTypes from "./badgeTypes";
 export * as interfaces from "./interfaces";
 export { TheBadge__factory } from "./TheBadge__factory";

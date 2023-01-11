@@ -3,8 +3,6 @@
 /* eslint-disable */
 import type * as badgeTypeControllers from "./badgeTypeControllers";
 export type { badgeTypeControllers };
-import type * as badgeTypes from "./badgeTypes";
-export type { badgeTypes };
 import type * as interfaces from "./interfaces";
 export type { interfaces };
 export type { TheBadge } from "./TheBadge";

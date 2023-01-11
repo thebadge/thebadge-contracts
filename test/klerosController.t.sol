@@ -24,7 +24,6 @@ contract TheBadgeTest is Config {
         stakeMultipliers[2] = 1;
 
         KlerosBadgeTypeController.CreateBadgeType memory strategy = KlerosBadgeTypeController.CreateBadgeType(
-            "ipfs/metadataForBadge.json",
             address(0), // governor
             address(0), // admin
             1, // court
@@ -33,9 +32,7 @@ contract TheBadgeTest is Config {
             "ipfs/clearingMetaEvidence.json",
             1, // challengePeriodDuration
             baseDeposits,
-            stakeMultipliers,
-            0, // mint cost
-            oneYear
+            stakeMultipliers
         );
         return strategy;
     }

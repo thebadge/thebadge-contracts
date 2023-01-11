@@ -39,7 +39,6 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * @param validFor The time in seconds of how long the badge is valid. (cero for infinite)
      */
     struct CreateBadgeType {
-        string badgeMetadata;
         address governor;
         address admin;
         uint256 courtId;
@@ -49,8 +48,6 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
         uint256 challengePeriodDuration;
         uint256[4] baseDeposits;
         uint256[3] stakeMultipliers;
-        uint256 mintCost; // TODO: rename to value
-        uint256 validFor; // how many days an asset is valid after being minted. if 0 then is valid forever.
     }
 
     struct RequestBadgeData {
@@ -98,12 +95,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * Events
      * =========================
      */
-    event NewKlerosStrategy(
-        uint256 indexed strategyId,
-        address indexed klerosTCRAddress,
-        string metadata,
-        string registrationMetadata
-    );
+    event NewKlerosStrategy(uint256 indexed strategyId, address indexed klerosTCRAddress, string registrationMetadata);
     event MintKlerosBadge(address indexed callee, uint256 indexed badgeTypeId, address indexed to, string evidence);
 
     /**
@@ -144,7 +136,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * @param badgeId BadgeId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
-    function createBadgeType(uint256 badgeId, bytes calldata data) public payable {
+    function createBadgeType(uint256 badgeId, bytes calldata data) public payable onlyTheBadge {
         KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeId];
         if (_klerosBadgeType.tcrList != address(0)) {
             revert KlerosBadgeTypeController__createBadgeType_badgeTypeAlreadyCreated();
@@ -176,7 +168,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
 
         klerosBadgeType[badgeId] = KlerosBadgeType(klerosTcrListAddress);
 
-        emit NewKlerosStrategy(badgeId, klerosTcrListAddress, args.badgeMetadata, args.registrationMetaEvidence);
+        emit NewKlerosStrategy(badgeId, klerosTcrListAddress, args.registrationMetaEvidence);
     }
 
     /**

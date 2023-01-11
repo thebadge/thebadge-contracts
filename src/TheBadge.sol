@@ -2,11 +2,10 @@
 pragma solidity 0.8.17;
 
 import "../lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import "../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 
 import "./utils.sol";
 import "./interfaces/IBadgeController.sol";
-
-import "../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 
 // TODO: add BADGE address as ERC20
 contract TheBadge is Initializable, ERC1155URIStorageUpgradeable {

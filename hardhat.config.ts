@@ -1,18 +1,13 @@
 import * as dotenv from "dotenv";
 
+import * as tdly from "@tenderly/hardhat-tenderly";
 import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-deploy";
-import "@typechain/hardhat";
-import "@nomiclabs/hardhat-etherscan";
-import "@openzeppelin/hardhat-upgrades";
-
-// import "./tasks/createCollection";
 
 dotenv.config();
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+tdly.setup();
 
 let accounts: any[] = [];
 if (process.env.PRIVATE_KEY !== undefined) {
@@ -43,6 +38,8 @@ const config: HardhatUserConfig = {
     goerli: {
       url: process.env.GOERLI_URL || "",
       accounts: accounts,
+      timeout: 100000,
+      gasPrice: 50284379181,
     },
     gnosis: {
       url: process.env.GNOSIS_URL || "",

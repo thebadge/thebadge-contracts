@@ -14,3 +14,7 @@ node_modules/
 
 cache/
 artifacts/
+
+# hardhat-tenderly plugin
+deployments
+EOF
