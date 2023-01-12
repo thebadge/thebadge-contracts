@@ -8,7 +8,6 @@ import type {
   BytesLike,
   CallOverrides,
   ContractTransaction,
-  Overrides,
   PayableOverrides,
   PopulatedTransaction,
   Signer,
@@ -36,7 +35,6 @@ export interface KlerosBadgeTypeControllerInterface extends utils.Interface {
     "canRequestBadge(uint256,address)": FunctionFragment;
     "claimBadge(uint256,address)": FunctionFragment;
     "createBadgeType(uint256,bytes)": FunctionFragment;
-    "initialize(address,address,address)": FunctionFragment;
     "klerosBadge(uint256,address)": FunctionFragment;
     "klerosBadgeType(uint256)": FunctionFragment;
     "requestBadge(address,uint256,address,bytes)": FunctionFragment;
@@ -52,7 +50,6 @@ export interface KlerosBadgeTypeControllerInterface extends utils.Interface {
       | "canRequestBadge"
       | "claimBadge"
       | "createBadgeType"
-      | "initialize"
       | "klerosBadge"
       | "klerosBadgeType"
       | "requestBadge"
@@ -83,14 +80,6 @@ export interface KlerosBadgeTypeControllerInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "createBadgeType",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "initialize",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>
-    ]
   ): string;
   encodeFunctionData(
     functionFragment: "klerosBadge",
@@ -130,7 +119,6 @@ export interface KlerosBadgeTypeControllerInterface extends utils.Interface {
     functionFragment: "createBadgeType",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "klerosBadge",
     data: BytesLike
@@ -147,22 +135,13 @@ export interface KlerosBadgeTypeControllerInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "theBadge", data: BytesLike): Result;
 
   events: {
-    "Initialized(uint8)": EventFragment;
     "MintKlerosBadge(address,uint256,address,string)": EventFragment;
     "NewKlerosStrategy(uint256,address,string)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MintKlerosBadge"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewKlerosStrategy"): EventFragment;
 }
-
-export interface InitializedEventObject {
-  version: number;
-}
-export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
-
-export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
 
 export interface MintKlerosBadgeEventObject {
   callee: string;
@@ -248,13 +227,6 @@ export interface KlerosBadgeTypeController extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    initialize(
-      _theBadge: PromiseOrValue<string>,
-      _arbitrator: PromiseOrValue<string>,
-      _tcrFactory: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     klerosBadge(
       arg0: PromiseOrValue<BigNumberish>,
       arg1: PromiseOrValue<string>,
@@ -314,13 +286,6 @@ export interface KlerosBadgeTypeController extends BaseContract {
     badgeId: PromiseOrValue<BigNumberish>,
     data: PromiseOrValue<BytesLike>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  initialize(
-    _theBadge: PromiseOrValue<string>,
-    _arbitrator: PromiseOrValue<string>,
-    _tcrFactory: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   klerosBadge(
@@ -384,13 +349,6 @@ export interface KlerosBadgeTypeController extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    initialize(
-      _theBadge: PromiseOrValue<string>,
-      _arbitrator: PromiseOrValue<string>,
-      _tcrFactory: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     klerosBadge(
       arg0: PromiseOrValue<BigNumberish>,
       arg1: PromiseOrValue<string>,
@@ -422,9 +380,6 @@ export interface KlerosBadgeTypeController extends BaseContract {
   };
 
   filters: {
-    "Initialized(uint8)"(version?: null): InitializedEventFilter;
-    Initialized(version?: null): InitializedEventFilter;
-
     "MintKlerosBadge(address,uint256,address,string)"(
       callee?: PromiseOrValue<string> | null,
       badgeTypeId?: PromiseOrValue<BigNumberish> | null,
@@ -482,13 +437,6 @@ export interface KlerosBadgeTypeController extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    initialize(
-      _theBadge: PromiseOrValue<string>,
-      _arbitrator: PromiseOrValue<string>,
-      _tcrFactory: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     klerosBadge(
       arg0: PromiseOrValue<BigNumberish>,
       arg1: PromiseOrValue<string>,
@@ -543,13 +491,6 @@ export interface KlerosBadgeTypeController extends BaseContract {
       badgeId: PromiseOrValue<BigNumberish>,
       data: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    initialize(
-      _theBadge: PromiseOrValue<string>,
-      _arbitrator: PromiseOrValue<string>,
-      _tcrFactory: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     klerosBadge(

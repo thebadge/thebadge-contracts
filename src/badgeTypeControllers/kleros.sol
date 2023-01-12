@@ -4,14 +4,14 @@ pragma solidity 0.8.17;
 import { ILightGeneralizedTCR } from "../interfaces/ILightGeneralizedTCR.sol";
 import { ILightGTCRFactory } from "../interfaces/ILightGTCRFactory.sol";
 import { IArbitrator } from "../../lib/erc-792/contracts/IArbitrator.sol";
-import "../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+// import "../../lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 
 import "../interfaces/IBadgeController.sol";
 import "../interfaces/ITheBadge.sol";
 
 // TODO: make this upgradable
 // TODO: only callable from TheBadge contract
-contract KlerosBadgeTypeController is Initializable, IBadgeController {
+contract KlerosBadgeTypeController is IBadgeController {
     ITheBadge public theBadge;
     IArbitrator public arbitrator;
     address public tcrFactory;
@@ -125,7 +125,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
         _;
     }
 
-    function initialize(address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
+    constructor(address _theBadge, address _arbitrator, address _tcrFactory) {
         theBadge = ITheBadge(_theBadge);
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
@@ -136,7 +136,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * @param badgeId BadgeId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
-    function createBadgeType(uint256 badgeId, bytes calldata data) public payable onlyTheBadge {
+    function createBadgeType(uint256 badgeId, bytes calldata data) public payable {
         KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeId];
         if (_klerosBadgeType.tcrList != address(0)) {
             revert KlerosBadgeTypeController__createBadgeType_badgeTypeAlreadyCreated();

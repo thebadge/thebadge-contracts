@@ -67,7 +67,6 @@ export interface TheBadgeInterface extends utils.Interface {
     "createBadgeTypeValue()": FunctionFragment;
     "emitters(address)": FunctionFragment;
     "feeCollector()": FunctionFragment;
-    "initialize(address,address)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "minBadgeMintValue()": FunctionFragment;
     "mintBadgeDefaultFee()": FunctionFragment;
@@ -104,7 +103,6 @@ export interface TheBadgeInterface extends utils.Interface {
       | "createBadgeTypeValue"
       | "emitters"
       | "feeCollector"
-      | "initialize"
       | "isApprovedForAll"
       | "minBadgeMintValue"
       | "mintBadgeDefaultFee"
@@ -171,10 +169,6 @@ export interface TheBadgeInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "feeCollector",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "initialize",
-    values: [PromiseOrValue<string>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
@@ -317,7 +311,6 @@ export interface TheBadgeInterface extends utils.Interface {
     functionFragment: "feeCollector",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
     data: BytesLike
@@ -398,7 +391,6 @@ export interface TheBadgeInterface extends utils.Interface {
     "BadgeTypeCreated(address,uint256,string)": EventFragment;
     "EmitterRegistered(address,address,string)": EventFragment;
     "EmitterUpdated(address,string)": EventFragment;
-    "Initialized(uint8)": EventFragment;
     "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
     "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
     "URI(string,uint256)": EventFragment;
@@ -409,7 +401,6 @@ export interface TheBadgeInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "BadgeTypeCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "EmitterRegistered"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "EmitterUpdated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TransferBatch"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TransferSingle"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "URI"): EventFragment;
@@ -476,13 +467,6 @@ export type EmitterUpdatedEvent = TypedEvent<
 >;
 
 export type EmitterUpdatedEventFilter = TypedEventFilter<EmitterUpdatedEvent>;
-
-export interface InitializedEventObject {
-  version: number;
-}
-export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
-
-export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
 
 export interface TransferBatchEventObject {
   operator: string;
@@ -611,12 +595,6 @@ export interface TheBadge extends BaseContract {
     ): Promise<[string] & { metadata: string }>;
 
     feeCollector(overrides?: CallOverrides): Promise<[string]>;
-
-    initialize(
-      _admin: PromiseOrValue<string>,
-      _feeCollector: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     isApprovedForAll(
       account: PromiseOrValue<string>,
@@ -796,12 +774,6 @@ export interface TheBadge extends BaseContract {
 
   feeCollector(overrides?: CallOverrides): Promise<string>;
 
-  initialize(
-    _admin: PromiseOrValue<string>,
-    _feeCollector: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   isApprovedForAll(
     account: PromiseOrValue<string>,
     operator: PromiseOrValue<string>,
@@ -978,12 +950,6 @@ export interface TheBadge extends BaseContract {
 
     feeCollector(overrides?: CallOverrides): Promise<string>;
 
-    initialize(
-      _admin: PromiseOrValue<string>,
-      _feeCollector: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     isApprovedForAll(
       account: PromiseOrValue<string>,
       operator: PromiseOrValue<string>,
@@ -1151,9 +1117,6 @@ export interface TheBadge extends BaseContract {
       metadata?: null
     ): EmitterUpdatedEventFilter;
 
-    "Initialized(uint8)"(version?: null): InitializedEventFilter;
-    Initialized(version?: null): InitializedEventFilter;
-
     "TransferBatch(address,address,address,uint256[],uint256[])"(
       operator?: PromiseOrValue<string> | null,
       from?: PromiseOrValue<string> | null,
@@ -1247,12 +1210,6 @@ export interface TheBadge extends BaseContract {
     ): Promise<BigNumber>;
 
     feeCollector(overrides?: CallOverrides): Promise<BigNumber>;
-
-    initialize(
-      _admin: PromiseOrValue<string>,
-      _feeCollector: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
 
     isApprovedForAll(
       account: PromiseOrValue<string>,
@@ -1425,12 +1382,6 @@ export interface TheBadge extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     feeCollector(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    initialize(
-      _admin: PromiseOrValue<string>,
-      _feeCollector: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
 
     isApprovedForAll(
       account: PromiseOrValue<string>,

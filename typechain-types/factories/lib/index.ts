@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as erc792 from "./erc-792";
+export * as openzeppelinContracts from "./openzeppelin-contracts";
 export * as openzeppelinContractsUpgradeable from "./openzeppelin-contracts-upgradeable";
