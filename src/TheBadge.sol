@@ -51,7 +51,7 @@ contract TheBadge is ERC1155URIStorage {
         string metadata;
         string controllerName;
         uint256 mintCost;
-        uint256 mintFee;
+        uint256 mintFee; // TODO: remove
         uint256 validFor;
     }
 
@@ -114,7 +114,15 @@ contract TheBadge is ERC1155URIStorage {
     event EmitterRegistered(address indexed emitter, address indexed registrant, string metadata);
     event EmitterUpdated(address indexed emitter, string metadata);
     event BadgeTypeCreated(address creator, uint256 badgeId, string metadata);
+    event BadgeRequested(
+        uint256 indexed badgeId,
+        address indexed account,
+        address registrant,
+        BadgeStatus status,
+        uint256 validFor
+    );
     event BadgeStatusUpdated(uint256 indexed badgeId, address indexed badgeOwner, BadgeStatus status);
+
     /**
      * =========================
      * Errors
@@ -337,8 +345,6 @@ contract TheBadge is ERC1155URIStorage {
             args.validFor
         );
 
-        // TODO: analyze if we save metadata here or on badgeType
-        // besides exposing uri standard method we could also export badgeUri
         _setURI(badgeIds, args.metadata);
 
         emit BadgeTypeCreated(_msgSender(), badgeIds, args.metadata);
@@ -414,13 +420,13 @@ contract TheBadge is ERC1155URIStorage {
         }
 
         _mint(account, badgeId, 1, "0x");
-        if (_badgeType.validFor == 0) {
-            badge[badgeId][account] = Badge(BadgeStatus.InReview, 0);
-        } else {
-            badge[badgeId][account] = Badge(BadgeStatus.InReview, block.timestamp + _badgeType.validFor);
-        }
+        BadgeStatus status = BadgeStatus.InReview;
+        uint256 validFor = _badgeType.validFor == 0 ? 0 : block.timestamp + _badgeType.validFor;
+        badge[badgeId][account] = Badge(status, validFor);
 
         controller.requestBadge{ value: (msg.value - _badgeType.mintCost) }(_msgSender(), badgeId, account, data);
+
+        emit BadgeRequested(badgeId, account, _msgSender(), status, validFor);
     }
 
     function updateBadgeStatus(

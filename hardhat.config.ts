@@ -4,7 +4,7 @@ import * as tdly from "@tenderly/hardhat-tenderly";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-ethers";
-import "hardhat-deploy";
+import "@openzeppelin/hardhat-upgrades";
 
 dotenv.config();
 tdly.setup();
@@ -45,9 +45,6 @@ const config: HardhatUserConfig = {
       url: process.env.GNOSIS_URL || "",
       accounts: accounts,
     },
-  },
-  namedAccounts: {
-    deployer: { default: 0 },
   },
   etherscan: {
     // Your API key for Etherscan

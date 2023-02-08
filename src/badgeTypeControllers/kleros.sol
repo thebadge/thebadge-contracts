@@ -95,8 +95,8 @@ contract KlerosBadgeTypeController is IBadgeController {
      * Events
      * =========================
      */
-    event NewKlerosStrategy(uint256 indexed strategyId, address indexed klerosTCRAddress, string registrationMetadata);
-    event MintKlerosBadge(address indexed callee, uint256 indexed badgeTypeId, address indexed to, string evidence);
+    event NewKlerosBadgeType(uint256 indexed badgeId, address indexed klerosTCRAddress, string registrationMetadata);
+    event RequestKlerosBadge(address indexed callee, uint256 indexed badgeTypeId, address indexed to, string evidence);
 
     /**
      * =========================
@@ -136,7 +136,7 @@ contract KlerosBadgeTypeController is IBadgeController {
      * @param badgeId BadgeId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
-    function createBadgeType(uint256 badgeId, bytes calldata data) public payable {
+    function createBadgeType(uint256 badgeId, bytes calldata data) public payable onlyTheBadge {
         KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeId];
         if (_klerosBadgeType.tcrList != address(0)) {
             revert KlerosBadgeTypeController__createBadgeType_badgeTypeAlreadyCreated();
@@ -168,7 +168,7 @@ contract KlerosBadgeTypeController is IBadgeController {
 
         klerosBadgeType[badgeId] = KlerosBadgeType(klerosTcrListAddress);
 
-        emit NewKlerosStrategy(badgeId, klerosTcrListAddress, args.registrationMetaEvidence);
+        emit NewKlerosBadgeType(badgeId, klerosTcrListAddress, args.registrationMetaEvidence);
     }
 
     /**
@@ -221,7 +221,8 @@ contract KlerosBadgeTypeController is IBadgeController {
         lightGeneralizedTCR.addItem{ value: (msg.value) }(args.evidence);
 
         klerosBadge[badgeId][account] = KlerosBadge(keccak256(abi.encodePacked(args.evidence)), callee, msg.value);
-        emit MintKlerosBadge(callee, badgeId, account, args.evidence);
+
+        emit RequestKlerosBadge(callee, badgeId, account, args.evidence);
     }
 
     /**
