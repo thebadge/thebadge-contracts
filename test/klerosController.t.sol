@@ -11,7 +11,7 @@ import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol
 import "../src/interfaces/IBadgeController.sol";
 
 contract TheBadgeTest is Config {
-    function getKlerosBaseBadgeType() public view returns (KlerosBadgeTypeController.CreateBadgeType memory) {
+    function getKlerosBaseBadgeType() public pure returns (KlerosBadgeTypeController.CreateBadgeType memory) {
         uint256[4] memory baseDeposits;
         baseDeposits[0] = 1;
         baseDeposits[1] = 1;
@@ -66,9 +66,9 @@ contract TheBadgeTest is Config {
         // create badge-type
         TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
         KlerosBadgeTypeController.CreateBadgeType memory klerosBadgeType = getKlerosBaseBadgeType();
-        klerosBadgeType.mintCost = 1 ether;
+        // klerosBadgeType.mintCost = 1 ether;
         klerosBadgeType.challengePeriodDuration = 10;
-        klerosBadgeType.validFor = 100;
+        // klerosBadgeType.validFor = 100;
         vm.prank(vegeta);
         theBadge.createBadgeType(badgeType, abi.encode(klerosBadgeType));
         uint256 badgeId = theBadge.badgeIds();
@@ -99,9 +99,9 @@ contract TheBadgeTest is Config {
         // create badge-type
         TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
         KlerosBadgeTypeController.CreateBadgeType memory klerosBadgeType = getKlerosBaseBadgeType();
-        klerosBadgeType.mintCost = 1 ether;
+        // klerosBadgeType.mintCost = 1 ether;
+        //klerosBadgeType.validFor = 100;
         klerosBadgeType.challengePeriodDuration = 10;
-        klerosBadgeType.validFor = 100;
         vm.prank(vegeta);
         theBadge.createBadgeType(badgeType, abi.encode(klerosBadgeType));
         uint256 badgeId = theBadge.badgeIds();
