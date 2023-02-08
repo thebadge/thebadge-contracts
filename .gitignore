@@ -1,6 +1,7 @@
 # Compiler files
 cache/
 out/
+typechain-types/
 
 # Ignores development broadcast logs
 !/broadcast

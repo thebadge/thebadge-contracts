@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 
-import "@openzeppelin/contracts/utils/StringsUpgradeable.sol";
+import "../../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol";
 
 import { TheBadge } from "../../src/TheBadge.sol";
 import { KlerosBadgeTypeController } from "../../src/badgeTypeControllers/kleros.sol";

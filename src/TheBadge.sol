@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.17;
 
-import "../lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
-// import "../lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
-
+import "../lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+// import "../lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
+import "../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "./utils.sol";
 import "./interfaces/IBadgeController.sol";
 
 // TODO: add BADGE address as ERC20
-contract TheBadge is ERC1155URIStorage {
+contract TheBadge is Initializable, ERC1155URIStorageUpgradeable {
     address public admin;
     uint256 public badgeIds;
     uint256 public registerEmitterValue;
@@ -193,7 +193,20 @@ contract TheBadge is ERC1155URIStorage {
      * =========================
      */
 
-    constructor(address _admin, address _feeCollector) ERC1155("") {
+    // constructor(address _admin, address _feeCollector) ERC1155("") {
+    //     if (address(0) == _admin || address(0) == _feeCollector) {
+    //         revert TheBadge__constructor_paramAddressesCanNotBeZero();
+    //     }
+    //     registerEmitterValue = uint256(0);
+    //     mintBadgeDefaultFee = uint256(4000); // in bps
+    //     minBadgeMintValue = uint256(0);
+    //     createBadgeTypeValue = uint256(0);
+    //     admin = _admin;
+    //     feeCollector = _feeCollector;
+    // }
+
+    function initialize(address _admin, address _feeCollector) public initializer {
+        __ERC1155URIStorage_init();
         if (address(0) == _admin || address(0) == _feeCollector) {
             revert TheBadge__constructor_paramAddressesCanNotBeZero();
         }

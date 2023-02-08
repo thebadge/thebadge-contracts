@@ -3,8 +3,8 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 
-import "@openzeppelin/contracts/utils/StringsUpgradeable.sol";
-import { AddressUpgradeable } from "@openzeppelin/contracts/utils/AddressUpgradeable.sol";
+import "../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol";
+import { AddressUpgradeable } from "../lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 
 import { Config, TheBadge } from "./utils/Config.sol";
 import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol";
