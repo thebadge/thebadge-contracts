@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "../lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 // import "../lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 import "../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import "./utils.sol";
+import "./utils/enums.sol";
 import "./interfaces/IBadgeController.sol";
 
 // TODO: add BADGE address as ERC20
@@ -51,7 +51,6 @@ contract TheBadge is Initializable, ERC1155URIStorageUpgradeable {
         string metadata;
         string controllerName;
         uint256 mintCost;
-        uint256 mintFee; // TODO: remove
         uint256 validFor;
     }
 
@@ -113,7 +112,7 @@ contract TheBadge is Initializable, ERC1155URIStorageUpgradeable {
      */
     event EmitterRegistered(address indexed emitter, address indexed registrant, string metadata);
     event EmitterUpdated(address indexed emitter, string metadata);
-    event BadgeTypeCreated(address creator, uint256 badgeId, string metadata);
+    event BadgeTypeCreated(address creator, uint256 badgeId, string metadata, uint256 validFor);
     event BadgeRequested(
         uint256 indexed badgeId,
         address indexed account,
@@ -360,7 +359,7 @@ contract TheBadge is Initializable, ERC1155URIStorageUpgradeable {
 
         _setURI(badgeIds, args.metadata);
 
-        emit BadgeTypeCreated(_msgSender(), badgeIds, args.metadata);
+        emit BadgeTypeCreated(_msgSender(), badgeIds, args.metadata, args.validFor);
 
         IBadgeController(_badgeTypeController.controller).createBadgeType{ value: (msg.value - createBadgeTypeValue) }(
             badgeIds,

@@ -61,7 +61,6 @@ contract Config is Test {
             "ipfs/metadataForBadge.json",
             "kleros",
             0,
-            0,
             oneYear
         );
         return badgeType;

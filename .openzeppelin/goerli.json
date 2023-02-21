@@ -1,0 +1,530 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x988a82b12B16Ebd7E8b667fc8B51eF1cc3700d2E",
+    "txHash": "0x36998f72791dbf51e51e7a45a7d590eeec6d6c50338a9f4a2242df2f7c6a3ca9"
+  },
+  "proxies": [
+    {
+      "address": "0x059a97A4ad4D148B39209Fa9Be262E6E00E97804",
+      "txHash": "0xa6c093f114af0e41dd4638071c5f41eb7adb559c73bc09bc20bae6ba906a4001",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x21bDD74A233339Ee96e6f208b118f29FbF27BdEA",
+      "txHash": "0x09c321b0db5cc919ccd03df56bcdf97a4bb0c317acfe966a9707ee88c5ea4a4e",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "464d00a707d459efb9dd23d46a50ebacaa1cb61254f09c3e6eeb98b1e3d83d45": {
+      "address": "0x39ecEf4707c093af274F324b1C4f65C60d606357",
+      "txHash": "0x1cdbfd8f8e7dd6f66c837db26569bb4443d19bb0703b618397c411fa20280ff9",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_balances",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "contract": "ERC1155Upgradeable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/ERC1155Upgradeable.sol:25"
+          },
+          {
+            "label": "_operatorApprovals",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "contract": "ERC1155Upgradeable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/ERC1155Upgradeable.sol:28"
+          },
+          {
+            "label": "_uri",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_string_storage",
+            "contract": "ERC1155Upgradeable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/ERC1155Upgradeable.sol:31"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "ERC1155Upgradeable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/ERC1155Upgradeable.sol:528"
+          },
+          {
+            "label": "_baseURI",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_string_storage",
+            "contract": "ERC1155URIStorageUpgradeable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol:27"
+          },
+          {
+            "label": "_tokenURIs",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_mapping(t_uint256,t_string_storage)",
+            "contract": "ERC1155URIStorageUpgradeable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol:30"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "153",
+            "type": "t_array(t_uint256)48_storage",
+            "contract": "ERC1155URIStorageUpgradeable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol:77"
+          },
+          {
+            "label": "admin",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_address",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:12"
+          },
+          {
+            "label": "badgeIds",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_uint256",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:13"
+          },
+          {
+            "label": "registerEmitterValue",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_uint256",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:14"
+          },
+          {
+            "label": "mintBadgeDefaultFee",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_uint256",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:15"
+          },
+          {
+            "label": "minBadgeMintValue",
+            "offset": 0,
+            "slot": "205",
+            "type": "t_uint256",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:16"
+          },
+          {
+            "label": "createBadgeTypeValue",
+            "offset": 0,
+            "slot": "206",
+            "type": "t_uint256",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:17"
+          },
+          {
+            "label": "feeCollector",
+            "offset": 0,
+            "slot": "207",
+            "type": "t_address",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:18"
+          },
+          {
+            "label": "emitters",
+            "offset": 0,
+            "slot": "208",
+            "type": "t_mapping(t_address,t_struct(Emitter)3273_storage)",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:91"
+          },
+          {
+            "label": "badgeTypeController",
+            "offset": 0,
+            "slot": "209",
+            "type": "t_mapping(t_string_memory_ptr,t_struct(BadgeTypeController)3278_storage)",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:95"
+          },
+          {
+            "label": "badgeType",
+            "offset": 0,
+            "slot": "210",
+            "type": "t_mapping(t_uint256,t_struct(BadgeType)3300_storage)",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:100"
+          },
+          {
+            "label": "badge",
+            "offset": 0,
+            "slot": "211",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_struct(Badge)3306_storage))",
+            "contract": "TheBadge",
+            "src": "src/TheBadge.sol:106"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]",
+            "numberOfBytes": "1504"
+          },
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_enum(BadgeStatus)5678": {
+            "label": "enum BadgeStatus",
+            "members": [
+              "NotCreated",
+              "InReview",
+              "Approved",
+              "Rejected",
+              "Revoked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Badge)3306_storage)": {
+            "label": "mapping(address => struct TheBadge.Badge)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Emitter)3273_storage)": {
+            "label": "mapping(address => struct TheBadge.Emitter)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_struct(BadgeTypeController)3278_storage)": {
+            "label": "mapping(string => struct TheBadge.BadgeTypeController)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_struct(Badge)3306_storage))": {
+            "label": "mapping(uint256 => mapping(address => struct TheBadge.Badge))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_string_storage)": {
+            "label": "mapping(uint256 => string)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(BadgeType)3300_storage)": {
+            "label": "mapping(uint256 => struct TheBadge.BadgeType)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Badge)3306_storage": {
+            "label": "struct TheBadge.Badge",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(BadgeStatus)5678",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "dueDate",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(BadgeType)3300_storage": {
+            "label": "struct TheBadge.BadgeType",
+            "members": [
+              {
+                "label": "emitter",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "controllerName",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "paused",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "mintCost",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "mintFee",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "validFor",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_struct(BadgeTypeController)3278_storage": {
+            "label": "struct TheBadge.BadgeTypeController",
+            "members": [
+              {
+                "label": "controller",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "paused",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Emitter)3273_storage": {
+            "label": "struct TheBadge.Emitter",
+            "members": [
+              {
+                "label": "metadata",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "3837851b2bb151fce83cf24ccb007905c68d2285e5517b6c8187678a3fcc5e7a": {
+      "address": "0x89029027a184e08FedCa588d32A128532EaB42B2",
+      "txHash": "0xca248053606d8fa483da33fdc6de744f7800f2d22a8ec98fc9a14e74800b7434",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "theBadge",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_contract(ITheBadge)5582",
+            "contract": "KlerosBadgeTypeController",
+            "src": "src/badgeTypeControllers/kleros.sol:14"
+          },
+          {
+            "label": "arbitrator",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IArbitrator)118",
+            "contract": "KlerosBadgeTypeController",
+            "src": "src/badgeTypeControllers/kleros.sol:15"
+          },
+          {
+            "label": "tcrFactory",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "KlerosBadgeTypeController",
+            "src": "src/badgeTypeControllers/kleros.sol:16"
+          },
+          {
+            "label": "klerosBadgeType",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_uint256,t_struct(KlerosBadgeType)4585_storage)",
+            "contract": "KlerosBadgeTypeController",
+            "src": "src/badgeTypeControllers/kleros.sol:86"
+          },
+          {
+            "label": "klerosBadge",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_struct(KlerosBadge)4592_storage))",
+            "contract": "KlerosBadgeTypeController",
+            "src": "src/badgeTypeControllers/kleros.sol:92"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IArbitrator)118": {
+            "label": "contract IArbitrator",
+            "numberOfBytes": "20"
+          },
+          "t_contract(ITheBadge)5582": {
+            "label": "contract ITheBadge",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_struct(KlerosBadge)4592_storage)": {
+            "label": "mapping(address => struct KlerosBadgeTypeController.KlerosBadge)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_struct(KlerosBadge)4592_storage))": {
+            "label": "mapping(uint256 => mapping(address => struct KlerosBadgeTypeController.KlerosBadge))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(KlerosBadgeType)4585_storage)": {
+            "label": "mapping(uint256 => struct KlerosBadgeTypeController.KlerosBadgeType)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(KlerosBadge)4592_storage": {
+            "label": "struct KlerosBadgeTypeController.KlerosBadge",
+            "members": [
+              {
+                "label": "itemID",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "callee",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "deposit",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(KlerosBadgeType)4585_storage": {
+            "label": "struct KlerosBadgeTypeController.KlerosBadgeType",
+            "members": [
+              {
+                "label": "tcrList",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}

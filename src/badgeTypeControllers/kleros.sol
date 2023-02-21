@@ -8,13 +8,14 @@ import { IArbitrator } from "../../lib/erc-792/contracts/IArbitrator.sol";
 import "../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "../interfaces/IBadgeController.sol";
 import "../interfaces/ITheBadge.sol";
+import "../utils/CappedMath.sol";
 
-// TODO: make this upgradable
-// TODO: only callable from TheBadge contract
 contract KlerosBadgeTypeController is Initializable, IBadgeController {
     ITheBadge public theBadge;
     IArbitrator public arbitrator;
     address public tcrFactory;
+
+    using CappedMath for uint256;
 
     /**
      * Struct to use as args to create a Kleros badge type strategy.
@@ -96,7 +97,13 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * =========================
      */
     event NewKlerosBadgeType(uint256 indexed badgeId, address indexed klerosTCRAddress, string registrationMetadata);
-    event RequestKlerosBadge(address indexed callee, uint256 indexed badgeTypeId, address indexed to, string evidence);
+    event RequestKlerosBadge(
+        address indexed callee,
+        uint256 indexed badgeTypeId,
+        bytes32 klerosItemID,
+        address indexed to,
+        string evidence
+    );
 
     /**
      * =========================
@@ -226,9 +233,53 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
         // save deposit amount for callee as it has to be returned if it was not challenged.
         lightGeneralizedTCR.addItem{ value: (msg.value) }(args.evidence);
 
-        klerosBadge[badgeId][account] = KlerosBadge(keccak256(abi.encodePacked(args.evidence)), callee, msg.value);
+        bytes32 klerosItemID = keccak256(abi.encodePacked(args.evidence));
+        klerosBadge[badgeId][account] = KlerosBadge(klerosItemID, callee, msg.value);
 
-        emit RequestKlerosBadge(callee, badgeId, account, args.evidence);
+        emit RequestKlerosBadge(callee, badgeId, klerosItemID, account, args.evidence);
+    }
+
+    /**
+     * @notice get the arbitration cost for a submission or a remove. If the badge is in other state it will return wrong information
+     * @param badgeId the badge type id
+     * @param account the account that request the badge
+     */
+    function getChallengeValue(uint256 badgeId, address account) public view returns (uint256) {
+        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeId];
+        KlerosBadge storage _klerosBadge = klerosBadge[badgeId][account];
+        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
+
+        (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
+        uint256 lastRequestIndex = requestCount - 1;
+
+        (, , , , , , , , bytes memory requestArbitratorExtraData, ) = lightGeneralizedTCR.getRequestInfo(
+            _klerosBadge.itemID,
+            lastRequestIndex
+        );
+
+        uint256 arbitrationCost = arbitrator.arbitrationCost(requestArbitratorExtraData);
+
+        uint256 challengerBaseDeposit = theBadge.badge(badgeId, account).status == BadgeStatus.InReview
+            ? lightGeneralizedTCR.submissionChallengeBaseDeposit()
+            : lightGeneralizedTCR.removalChallengeBaseDeposit();
+
+        return arbitrationCost.addCap(challengerBaseDeposit);
+    }
+
+    /**
+     * @notice Challenges a badge with status InReview. Accepts enough ETH to cover the deposit
+     * @param badgeId the badge type id
+     * @param account the account that request the badge
+     * @param evidence the IPFS hash of the evidence.
+     */
+    function challengeBadge(uint256 badgeId, address account, string calldata evidence) external payable {
+        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeId];
+        KlerosBadge storage _klerosBadge = klerosBadge[badgeId][account];
+
+        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
+        lightGeneralizedTCR.challengeRequest(_klerosBadge.itemID, evidence);
+
+        theBadge.updateBadgeStatus(badgeId, account, BadgeStatus.InReview);
     }
 
     /**
