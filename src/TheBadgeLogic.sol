@@ -337,13 +337,6 @@ contract TheBadgeLogic is TheBadgeRoles {
     }
 
     /**
-     * @notice allows the feeCollector collect contract balance
-     */
-    function collectFees() public {
-        payable(feeCollector).transfer(address(this).balance);
-    }
-
-    /**
      * @notice we need a receive function to receive deposits devolution from kleros
      */
     receive() external payable {}

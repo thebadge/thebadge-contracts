@@ -10,7 +10,13 @@ interface IBadgeController {
 
     function badgeRequestValue(uint256 badgeTypeId) external view returns (uint256);
 
-    function requestBadge(address callee, uint256 badgeTypeId, address account, bytes calldata data) external payable;
+    function requestBadge(
+        address callee,
+        uint256 badgeTypeId,
+        uint256 badgeId,
+        address account,
+        bytes calldata data
+    ) external payable;
 
-    function claimBadge(uint256 badgeId, address account) external payable;
+    function claimBadge(uint256 badgeId) external payable;
 }

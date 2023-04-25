@@ -100,10 +100,6 @@ contract TheBadge is
         _unpause();
     }
 
-    // function mint(address account, uint256 id, uint256 amount, bytes memory data) public onlyRole(MINTER_ROLE) {
-    //     _mint(account, id, amount, data);
-    // }
-
     /**
      * @notice request the emission of a badge of a badgeType
      */
@@ -140,16 +136,18 @@ contract TheBadge is
             payable(_badgeType.creator).transfer(_badgeType.mintCreatorFee - theBadgeFee);
         }
 
+        // save asset info
         uint256 badgeId = badgeIds.current();
         _setURI(badgeId, tokenURI);
         _mint(account, badgeId, 1, "0x");
-
         uint256 validFor = _badgeType.validFor == 0 ? 0 : block.timestamp + _badgeType.validFor;
         badge[badgeId][account] = Badge(badgeTypeId, validFor);
 
+        // delegate to badgeType controller the creation of a new badge.
         controller.requestBadge{ value: (msg.value - _badgeType.mintCreatorFee) }(
             _msgSender(),
             badgeTypeId,
+            badgeId,
             account,
             data
         );
