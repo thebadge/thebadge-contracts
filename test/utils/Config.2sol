@@ -7,7 +7,6 @@ import "../../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgr
 
 import { TheBadge } from "../../src/TheBadge.sol";
 import { KlerosBadgeTypeController } from "../../src/badgeTypeControllers/kleros.sol";
-import { BadgeStatus } from "../../src/utils.sol";
 
 contract Config is Test {
     address public deployer;
@@ -40,7 +39,6 @@ contract Config is Test {
     //address klerosArbitror = 0x1128eD55ab2d796fa92D2F8E1f336d745354a77A;
 
     constructor() {
-        vm.deal(admin, 100 ether);
         vm.deal(admin, 100 ether);
         vm.deal(vegeta, 100 ether);
         vm.deal(goku, 100 ether);

@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "../lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 // import "../lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 import "../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import "./utils/enums.sol";
+// import "./utils/enums.sol";
 import "./interfaces/IBadgeController.sol";
 
 // TODO: add BADGE address as ERC20
@@ -16,6 +16,19 @@ contract TheBadge is Initializable, ERC1155URIStorageUpgradeable {
     uint256 public minBadgeMintValue;
     uint256 public createBadgeTypeValue;
     address public feeCollector;
+
+    enum BadgeStatus {
+        // The asset has not been created.
+        NotCreated,
+        // The asset is going through an approval process.
+        InReview,
+        // The asset was approved.
+        Approved,
+        // The asset was rejected.
+        Rejected,
+        // The asset was revoked.
+        Revoked
+    }
 
     /**
      * =========================
@@ -326,7 +339,7 @@ contract TheBadge is Initializable, ERC1155URIStorageUpgradeable {
     /**
      * @notice Creates a badge type that will allow users to mint badges.
      */
-    function createBadgeType(CreateBadgeType memory args, bytes memory data) public payable onlyEmitter {
+    function createBadgeType(CreateBadgeType memory args) public payable onlyEmitter {
         if (msg.value != createBadgeTypeValue) {
             revert TheBadge__createBadgeType_wrongValue();
         }
@@ -361,10 +374,10 @@ contract TheBadge is Initializable, ERC1155URIStorageUpgradeable {
 
         emit BadgeTypeCreated(_msgSender(), badgeIds, args.metadata, args.validFor);
 
-        IBadgeController(_badgeTypeController.controller).createBadgeType{ value: (msg.value - createBadgeTypeValue) }(
-            badgeIds,
-            data
-        );
+        // IBadgeController(_badgeTypeController.controller).createBadgeType{ value: (msg.value - createBadgeTypeValue) }(
+        //     badgeIds,
+        //     data
+        // );
     }
 
     function updateBadgeType(uint256 badgeId, uint256 mintCost, uint256 validFor, bool paused) public {

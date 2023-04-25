@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import "../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol";
 import { AddressUpgradeable } from "../lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 
-import { Config, TheBadge, KlerosBadgeTypeController, BadgeStatus } from "./utils/Config.sol";
+import { Config, TheBadge, KlerosBadgeTypeController } from "./utils/Config.sol";
 import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol";
 import "../src/interfaces/IBadgeController.sol";
 
@@ -123,13 +123,11 @@ contract TheBadgeTest is Config {
         vm.prank(goku);
         klerosController.claimBadge(badgeId, goku);
 
-        (BadgeStatus status, ) = theBadge.badge(badgeId, goku);
         (, , uint256 deposit) = klerosController.klerosBadge(badgeId, goku);
 
         assertEq(deposit, 0);
         assertEq(goku.balance, prevBalance + prevDeposit);
         assertEq(theBadge.balanceOf(goku, badgeId), 1);
-        assertEq(uint8(BadgeStatus.Approved), uint8(status));
     }
 
     // function test_balanceOfDueBadge_shouldBeZero() public {

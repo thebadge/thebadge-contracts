@@ -33,6 +33,8 @@ async function main(hre: HardhatRuntimeEnvironment) {
   ]);
   await klerosController.deployed();
 
+  // TODO: set kleros controller
+
   console.log("TheBadge:", theBadge.address);
   console.log("klerosBadgeTypeController:", klerosController.address);
 }

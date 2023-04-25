@@ -8,8 +8,6 @@ import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol
 
 import { Config, TheBadge } from "./utils/Config.sol";
 
-import { BadgeStatus } from "../src/utils.sol";
-
 contract TheBadgeTestCore is Config {
     function test_createBadgeType_notAnEmitter() public {
         TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
@@ -23,7 +21,7 @@ contract TheBadgeTestCore is Config {
     // verifying that if value is lower than createBadgeTypeValue, it should revert
     function test_createBadgeType_wrongValue() public {
         vm.prank(admin);
-        theBadge.updateValues(0, 0, 1 ether, 0);
+        theBadge.updateProtocolValues(0, 0, 1 ether, 0);
 
         vm.prank(vegeta);
         theBadge.registerEmitter(vegeta, "metadata");
@@ -38,7 +36,7 @@ contract TheBadgeTestCore is Config {
     // verifying that if the badge mint value is lower than minBadgeMintValue, it should revert
     function test_createBadgeType_lowerMintBadgeValue() public {
         vm.prank(admin);
-        theBadge.updateValues(0, 0.5 ether, 0, 0);
+        theBadge.updateProtocolValues(0, 0.5 ether, 0, 0);
 
         vm.prank(vegeta);
         theBadge.registerEmitter(vegeta, "metadata");
@@ -84,7 +82,7 @@ contract TheBadgeTestCore is Config {
         TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
 
         vm.prank(admin);
-        theBadge.updateValues(0, 0, 1 ether, 0);
+        theBadge.updateProtocolValues(0, 0, 1 ether, 0);
 
         vm.prank(vegeta);
         theBadge.registerEmitter(vegeta, "metadata");
@@ -144,7 +142,7 @@ contract TheBadgeTestCore is Config {
     // verifying that it should fail if mintCost is lower than allowed
     function test_updateBadgeType_invalidMintCost() public {
         vm.prank(admin);
-        theBadge.updateValues(0, 0.1 ether, 0, 0);
+        theBadge.updateProtocolValues(0, 0.1 ether, 0, 0);
 
         vm.prank(vegeta);
         theBadge.registerEmitter(vegeta, "metadata");
@@ -387,76 +385,11 @@ contract TheBadgeTestCore is Config {
         );
         theBadge.requestBadge{ value: 1 ether }(1, goku, "");
 
-        (BadgeStatus status, uint256 dueDate) = theBadge.badge(1, goku);
+        uint256 dueDate = theBadge.badge(1, goku);
 
         assertEq(vegeta.balance, vegetaOldBalance + 0.6 ether);
         assertEq(feeCollector.balance, feeCollectorOldBalance + 0.4 ether);
-        assertEq(uint8(BadgeStatus.InReview), uint8(status));
         assertEq(dueDate, block.timestamp + badgeType.validFor);
-    }
-
-    // Test updateBadgeStatus by calling it from a controller didn't emit
-    // the token. It should revert
-    function test__updateBadgeStatus_notTheController() public {
-        vm.prank(vegeta);
-        theBadge.registerEmitter(vegeta, "metadata");
-
-        vm.prank(vegeta);
-        vm.mockCall(
-            address(klerosController),
-            0,
-            abi.encodeWithSelector(klerosController.createBadgeType.selector, 1, ""),
-            ""
-        );
-        TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
-        badgeType.mintCost = 1 ether;
-        theBadge.createBadgeType(badgeType, "");
-
-        vm.prank(goku);
-        vm.mockCall(
-            address(klerosController),
-            0,
-            abi.encodeWithSelector(klerosController.requestBadge.selector, goku, 1, goku, ""),
-            ""
-        );
-        theBadge.requestBadge{ value: 1 ether }(1, goku, "");
-
-        vm.prank(goku);
-        vm.expectRevert(TheBadge.TheBadge__onlyController_senderIsNotTheController.selector);
-        theBadge.updateBadgeStatus(1, goku, BadgeStatus.Approved);
-    }
-
-    // Test updateBadgeStatus by calling it from a controller that previously emitted
-    // a token. It should work
-    function test__updateBadgeStatus_shouldWork() public {
-        vm.prank(vegeta);
-        theBadge.registerEmitter(vegeta, "metadata");
-
-        vm.prank(vegeta);
-        vm.mockCall(
-            address(klerosController),
-            0,
-            abi.encodeWithSelector(klerosController.createBadgeType.selector, 1, ""),
-            ""
-        );
-        TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
-        badgeType.mintCost = 1 ether;
-        theBadge.createBadgeType(badgeType, "");
-
-        vm.prank(goku);
-        vm.mockCall(
-            address(klerosController),
-            0,
-            abi.encodeWithSelector(klerosController.requestBadge.selector, goku, 1, goku, ""),
-            ""
-        );
-        theBadge.requestBadge{ value: 1 ether }(1, goku, "");
-
-        vm.prank(address(klerosController));
-        theBadge.updateBadgeStatus(1, goku, BadgeStatus.Approved);
-        (BadgeStatus status, ) = theBadge.badge(1, goku);
-
-        assertEq(uint8(status), uint8(BadgeStatus.Approved));
     }
 
     function test__feeCollector_shouldWork() public {

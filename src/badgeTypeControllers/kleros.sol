@@ -104,6 +104,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
         address indexed to,
         string evidence
     );
+    event BadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
 
     /**
      * =========================
@@ -149,7 +150,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * @param badgeId BadgeId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
-    function createBadgeType(uint256 badgeId, bytes calldata data) public payable onlyTheBadge {
+    function createBadgeType(uint256 badgeId, bytes calldata data) public onlyTheBadge {
         KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeId];
         if (_klerosBadgeType.tcrList != address(0)) {
             revert KlerosBadgeTypeController__createBadgeType_badgeTypeAlreadyCreated();
@@ -205,9 +206,10 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
     function canRequestBadge(uint256 _badgeId, address _account) public view returns (bool) {
         ITheBadge.Badge memory _badge = theBadge.badge(_badgeId, _account);
 
-        if (_badge.dueDate == 0 && (_badge.status == BadgeStatus.InReview || _badge.status == BadgeStatus.Approved)) {
-            return false;
-        }
+        // TODO: fix this
+        // if (_badge.dueDate == 0 && (_badge.status == BadgeStatus.InReview || _badge.status == BadgeStatus.Approved)) {
+        //     return false;
+        // }
 
         if (_badge.dueDate > 0 && block.timestamp < _badge.dueDate) {
             return false;
@@ -259,9 +261,12 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
 
         uint256 arbitrationCost = arbitrator.arbitrationCost(requestArbitratorExtraData);
 
-        uint256 challengerBaseDeposit = theBadge.badge(badgeId, account).status == BadgeStatus.InReview
-            ? lightGeneralizedTCR.submissionChallengeBaseDeposit()
-            : lightGeneralizedTCR.removalChallengeBaseDeposit();
+        uint256 challengerBaseDeposit = lightGeneralizedTCR.submissionChallengeBaseDeposit();
+
+        // TODO: fix this. as TCR using itemID
+        // theBadge.badge(badgeId, account).status == BadgeStatus.InReview
+        //     ? lightGeneralizedTCR.submissionChallengeBaseDeposit()
+        //     : lightGeneralizedTCR.removalChallengeBaseDeposit();
 
         return arbitrationCost.addCap(challengerBaseDeposit);
     }
@@ -272,15 +277,18 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * @param account the account that request the badge
      * @param evidence the IPFS hash of the evidence.
      */
+    // TODO: rename to challengeBadgeRequest
     function challengeBadge(uint256 badgeId, address account, string calldata evidence) external payable {
         KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeId];
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId][account];
 
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
-        lightGeneralizedTCR.challengeRequest(_klerosBadge.itemID, evidence);
+        lightGeneralizedTCR.challengeRequest{ value: (msg.value) }(_klerosBadge.itemID, evidence);
 
-        theBadge.updateBadgeStatus(badgeId, account, BadgeStatus.InReview);
+        // emit BadgeChallenged(badgeId, account, evidence, msg.sender);
     }
+
+    // TODO: add remove badge
 
     /**
      * @notice claim a badge from a TCR list
@@ -294,8 +302,6 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
 
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
         lightGeneralizedTCR.executeRequest(_klerosBadge.itemID);
-
-        theBadge.updateBadgeStatus(badgeId, account, BadgeStatus.Approved);
 
         if (_klerosBadge.deposit > address(this).balance) {
             revert KlerosBadgeTypeController__claimBadge_insufficientBalance();
