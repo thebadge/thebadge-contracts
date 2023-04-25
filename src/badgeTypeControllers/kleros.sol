@@ -147,11 +147,11 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
 
     /**
      * @notice Allows to create off-chain kleros strategies for registered entities
-     * @param badgeId BadgeId from TheBadge contract
+     * @param badgeTypeId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
-    function createBadgeType(uint256 badgeId, bytes calldata data) public onlyTheBadge {
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeId];
+    function createBadgeType(uint256 badgeTypeId, bytes calldata data) public onlyTheBadge {
+        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
         if (_klerosBadgeType.tcrList != address(0)) {
             revert KlerosBadgeTypeController__createBadgeType_badgeTypeAlreadyCreated();
         }
@@ -180,9 +180,9 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
             revert KlerosBadgeTypeController__createBadgeType_TCRListAddressZero();
         }
 
-        klerosBadgeType[badgeId] = KlerosBadgeType(klerosTcrListAddress);
+        klerosBadgeType[badgeTypeId] = KlerosBadgeType(klerosTcrListAddress);
 
-        emit NewKlerosBadgeType(badgeId, klerosTcrListAddress, args.registrationMetaEvidence);
+        emit NewKlerosBadgeType(badgeTypeId, klerosTcrListAddress, args.registrationMetaEvidence);
     }
 
     /**

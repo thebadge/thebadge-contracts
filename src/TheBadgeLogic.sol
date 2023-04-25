@@ -11,7 +11,10 @@ contract TheBadgeLogic is TheBadgeRoles {
     CountersUpgradeable.Counter private badgeTypeIds;
     uint256 public registerCreatorValue;
     uint256 public mintBadgeDefaultFee; // in bps
-    uint256 public minBadgeMintValue;
+    // TODO: does this var makes sense? it was thought to define a min value to mint a badge.
+    // For example, if the badge is going to have a cost (it can be free) it has to be bigger than this variable.
+    // badgeType1 = mint cost is 4 because minBadgeMintValue is 4.
+    // uint256 public minBadgeMintValue;
     uint256 public createBadgeTypeValue;
     address public feeCollector;
 
@@ -57,7 +60,7 @@ contract TheBadgeLogic is TheBadgeRoles {
         bool paused;
         uint256 mintCreatorFee;
         uint256 validFor;
-        uint256 mintProtocolFee; // in bps. It is applied to mintCreatorFee
+        uint256 mintProtocolFee; // in bps. It is taken from mintCreatorFee
     }
 
     /**
@@ -162,12 +165,10 @@ contract TheBadgeLogic is TheBadgeRoles {
 
     function updateProtocolValues(
         uint256 _mintBadgeDefaultFee,
-        uint256 _minBadgeMintValue,
         uint256 _createBadgeTypeValue,
         uint256 _registerCreatorValue
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         mintBadgeDefaultFee = _mintBadgeDefaultFee;
-        minBadgeMintValue = _minBadgeMintValue;
         createBadgeTypeValue = _createBadgeTypeValue;
         registerCreatorValue = _registerCreatorValue;
     }

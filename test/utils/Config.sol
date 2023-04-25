@@ -6,22 +6,16 @@ import "forge-std/Test.sol";
 import "../../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol";
 
 import { TheBadge } from "../../src/TheBadge.sol";
+import { TheBadgeLogic } from "../../src/TheBadgeLogic.sol";
 import { KlerosBadgeTypeController } from "../../src/badgeTypeControllers/kleros.sol";
 
 contract Config is Test {
-    address public deployer;
-
-    uint256 public adminKey = 1;
     address public admin = vm.addr(1);
-
-    uint256 public vegetaKey = 2;
     address public vegeta = vm.addr(2);
-
-    uint256 public gokuKey = 3;
     address public goku = vm.addr(3);
-
-    uint256 public feeCollectorKey = 4;
     address public feeCollector = vm.addr(4);
+    address public minter = vm.addr(5);
+    address public creator = vm.addr(6);
 
     uint256 public offChainStrategyFee = 0 ether;
 
@@ -42,10 +36,12 @@ contract Config is Test {
         vm.deal(admin, 100 ether);
         vm.deal(vegeta, 100 ether);
         vm.deal(goku, 100 ether);
+        vm.deal(minter, 100 ether);
         vm.deal(feeCollector, 100 ether);
+        vm.deal(creator, 100 ether);
 
         theBadge = new TheBadge();
-        theBadge.initialize(admin, feeCollector);
+        theBadge.initialize(admin, feeCollector, minter);
 
         klerosController = new KlerosBadgeTypeController();
         klerosController.initialize(address(theBadge), klerosArbitror, lightGTCRFactory);
@@ -55,13 +51,39 @@ contract Config is Test {
     }
 
     function getBaseBadgeType() public view returns (TheBadge.CreateBadgeType memory) {
-        TheBadge.CreateBadgeType memory badgeType = TheBadge.CreateBadgeType(
+        TheBadge.CreateBadgeType memory badgeType = TheBadgeLogic.CreateBadgeType(
             "ipfs/metadataForBadge.json",
             "kleros",
             0,
             oneYear
         );
         return badgeType;
+    }
+
+    function getKlerosBaseBadgeType() public pure returns (KlerosBadgeTypeController.CreateBadgeType memory) {
+        uint256[4] memory baseDeposits;
+        baseDeposits[0] = 1;
+        baseDeposits[1] = 1;
+        baseDeposits[2] = 1;
+        baseDeposits[3] = 1;
+
+        uint256[3] memory stakeMultipliers;
+        stakeMultipliers[0] = 1;
+        stakeMultipliers[1] = 1;
+        stakeMultipliers[2] = 1;
+
+        KlerosBadgeTypeController.CreateBadgeType memory strategy = KlerosBadgeTypeController.CreateBadgeType(
+            address(0), // governor
+            address(0), // admin
+            1, // court
+            1, // jurors
+            "ipfs/registrationMetaEvidence.json",
+            "ipfs/clearingMetaEvidence.json",
+            100, // challengePeriodDuration
+            baseDeposits,
+            stakeMultipliers
+        );
+        return strategy;
     }
 
     function _bytesToAddress(bytes memory bys) public pure returns (address addr) {

@@ -66,25 +66,30 @@ contract TheBadge is
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
-        _disableInitializers();
+        // +++++++++++++++++++++
+        // +++++++++++++++++++++
+        // TODO: enable this, it was commented until we find a better solution to test UUPS with foundry
+        // +++++++++++++++++++++
+        // +++++++++++++++++++++
+        // _disableInitializers();
     }
 
-    function initialize(address feeCollectorAddress, address minterAddress) public initializer {
+    function initialize(address admin, address feeCollector, address minter) public initializer {
         __ERC1155_init("");
         __AccessControl_init();
         __Pausable_init();
         __UUPSUpgradeable_init();
 
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, msg.sender);
-        _grantRole(MINTER_ROLE, minterAddress);
+        _grantRole(MINTER_ROLE, minter);
         _grantRole(UPGRADER_ROLE, msg.sender);
 
+        feeCollector = feeCollector;
+
         registerCreatorValue = uint256(0);
-        mintBadgeDefaultFee = uint256(4000); // in bps
-        minBadgeMintValue = uint256(0);
         createBadgeTypeValue = uint256(0);
-        feeCollector = feeCollectorAddress;
+        mintBadgeDefaultFee = uint256(5000); // in bps
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {
