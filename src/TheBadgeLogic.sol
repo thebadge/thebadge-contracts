@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin-upgrade/contracts/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./TheBadgeRoles.sol";
 import "./interfaces/IBadgeController.sol";
 
-// TODO: rename emitter with creator
 contract TheBadgeLogic is TheBadgeRoles {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private badgeTypeIds;
-    uint256 public registerEmitterValue;
+    uint256 public registerCreatorValue;
     uint256 public mintBadgeDefaultFee; // in bps
     uint256 public minBadgeMintValue;
     uint256 public createBadgeTypeValue;
@@ -23,10 +22,10 @@ contract TheBadgeLogic is TheBadgeRoles {
      */
 
     /**
-     * @param metadata information related with the emitter.
+     * @param metadata information related with the creator.
      * @param isVerified if it was verified by TheBadge.
      */
-    struct Emitter {
+    struct Creator {
         string metadata;
     }
 
@@ -41,10 +40,6 @@ contract TheBadgeLogic is TheBadgeRoles {
 
     /**
      * Struct to use as arg to create a badge type
-     * @param badgeType The type of the badge
-     * @param mintCost The cost for minting a badge, it goes to the emitter.
-     * @param mintFee The fee charged for The Badge to the mintCost.
-     * @param validFor The time in seconds of how long the badge is valid. (cero for infinite)
      */
     struct CreateBadgeType {
         string metadata;
@@ -55,15 +50,9 @@ contract TheBadgeLogic is TheBadgeRoles {
 
     /**
      * Struct to store generic information of a badge type.
-     * @param emitter The address who created the badge type.
-     * @param badgeType The type of the badge (Kleros, custom, etc).
-     * @param paused If paused, it is not possible to mint badges for this badge type.
-     * @param mintCost The cost for minting a badge, it goes to the emitter.
-     * @param mintFee The fee charged for The Badge to the mintCost.
-     * @param validFor The time in seconds of how long the badge is valid. (cero for infinite)
      */
     struct BadgeType {
-        address emitter;
+        address creator;
         string controllerName;
         bool paused;
         uint256 mintCreatorFee;
@@ -78,11 +67,10 @@ contract TheBadgeLogic is TheBadgeRoles {
      */
 
     /**
-     * @notice emitters are all entities who can create badges
+     * @notice badgeType creators are all entities who can create badges
      * registrationOpen variable determines if the register is open or not.
-     * emitterAddress => EmitterInfo
      */
-    mapping(address => Emitter) public emitters;
+    mapping(address => Creator) public creators;
     /**
      * @notice badge types controllers
      */
@@ -98,8 +86,8 @@ contract TheBadgeLogic is TheBadgeRoles {
      * Events
      * =========================
      */
-    event EmitterRegistered(address indexed emitter, string metadata);
-    event EmitterUpdated(address indexed emitter, string metadata);
+    event CreatorRegistered(address indexed creator, string metadata);
+    event CreatorUpdated(address indexed creator, string metadata);
     event BadgeTypeCreated(uint256 indexed badgeTypeID, string metadata);
 
     /**
@@ -110,12 +98,12 @@ contract TheBadgeLogic is TheBadgeRoles {
 
     error TheBadge__constructor_paramAddressesCanNotBeZero();
     error TheBadge__updateAddresses_paramAddressesCanNotBeZero();
-    error TheBadge__onlyEmitter_senderIsNotAnEmitter();
+    error TheBadge__onlyCreator_senderIsNotACreator();
     error TheBadge__onlyAdmin_senderIsNotAdmin();
     error TheBadge__onlyController_senderIsNotTheController();
-    error TheBadge__registerEmitter_invalidAddress();
-    error TheBadge__registerEmitter_wrongValue();
-    error TheBadge__registerEmitter_alreadyRegistered();
+    error TheBadge__registerCreator_invalidAddress();
+    error TheBadge__registerCreator_wrongValue();
+    error TheBadge__registerCreator_alreadyRegistered();
     error TheBadge__setBadgeTypeController_emptyName();
     error TheBadge__setBadgeTypeController_notFound();
     error TheBadge__setBadgeTypeController_alreadySet();
@@ -123,7 +111,7 @@ contract TheBadgeLogic is TheBadgeRoles {
     error TheBadge__createBadgeType_invalidMintCost();
     error TheBadge__createBadgeType_invalidController();
     error TheBadge__createBadgeType_controllerIsPaused();
-    error TheBadge__createBadgeType_notAnEmitter();
+    error TheBadge__createBadgeType_notACreator();
     error TheBadge__createBadgeType_wrongValue();
     error TheBadge__updateBadgeType_notBadgeTypeOwner();
     error TheBadge__updateBadgeType_invalidMintCost();
@@ -133,7 +121,7 @@ contract TheBadgeLogic is TheBadgeRoles {
     error TheBadge__requestBadge_badgeTypeNotFound();
     error TheBadge__requestBadge_controllerIsPaused();
     error TheBadge__requestBadge_isPaused();
-    error TheBadge__updateEmitter_notFound();
+    error TheBadge__updateCreator_notFound();
     error TheBadge__ERC1155_notAllowed();
 
     /**
@@ -142,10 +130,10 @@ contract TheBadgeLogic is TheBadgeRoles {
      * =========================
      */
 
-    modifier onlyEmitter() {
-        Emitter storage emitter = emitters[msg.sender];
-        if (bytes(emitter.metadata).length == 0) {
-            revert TheBadge__onlyEmitter_senderIsNotAnEmitter();
+    modifier onlyBadgeTypeCreator() {
+        Creator storage creator = creators[msg.sender];
+        if (bytes(creator.metadata).length == 0) {
+            revert TheBadge__onlyCreator_senderIsNotACreator();
         }
         _;
     }
@@ -176,12 +164,12 @@ contract TheBadgeLogic is TheBadgeRoles {
         uint256 _mintBadgeDefaultFee,
         uint256 _minBadgeMintValue,
         uint256 _createBadgeTypeValue,
-        uint256 _registerEmitterValue
+        uint256 _registerCreatorValue
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         mintBadgeDefaultFee = _mintBadgeDefaultFee;
         minBadgeMintValue = _minBadgeMintValue;
         createBadgeTypeValue = _createBadgeTypeValue;
-        registerEmitterValue = _registerEmitterValue;
+        registerCreatorValue = _registerCreatorValue;
     }
 
     /**
@@ -223,53 +211,52 @@ contract TheBadgeLogic is TheBadgeRoles {
     }
 
     /**
-     * @notice Register a new emitter
+     * @notice Register a new badge type creator
      * @param _metadata IPFS url
      */
-    function registerEmitter(string memory _metadata) public payable {
-        if (msg.value != registerEmitterValue) {
-            revert TheBadge__registerEmitter_wrongValue();
+    function registerBadgeTypeCreator(string memory _metadata) public payable {
+        if (msg.value != registerCreatorValue) {
+            revert TheBadge__registerCreator_wrongValue();
         }
 
         if (msg.value > 0) {
             payable(feeCollector).transfer(msg.value);
         }
 
-        Emitter storage emitter = emitters[_msgSender()];
-        if (bytes(emitter.metadata).length != 0) {
-            revert TheBadge__registerEmitter_alreadyRegistered();
+        Creator storage creator = creators[_msgSender()];
+        if (bytes(creator.metadata).length != 0) {
+            revert TheBadge__registerCreator_alreadyRegistered();
         }
 
-        emitter.metadata = _metadata;
+        creator.metadata = _metadata;
 
-        emit EmitterRegistered(_msgSender(), emitter.metadata);
+        emit CreatorRegistered(_msgSender(), creator.metadata);
     }
 
     /**
-     * @dev Allow to update some emitter's attributes for the admin
-     * @param _emitter The emitter address
+     * @dev Allow to update some creator's attributes for the admin
+     * @param _creator The creator address
      */
-    function updateEmitter(address _emitter, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        Emitter storage emitter = emitters[_emitter];
+    function updateBadgeTypeCreator(address _creator, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        Creator storage creator = creators[_creator];
 
-        if (bytes(emitter.metadata).length == 0) {
-            revert TheBadge__updateEmitter_notFound();
+        if (bytes(creator.metadata).length == 0) {
+            revert TheBadge__updateCreator_notFound();
         }
 
         if (bytes(_metadata).length > 0) {
-            emitter.metadata = _metadata;
+            creator.metadata = _metadata;
         }
 
-        emit EmitterUpdated(_emitter, _metadata);
+        emit CreatorUpdated(_creator, _metadata);
     }
 
-    // TODO: rename emitter with creator
-    // TODO: suspend/remove emitter
+    // TODO: suspend/remove badgeType creator
 
     /**
      * @notice Creates a badge type that will allow users to mint badges of this type.
      */
-    function createBadgeType(CreateBadgeType memory args, bytes memory data) public payable onlyEmitter {
+    function createBadgeType(CreateBadgeType memory args, bytes memory data) public payable onlyBadgeTypeCreator {
         // check values
         if (msg.value != createBadgeTypeValue) {
             revert TheBadge__createBadgeType_wrongValue();
@@ -310,11 +297,11 @@ contract TheBadgeLogic is TheBadgeRoles {
     function updateBadgeType(uint256 badgeTypeId, uint256 mintCreatorFee, uint256 validFor, bool paused) public {
         BadgeType storage _badgeType = badgeType[badgeTypeId];
 
-        if (_badgeType.emitter == address(0)) {
+        if (_badgeType.creator == address(0)) {
             revert TheBadge__updateBadgeType_badgeTypeNotFound();
         }
 
-        if (_msgSender() != _badgeType.emitter) {
+        if (_msgSender() != _badgeType.creator) {
             revert TheBadge__updateBadgeType_notBadgeTypeOwner();
         }
 
@@ -331,7 +318,7 @@ contract TheBadgeLogic is TheBadgeRoles {
     function updateBadgeTypeFee(uint256 badgeTypeId, uint256 feeInBps) public onlyRole(DEFAULT_ADMIN_ROLE) {
         BadgeType storage _badgeType = badgeType[badgeTypeId];
 
-        if (_badgeType.emitter == address(0)) {
+        if (_badgeType.creator == address(0)) {
             revert TheBadge__updateBadgeTypeFee_badgeTypeNotFound();
         }
 

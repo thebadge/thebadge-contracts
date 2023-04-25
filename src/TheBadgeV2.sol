@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin-upgrade/contracts/token/ERC1155/ERC1155Upgradeable.sol";
-import "@openzeppelin-upgrade/contracts/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
-import "@openzeppelin-upgrade/contracts/security/PausableUpgradeable.sol";
-import "@openzeppelin-upgrade/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin-upgrade/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin-upgrade/contracts/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 import "./TheBadgeRoles.sol";
 import "./TheBadgeLogic.sol";
@@ -80,7 +80,7 @@ contract TheBadge is
         _grantRole(MINTER_ROLE, minterAddress);
         _grantRole(UPGRADER_ROLE, msg.sender);
 
-        registerEmitterValue = uint256(0);
+        registerCreatorValue = uint256(0);
         mintBadgeDefaultFee = uint256(4000); // in bps
         minBadgeMintValue = uint256(0);
         createBadgeTypeValue = uint256(0);
@@ -112,7 +112,7 @@ contract TheBadge is
         BadgeTypeController storage _badgeTypeController = badgeTypeController[_badgeType.controllerName];
         IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
 
-        if (_badgeType.emitter == address(0)) {
+        if (_badgeType.creator == address(0)) {
             revert TheBadge__requestBadge_badgeTypeNotFound();
         }
 
@@ -132,7 +132,7 @@ contract TheBadge is
         if (_badgeType.mintCreatorFee > 0) {
             uint256 theBadgeFee = calculateFee(_badgeType.mintCreatorFee, _badgeType.mintProtocolFee);
             payable(feeCollector).transfer(theBadgeFee);
-            payable(_badgeType.emitter).transfer(_badgeType.mintCreatorFee - theBadgeFee);
+            payable(_badgeType.creator).transfer(_badgeType.mintCreatorFee - theBadgeFee);
         }
 
         uint256 badgeId = badgeIds.current();
