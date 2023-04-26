@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
 import { ILightGeneralizedTCR } from "../interfaces/ILightGeneralizedTCR.sol";
@@ -19,7 +19,6 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
 
     /**
      * Struct to use as args to create a Kleros badge type strategy.
-     *  @param badgeMetadata IPFS uri for the badge
      *  @param governor An address with permission to updates parameters of the list. Use Kleros governor for full decentralization.
      *  @param admin The address with permission to add/remove items directly.
      *  @param courtId The ID of the kleros's court.
@@ -71,7 +70,6 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
         uint256 badgeTypeId;
         bytes32 itemID;
         address callee;
-        address receiver;
         uint256 deposit;
     }
 
@@ -81,16 +79,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * =========================
      */
 
-    /**
-     * @notice Kleros's badge information.
-     * badgeId => KlerosBadgeInfo
-     */
     mapping(uint256 => KlerosBadgeType) public klerosBadgeType;
-
-    /**
-     * @notice Information related to a specific asset from a kleros strategy
-     * badgeId => address => KlerosAssetInfo
-     */
     mapping(uint256 => KlerosBadge) public klerosBadge;
 
     /**
@@ -98,9 +87,9 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * Events
      * =========================
      */
-    event NewKlerosBadgeType(uint256 indexed badgeId, address indexed klerosTCRAddress, string registrationMetadata);
+    event NewKlerosBadgeType(uint256 indexed badgeTypeId, address indexed tcrAddress, string metadataUri);
     event RequestKlerosBadge(uint256 indexed badgeTypeId, uint256 indexed badgeId, string evidence);
-    event BadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
+    event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
 
     /**
      * =========================
@@ -129,11 +118,11 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
         _;
     }
 
-    // constructor(address _theBadge, address _arbitrator, address _tcrFactory) {
-    //     theBadge = ITheBadge(_theBadge);
-    //     arbitrator = IArbitrator(_arbitrator);
-    //     tcrFactory = _tcrFactory;
-    // }
+    /**
+     * =========================
+     * Methods
+     * =========================
+     */
 
     function initialize(address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
         theBadge = ITheBadge(_theBadge);
@@ -187,7 +176,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * @notice Returns the cost for minting a badge for a kleros strategy
      * It sums kleros base deposit + kleros arbitration cost
      */
-    function badgeRequestValue(uint256 badgeTypeId) public view returns (uint256) {
+    function mintValue(uint256 badgeTypeId) public view returns (uint256) {
         KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
 
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
@@ -201,47 +190,29 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
     /**
      * @notice Badge can be minted if it was never requested for the address or if it has a due date before now
      */
-    function canRequestBadge(uint256 _badgeTypeId, address _account) public view returns (bool) {
-        // TODO: analyze if this method makes sense
-
-        // ITheBadge.Badge memory _badge = theBadge.badge(_badgeTypeId, _account);
-
-        // if (_badge.dueDate == 0 && (_badge.status == BadgeStatus.InReview || _badge.status == BadgeStatus.Approved)) {
-        //     return false;
-        // }
-
-        // if (_badge.dueDate > 0 && block.timestamp < _badge.dueDate) {
-        //     return false;
-        // }
-
+    function canMint(uint256, address) public view returns (bool) {
         return true;
     }
 
     /**
      * @notice mint badge for kleros strategy
      */
-    function requestBadge(
-        address callee,
-        uint256 badgeTypeId,
-        uint256 badgeId,
-        address account,
-        bytes calldata data
-    ) public payable {
-        uint256 mintCost = badgeRequestValue(badgeTypeId);
+    function mint(address callee, uint256 badgeTypeId, uint256 badgeId, bytes calldata data) public payable {
+        // check value
+        uint256 mintCost = mintValue(badgeTypeId);
         if (msg.value != mintCost) {
             revert KlerosBadgeTypeController__mintBadge_wrongValue();
         }
 
         KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
-
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
         RequestBadgeData memory args = abi.decode(data, (RequestBadgeData));
 
-        // save deposit amount for callee as it has to be returned if it was not challenged.
         lightGeneralizedTCR.addItem{ value: (msg.value) }(args.evidence);
 
+        // save deposit amount for callee as it has to be returned if it was not challenged.
         bytes32 klerosItemID = keccak256(abi.encodePacked(args.evidence));
-        klerosBadge[badgeId] = KlerosBadge(badgeTypeId, klerosItemID, callee, account, msg.value);
+        klerosBadge[badgeId] = KlerosBadge(badgeTypeId, klerosItemID, callee, msg.value);
 
         emit RequestKlerosBadge(badgeTypeId, badgeId, args.evidence);
     }
@@ -280,7 +251,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * b. Transfers deposit to badge's callee
      * c. Sets badge's callee deposit to 0
      */
-    function claimBadge(uint256 badgeId) public payable {
+    function claim(uint256 badgeId) public payable {
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
         KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[_klerosBadge.badgeTypeId];
 
@@ -296,22 +267,19 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
         payable(_klerosBadge.callee).transfer(balanceToDeposit);
     }
 
-    function balanceOf(uint256 badgeTypeId, address account) public view returns (uint256) {
-        // TODO: fix this. We need a new mapping
-        // perhaps map(account => badgeTypeId[])
+    function isAssetActive(uint256 badgeId) public view returns (bool) {
+        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
+        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[_klerosBadge.badgeTypeId];
 
-        // KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeId];
-        // KlerosBadge storage _klerosBadge = klerosBadge[badgeId][account];
+        if (_klerosBadgeType.tcrList != address(0)) {
+            ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
+            (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
+            if (klerosItemStatus == 1 || klerosItemStatus == 3) {
+                return true;
+            }
+        }
 
-        // if (_klerosBadgeType.tcrList != address(0)) {
-        //     ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
-        //     (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
-        //     if (klerosItemStatus == 1 || klerosItemStatus == 3) {
-        //         return 1;
-        //     }
-        // }
-
-        return 0;
+        return false;
     }
 
     /**

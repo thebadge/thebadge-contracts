@@ -69,10 +69,6 @@ contract TheBadgeLogic is TheBadgeRoles {
      * =========================
      */
 
-    /**
-     * @notice badgeType creators are all entities who can create badges
-     * registrationOpen variable determines if the register is open or not.
-     */
     mapping(address => Creator) public creators;
     /**
      * @notice badge types controllers
@@ -99,33 +95,21 @@ contract TheBadgeLogic is TheBadgeRoles {
      * =========================
      */
 
-    error TheBadge__constructor_paramAddressesCanNotBeZero();
-    error TheBadge__updateAddresses_paramAddressesCanNotBeZero();
     error TheBadge__onlyCreator_senderIsNotACreator();
-    error TheBadge__onlyAdmin_senderIsNotAdmin();
     error TheBadge__onlyController_senderIsNotTheController();
-    error TheBadge__registerCreator_invalidAddress();
     error TheBadge__registerCreator_wrongValue();
     error TheBadge__registerCreator_alreadyRegistered();
     error TheBadge__setBadgeTypeController_emptyName();
     error TheBadge__setBadgeTypeController_notFound();
     error TheBadge__setBadgeTypeController_alreadySet();
     error TheBadge__setControllerStatus_notFound();
-    error TheBadge__createBadgeType_invalidMintCost();
     error TheBadge__createBadgeType_invalidController();
     error TheBadge__createBadgeType_controllerIsPaused();
-    error TheBadge__createBadgeType_notACreator();
     error TheBadge__createBadgeType_wrongValue();
     error TheBadge__updateBadgeType_notBadgeTypeOwner();
-    error TheBadge__updateBadgeType_invalidMintCost();
     error TheBadge__updateBadgeType_badgeTypeNotFound();
     error TheBadge__updateBadgeTypeFee_badgeTypeNotFound();
-    error TheBadge__requestBadge_wrongValue();
-    error TheBadge__requestBadge_badgeTypeNotFound();
-    error TheBadge__requestBadge_controllerIsPaused();
-    error TheBadge__requestBadge_isPaused();
     error TheBadge__updateCreator_notFound();
-    error TheBadge__ERC1155_notAllowed();
 
     /**
      * =========================
@@ -327,17 +311,14 @@ contract TheBadgeLogic is TheBadgeRoles {
     }
 
     /**
-     * @notice returns the cost for minting a bade of a badgeType
+     * @notice returns the cost for minting a badge of a badgeType
      */
     function badgeRequestValue(uint256 badgeTypeId) public view returns (uint256) {
         BadgeType storage _badgeType = badgeType[badgeTypeId];
         IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
 
-        return controller.badgeRequestValue(badgeTypeId) + _badgeType.mintCreatorFee;
+        return controller.mintValue(badgeTypeId) + _badgeType.mintCreatorFee;
     }
 
-    /**
-     * @notice we need a receive function to receive deposits devolution from kleros
-     */
     receive() external payable {}
 }

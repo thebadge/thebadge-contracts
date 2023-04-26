@@ -27,6 +27,7 @@ contract TheBadge is
 
     struct Badge {
         uint256 badgeTypeId;
+        address account;
         uint256 dueDate;
     }
 
@@ -36,11 +37,7 @@ contract TheBadge is
      * =========================
      */
 
-    /**
-     * @notice Information related to a specific asset
-     * badgeId => address => Badge
-     */
-    mapping(uint256 => mapping(address => Badge)) public badge;
+    mapping(uint256 => Badge) public badge;
 
     /**
      * =========================
@@ -57,6 +54,10 @@ contract TheBadge is
      */
 
     error TheBadge__SBT();
+    error TheBadge__requestBadge_badgeTypeNotFound();
+    error TheBadge__requestBadge_wrongValue();
+    error TheBadge__requestBadge_isPaused();
+    error TheBadge__requestBadge_controllerIsPaused();
 
     /**
      * =========================
@@ -106,7 +107,7 @@ contract TheBadge is
     function mint(uint256 badgeTypeId, address account, string memory tokenURI, bytes memory data) external payable {
         // +++++++++++++++++++++
         // +++++++++++++++++++++
-        // TODO: add onlyRole(MINTER_ROLE)
+        // TODO: add onlyRole(MINTER_ROLE) before going prod
         // +++++++++++++++++++++
         // +++++++++++++++++++++
         BadgeType storage _badgeType = badgeType[badgeTypeId];
@@ -141,16 +142,10 @@ contract TheBadge is
         _setURI(badgeId, tokenURI);
         _mint(account, badgeId, 1, "0x");
         uint256 validFor = _badgeType.validFor == 0 ? 0 : block.timestamp + _badgeType.validFor;
-        badge[badgeId][account] = Badge(badgeTypeId, validFor);
+        badge[badgeId] = Badge(badgeTypeId, account, validFor);
 
         // delegate to badgeType controller the creation of a new badge.
-        controller.requestBadge{ value: (msg.value - _badgeType.mintCreatorFee) }(
-            _msgSender(),
-            badgeTypeId,
-            badgeId,
-            account,
-            data
-        );
+        controller.mint{ value: (msg.value - _badgeType.mintCreatorFee) }(_msgSender(), badgeTypeId, badgeId, data);
 
         badgeIds.increment();
     }
