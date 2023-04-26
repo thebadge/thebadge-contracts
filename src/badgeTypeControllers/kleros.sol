@@ -7,11 +7,11 @@ import { IArbitrator } from "../../lib/erc-792/contracts/IArbitrator.sol";
 
 import "../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "../interfaces/IBadgeController.sol";
-import "../interfaces/ITheBadge.sol";
+import { TheBadge } from "../TheBadge.sol";
 import "../utils/CappedMath.sol";
 
-contract KlerosBadgeTypeController is Initializable, IBadgeController {
-    ITheBadge public theBadge;
+contract KlerosController is Initializable, IBadgeController {
+    TheBadge public theBadge;
     IArbitrator public arbitrator;
     address public tcrFactory;
 
@@ -50,7 +50,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
         uint256[3] stakeMultipliers;
     }
 
-    struct RequestBadgeData {
+    struct MintParams {
         string evidence;
     }
 
@@ -67,7 +67,6 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * @param deposit the deposit amount
      */
     struct KlerosBadge {
-        uint256 badgeTypeId;
         bytes32 itemID;
         address callee;
         uint256 deposit;
@@ -88,7 +87,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * =========================
      */
     event NewKlerosBadgeType(uint256 indexed badgeTypeId, address indexed tcrAddress, string metadataUri);
-    event mintKlerosBadge(uint256 indexed badgeTypeId, uint256 indexed badgeId, string evidence);
+    event mintKlerosBadge(uint256 indexed badgeId, string evidence);
     event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
 
     /**
@@ -125,7 +124,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      */
 
     function initialize(address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
-        theBadge = ITheBadge(_theBadge);
+        theBadge = TheBadge(payable(_theBadge));
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
     }
@@ -206,15 +205,15 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
 
         KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
-        RequestBadgeData memory args = abi.decode(data, (RequestBadgeData));
+        MintParams memory args = abi.decode(data, (MintParams));
 
         lightGeneralizedTCR.addItem{ value: (msg.value) }(args.evidence);
 
         // save deposit amount for callee as it has to be returned if it was not challenged.
         bytes32 klerosItemID = keccak256(abi.encodePacked(args.evidence));
-        klerosBadge[badgeId] = KlerosBadge(badgeTypeId, klerosItemID, callee, msg.value);
+        klerosBadge[badgeId] = KlerosBadge(klerosItemID, callee, msg.value);
 
-        emit mintKlerosBadge(badgeTypeId, badgeId, args.evidence);
+        emit mintKlerosBadge(badgeId, args.evidence);
     }
 
     /**
@@ -223,7 +222,8 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      */
     function getChallengeValue(uint256 badgeId) public view returns (uint256) {
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[_klerosBadge.badgeTypeId];
+        (uint256 badgeTypeId, , ) = theBadge.badge(badgeId);
+        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
 
         (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
@@ -253,7 +253,8 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      */
     function claim(uint256 badgeId) public payable {
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[_klerosBadge.badgeTypeId];
+        (uint256 badgeTypeId, , ) = theBadge.badge(badgeId);
+        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
 
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
         lightGeneralizedTCR.executeRequest(_klerosBadge.itemID);
@@ -269,7 +270,8 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
 
     function isAssetActive(uint256 badgeId) public view returns (bool) {
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[_klerosBadge.badgeTypeId];
+        (uint256 badgeTypeId, , ) = theBadge.badge(badgeId);
+        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
 
         if (_klerosBadgeType.tcrList != address(0)) {
             ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);

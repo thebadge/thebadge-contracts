@@ -172,7 +172,7 @@ contract TheBadge is
         uint256[] memory amounts,
         bytes memory data
     ) internal override whenNotPaused {
-        if (!hasRole(MINTER_ROLE, _msgSender())) {
+        if (from != address(0)) {
             revert TheBadge__SBT();
         }
 

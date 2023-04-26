@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 // import { AddressUpgradeable } from "../lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 // import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol";
 
-import { Config, TheBadge, TheBadgeLogic, KlerosBadgeTypeController } from "./utils/Config.sol";
+import { Config, TheBadge, TheBadgeLogic, KlerosController } from "./utils/Config.sol";
 
 contract TheBadgeTestCore is Config {
     function test_createKlerosBadgeType_shouldWork() public {
@@ -17,7 +17,7 @@ contract TheBadgeTestCore is Config {
         // Crete badge type
         vm.prank(vegeta);
         TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
-        KlerosBadgeTypeController.CreateBadgeType memory klerosBadgeType = getKlerosBaseBadgeType();
+        KlerosController.CreateBadgeType memory klerosBadgeType = getKlerosBaseBadgeType();
         theBadge.createBadgeType(badgeType, abi.encode(klerosBadgeType));
 
         (
@@ -48,9 +48,36 @@ contract TheBadgeTestCore is Config {
         // Crete badge type
         vm.prank(vegeta);
         TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
-        KlerosBadgeTypeController.CreateBadgeType memory klerosBadgeType = getKlerosBaseBadgeType();
+        KlerosController.CreateBadgeType memory klerosBadgeType = getKlerosBaseBadgeType();
         theBadge.createBadgeType(badgeType, abi.encode(klerosBadgeType));
 
-        address tcrList = klerosController.klerosBadgeType(0);
+        // first badgeType has id = 0;
+        uint256 badgeTypeId = 0;
+
+        // check goku account has not balance for badgeTypeId
+        assertEq(theBadge.balanceOfBadgeType(goku, badgeTypeId), 0);
+
+        // goku mints badgeTypeId
+        uint256 mintValue = theBadge.mintValue(badgeTypeId);
+        string memory evidenceUri = "ipfs://evidence.json";
+        KlerosController.MintParams memory badgeInfo = KlerosController.MintParams(evidenceUri);
+        vm.prank(goku);
+        theBadge.mint{ value: mintValue }(badgeTypeId, goku, evidenceUri, abi.encode(badgeInfo));
+
+        // first badge has id = 0;
+        uint256 badgeId = 0;
+
+        // check goku account has not balance for badgeTypeId.
+        // at this moment, the badge is in review period, so balance has to be still 0.
+        assertEq(theBadge.balanceOfBadgeType(goku, badgeTypeId), 0);
+
+        // check status on KlerosController
+        (bytes32 itemID, address mintCallee, uint256 deposit) = klerosController.klerosBadge(badgeId);
+        assertEq(itemID, keccak256(abi.encodePacked(evidenceUri)));
+        assertEq(mintCallee, goku);
+        assertEq(deposit, mintValue - badgeType.mintCreatorFee);
+        assertEq(theBadge.balanceOf(goku, badgeId), 0); // balanceOf is 0 until challenge period ends and claimKlerosBadge is called
+
+        // address tcrList = klerosController.klerosBadgeType(badgeTypeId);
     }
 }

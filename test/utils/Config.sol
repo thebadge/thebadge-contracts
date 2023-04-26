@@ -7,7 +7,7 @@ import "../../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgr
 
 import { TheBadge } from "../../src/TheBadge.sol";
 import { TheBadgeLogic } from "../../src/TheBadgeLogic.sol";
-import { KlerosBadgeTypeController } from "../../src/badgeTypeControllers/kleros.sol";
+import { KlerosController } from "../../src/badgeTypeControllers/kleros.sol";
 
 contract Config is Test {
     address public admin = vm.addr(1);
@@ -22,7 +22,7 @@ contract Config is Test {
     uint256 oneYear = 60 * 60 * 24 * 365;
 
     TheBadge public theBadge;
-    KlerosBadgeTypeController public klerosController;
+    KlerosController public klerosController;
 
     // GBC:
     address lightGTCRFactory = 0x08e58Bc26CFB0d346bABD253A1799866F269805a;
@@ -43,7 +43,7 @@ contract Config is Test {
         theBadge = new TheBadge();
         theBadge.initialize(admin, feeCollector, minter);
 
-        klerosController = new KlerosBadgeTypeController();
+        klerosController = new KlerosController();
         klerosController.initialize(address(theBadge), klerosArbitror, lightGTCRFactory);
 
         vm.prank(admin);
@@ -60,19 +60,19 @@ contract Config is Test {
         return badgeType;
     }
 
-    function getKlerosBaseBadgeType() public pure returns (KlerosBadgeTypeController.CreateBadgeType memory) {
+    function getKlerosBaseBadgeType() public pure returns (KlerosController.CreateBadgeType memory) {
         uint256[4] memory baseDeposits;
-        baseDeposits[0] = 1;
-        baseDeposits[1] = 1;
-        baseDeposits[2] = 1;
-        baseDeposits[3] = 1;
+        baseDeposits[0] = 0.1 ether;
+        baseDeposits[1] = 0.1 ether;
+        baseDeposits[2] = 0.1 ether;
+        baseDeposits[3] = 0.1 ether;
 
         uint256[3] memory stakeMultipliers;
         stakeMultipliers[0] = 1;
         stakeMultipliers[1] = 1;
         stakeMultipliers[2] = 1;
 
-        KlerosBadgeTypeController.CreateBadgeType memory strategy = KlerosBadgeTypeController.CreateBadgeType(
+        KlerosController.CreateBadgeType memory strategy = KlerosController.CreateBadgeType(
             address(0), // governor
             address(0), // admin
             1, // court
