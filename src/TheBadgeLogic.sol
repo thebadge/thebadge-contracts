@@ -236,6 +236,7 @@ contract TheBadgeLogic is TheBadgeRoles {
         emit CreatorUpdated(_creator, _metadata);
     }
 
+    // TODO: suspend/remove creator
     // TODO: suspend/remove badgeType creator
 
     /**
@@ -313,7 +314,7 @@ contract TheBadgeLogic is TheBadgeRoles {
     /**
      * @notice returns the cost for minting a badge of a badgeType
      */
-    function badgeRequestValue(uint256 badgeTypeId) public view returns (uint256) {
+    function mintValue(uint256 badgeTypeId) public view returns (uint256) {
         BadgeType storage _badgeType = badgeType[badgeTypeId];
         IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
 

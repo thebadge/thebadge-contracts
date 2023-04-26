@@ -88,7 +88,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
      * =========================
      */
     event NewKlerosBadgeType(uint256 indexed badgeTypeId, address indexed tcrAddress, string metadataUri);
-    event RequestKlerosBadge(uint256 indexed badgeTypeId, uint256 indexed badgeId, string evidence);
+    event mintKlerosBadge(uint256 indexed badgeTypeId, uint256 indexed badgeId, string evidence);
     event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
 
     /**
@@ -214,7 +214,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
         bytes32 klerosItemID = keccak256(abi.encodePacked(args.evidence));
         klerosBadge[badgeId] = KlerosBadge(badgeTypeId, klerosItemID, callee, msg.value);
 
-        emit RequestKlerosBadge(badgeTypeId, badgeId, args.evidence);
+        emit mintKlerosBadge(badgeTypeId, badgeId, args.evidence);
     }
 
     /**

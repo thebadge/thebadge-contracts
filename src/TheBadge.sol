@@ -118,7 +118,7 @@ contract TheBadge is
             revert TheBadge__requestBadge_badgeTypeNotFound();
         }
 
-        if (msg.value < badgeRequestValue(badgeTypeId)) {
+        if (msg.value < mintValue(badgeTypeId)) {
             revert TheBadge__requestBadge_wrongValue();
         }
 
