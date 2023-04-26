@@ -25,20 +25,6 @@ contract TheBadge is
 
     CountersUpgradeable.Counter internal badgeIds;
 
-    struct Badge {
-        uint256 badgeTypeId;
-        address account;
-        uint256 dueDate;
-    }
-
-    /**
-     * =========================
-     * Store
-     * =========================
-     */
-
-    mapping(uint256 => Badge) public badge;
-
     /**
      * =========================
      * Events
@@ -101,9 +87,6 @@ contract TheBadge is
         _unpause();
     }
 
-    /**
-     * @notice request the emission of a badge of a badgeType
-     */
     function mint(uint256 badgeTypeId, address account, string memory tokenURI, bytes memory data) external payable {
         // +++++++++++++++++++++
         // +++++++++++++++++++++
@@ -143,11 +126,25 @@ contract TheBadge is
         _mint(account, badgeId, 1, "0x");
         uint256 validFor = _badgeType.validFor == 0 ? 0 : block.timestamp + _badgeType.validFor;
         badge[badgeId] = Badge(badgeTypeId, account, validFor);
+        badgeTypesByAccount[badgeTypeId][account].push(badgeId);
 
         // delegate to badgeType controller the creation of a new badge.
         controller.mint{ value: (msg.value - _badgeType.mintCreatorFee) }(_msgSender(), badgeTypeId, badgeId, data);
 
         badgeIds.increment();
+    }
+
+    function balanceOf(address account, uint256 badgeId) public view override returns (uint256) {
+        Badge memory _badge = badge[badgeId];
+
+        if (_badge.badgeTypeId == 0 || _badge.account != account) {
+            return 0;
+        }
+
+        BadgeType memory _badgeType = badgeType[_badge.badgeTypeId];
+        IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
+
+        return controller.isAssetActive(badgeId) ? 1 : 0;
     }
 
     /**

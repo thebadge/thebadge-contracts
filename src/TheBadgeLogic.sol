@@ -63,6 +63,12 @@ contract TheBadgeLogic is TheBadgeRoles {
         uint256 mintProtocolFee; // in bps. It is taken from mintCreatorFee
     }
 
+    struct Badge {
+        uint256 badgeTypeId;
+        address account;
+        uint256 dueDate;
+    }
+
     /**
      * =========================
      * Store
@@ -70,15 +76,10 @@ contract TheBadgeLogic is TheBadgeRoles {
      */
 
     mapping(address => Creator) public creators;
-    /**
-     * @notice badge types controllers
-     */
     mapping(string => BadgeTypeController) public badgeTypeController;
-    /**
-     * @notice base information of a badge.
-     * badgeId => BadgeType
-     */
     mapping(uint256 => BadgeType) public badgeType;
+    mapping(uint256 => Badge) public badge;
+    mapping(uint256 => mapping(address => uint256[])) public badgeTypesByAccount;
 
     /**
      * =========================
@@ -319,6 +320,24 @@ contract TheBadgeLogic is TheBadgeRoles {
         IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
 
         return controller.mintValue(badgeTypeId) + _badgeType.mintCreatorFee;
+    }
+
+    function balanceOfBadgeType(address account, uint256 badgeTypeId) public view returns (uint256) {
+        if (badgeTypesByAccount[badgeTypeId][account].length == 0) {
+            return 0;
+        }
+
+        BadgeType memory _badgeType = badgeType[badgeTypeId];
+        IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
+
+        uint256 balance = 0;
+        for (uint i = 0; i < badgeTypesByAccount[badgeTypeId][account].length; i++) {
+            if (controller.isAssetActive(badgeTypesByAccount[badgeTypeId][account][i])) {
+                balance++;
+            }
+        }
+
+        return balance;
     }
 
     receive() external payable {}

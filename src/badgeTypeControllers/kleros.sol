@@ -190,7 +190,7 @@ contract KlerosBadgeTypeController is Initializable, IBadgeController {
     /**
      * @notice Badge can be minted if it was never requested for the address or if it has a due date before now
      */
-    function canMint(uint256, address) public view returns (bool) {
+    function canMint(uint256, address) public pure returns (bool) {
         return true;
     }
 
