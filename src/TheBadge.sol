@@ -11,6 +11,8 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./TheBadgeRoles.sol";
 import "./TheBadgeLogic.sol";
 
+// TODO: save storage for upgradeability?
+
 /// @custom:security-contact hello@thebadge.com
 contract TheBadge is
     Initializable,
@@ -53,12 +55,7 @@ contract TheBadge is
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
-        // +++++++++++++++++++++
-        // +++++++++++++++++++++
-        // TODO: enable this, it was commented until we find a better solution to test UUPS with foundry
-        // +++++++++++++++++++++
-        // +++++++++++++++++++++
-        // _disableInitializers();
+        _disableInitializers();
     }
 
     function initialize(address admin, address feeCollector, address minter) public initializer {

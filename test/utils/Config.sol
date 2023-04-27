@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 import "forge-std/Test.sol";
 
 import "../../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol";
+import "../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 
 import { TheBadge } from "../../src/TheBadge.sol";
 import { TheBadgeLogic } from "../../src/TheBadgeLogic.sol";
@@ -40,7 +41,9 @@ contract Config is Test {
         vm.deal(feeCollector, 100 ether);
         vm.deal(creator, 100 ether);
 
-        theBadge = new TheBadge();
+        address imp = address(new TheBadge());
+        address proxy = ClonesUpgradeable.clone(imp);
+        theBadge = TheBadge(payable(proxy));
         theBadge.initialize(admin, feeCollector, minter);
 
         klerosController = new KlerosController();
