@@ -4,8 +4,7 @@ pragma solidity 0.8.17;
 import "forge-std/Test.sol";
 
 // import { AddressUpgradeable } from "../lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
-// import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol";
-
+import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol";
 import { Config, TheBadge, TheBadgeLogic, KlerosController } from "./utils/Config.sol";
 
 contract TheBadgeTestCore is Config {
@@ -78,6 +77,15 @@ contract TheBadgeTestCore is Config {
         assertEq(deposit, mintValue - badgeType.mintCreatorFee);
         assertEq(theBadge.balanceOf(goku, badgeId), 0); // balanceOf is 0 until challenge period ends and claimKlerosBadge is called
 
-        // address tcrList = klerosController.klerosBadgeType(badgeTypeId);
+        // move timestamp 1 unit after the challenge period has due.
+        address tcrList = klerosController.klerosBadgeType(badgeTypeId);
+        uint256 challengePeriodDuration = ILightGeneralizedTCR(tcrList).challengePeriodDuration();
+        vm.warp(block.timestamp + challengePeriodDuration + 1);
+
+        // claim badge
+        uint256 prevBalance = goku.balance;
+        klerosController.claim(badgeId);
+        assertEq(goku.balance, prevBalance + deposit);
+        assertEq(theBadge.balanceOfBadgeType(goku, badgeTypeId), 1);
     }
 }
