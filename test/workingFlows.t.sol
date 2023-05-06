@@ -8,16 +8,16 @@ import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol
 import { Config, TheBadge, TheBadgeLogic, KlerosController } from "./utils/Config.sol";
 
 contract TheBadgeTestCore is Config {
-    function test_createKlerosBadgeType_shouldWork() public {
+    function test_createKlerosBadgeModel_shouldWork() public {
         // register creator
         vm.prank(vegeta);
-        theBadge.registerBadgeTypeCreator("ipfs://creatorMetadata.json");
+        theBadge.registerBadgeModelCreator("ipfs://creatorMetadata.json");
 
         // Crete badge type
         vm.prank(vegeta);
-        TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
-        KlerosController.CreateBadgeType memory klerosBadgeType = getKlerosBaseBadgeType();
-        theBadge.createBadgeType(badgeType, abi.encode(klerosBadgeType));
+        TheBadge.CreateBadgeModel memory badgeModel = getBaseBadgeModel();
+        KlerosController.CreateBadgeModel memory klerosBadgeModel = getKlerosBaseBadgeModel();
+        theBadge.createBadgeModel(badgeModel, abi.encode(klerosBadgeModel));
 
         (
             address emitter,
@@ -26,15 +26,15 @@ contract TheBadgeTestCore is Config {
             uint256 mintCreatorFee,
             uint256 validFor,
             uint256 mintProtocolFee
-        ) = theBadge.badgeType(0);
+        ) = theBadge.badgeModel(0);
 
-        address tcrList = klerosController.klerosBadgeType(0);
+        address tcrList = klerosController.klerosBadgeModel(0);
 
         assertEq(vegeta, emitter);
-        assertEq(controllerName, badgeType.controllerName);
+        assertEq(controllerName, badgeModel.controllerName);
         assertEq(paused, false);
-        assertEq(mintCreatorFee, badgeType.mintCreatorFee);
-        assertEq(validFor, badgeType.validFor);
+        assertEq(mintCreatorFee, badgeModel.mintCreatorFee);
+        assertEq(validFor, badgeModel.validFor);
         assertEq(mintProtocolFee, theBadge.mintBadgeDefaultFee());
         assertFalse(tcrList == address(0));
     }
@@ -42,43 +42,43 @@ contract TheBadgeTestCore is Config {
     function test_mintKlerosBadge_shouldWork() public {
         // register creator
         vm.prank(vegeta);
-        theBadge.registerBadgeTypeCreator("ipfs://creatorMetadata.json");
+        theBadge.registerBadgeModelCreator("ipfs://creatorMetadata.json");
 
         // Crete badge type
         vm.prank(vegeta);
-        TheBadge.CreateBadgeType memory badgeType = getBaseBadgeType();
-        KlerosController.CreateBadgeType memory klerosBadgeType = getKlerosBaseBadgeType();
-        theBadge.createBadgeType(badgeType, abi.encode(klerosBadgeType));
+        TheBadge.CreateBadgeModel memory badgeModel = getBaseBadgeModel();
+        KlerosController.CreateBadgeModel memory klerosBadgeModel = getKlerosBaseBadgeModel();
+        theBadge.createBadgeModel(badgeModel, abi.encode(klerosBadgeModel));
 
-        // first badgeType has id = 0;
-        uint256 badgeTypeId = 0;
+        // first  id = 0;
+        uint256 badgeModelId = 0;
 
-        // check goku account has not balance for badgeTypeId
-        assertEq(theBadge.balanceOfBadgeType(goku, badgeTypeId), 0);
+        // check goku account has not balance for badgeModelId
+        assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 0);
 
-        // goku mints badgeTypeId
-        uint256 mintValue = theBadge.mintValue(badgeTypeId);
+        // goku mints badgeModelId
+        uint256 mintValue = theBadge.mintValue(badgeModelId);
         string memory evidenceUri = "ipfs://evidence.json";
         KlerosController.MintParams memory badgeInfo = KlerosController.MintParams(evidenceUri);
         vm.prank(goku);
-        theBadge.mint{ value: mintValue }(badgeTypeId, goku, evidenceUri, abi.encode(badgeInfo));
+        theBadge.mint{ value: mintValue }(badgeModelId, goku, evidenceUri, abi.encode(badgeInfo));
 
         // first badge has id = 0;
         uint256 badgeId = 0;
 
-        // check goku account has not balance for badgeTypeId.
+        // check goku account has not balance for badgeModelId.
         // at this moment, the badge is in review period, so balance has to be still 0.
-        assertEq(theBadge.balanceOfBadgeType(goku, badgeTypeId), 0);
+        assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 0);
 
         // check status on KlerosController
         (bytes32 itemID, address mintCallee, uint256 deposit) = klerosController.klerosBadge(badgeId);
         assertEq(itemID, keccak256(abi.encodePacked(evidenceUri)));
         assertEq(mintCallee, goku);
-        assertEq(deposit, mintValue - badgeType.mintCreatorFee);
+        assertEq(deposit, mintValue - badgeModel.mintCreatorFee);
         assertEq(theBadge.balanceOf(goku, badgeId), 0); // balanceOf is 0 until challenge period ends and claimKlerosBadge is called
 
         // move timestamp 1 unit after the challenge period has due.
-        address tcrList = klerosController.klerosBadgeType(badgeTypeId);
+        address tcrList = klerosController.klerosBadgeModel(badgeModelId);
         uint256 challengePeriodDuration = ILightGeneralizedTCR(tcrList).challengePeriodDuration();
         vm.warp(block.timestamp + challengePeriodDuration + 1);
 
@@ -86,6 +86,6 @@ contract TheBadgeTestCore is Config {
         uint256 prevBalance = goku.balance;
         klerosController.claim(badgeId);
         assertEq(goku.balance, prevBalance + deposit);
-        assertEq(theBadge.balanceOfBadgeType(goku, badgeTypeId), 1);
+        assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 1);
     }
 }

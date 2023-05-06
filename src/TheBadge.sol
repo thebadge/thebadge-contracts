@@ -33,7 +33,7 @@ contract TheBadge is
      * =========================
      */
 
-    event BadgeRequested(uint256 indexed badgeTypeID, uint256 indexed badgeID, address indexed wallet);
+    event BadgeRequested(uint256 indexed badgeModelID, uint256 indexed badgeID, address indexed wallet);
 
     /**
      * =========================
@@ -42,7 +42,7 @@ contract TheBadge is
      */
 
     error TheBadge__SBT();
-    error TheBadge__requestBadge_badgeTypeNotFound();
+    error TheBadge__requestBadge_badgeModelNotFound();
     error TheBadge__requestBadge_wrongValue();
     error TheBadge__requestBadge_isPaused();
     error TheBadge__requestBadge_controllerIsPaused();
@@ -72,7 +72,7 @@ contract TheBadge is
         feeCollector = feeCollector;
 
         registerCreatorValue = uint256(0);
-        createBadgeTypeValue = uint256(0);
+        createBadgeModelValue = uint256(0);
         mintBadgeDefaultFee = uint256(5000); // in bps
     }
 
@@ -84,49 +84,48 @@ contract TheBadge is
         _unpause();
     }
 
-    function mint(uint256 badgeTypeId, address account, string memory tokenURI, bytes memory data) external payable {
+    function mint(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data) external payable {
         // +++++++++++++++++++++
         // +++++++++++++++++++++
         // TODO: add onlyRole(MINTER_ROLE) before going prod
         // +++++++++++++++++++++
         // +++++++++++++++++++++
-        BadgeType storage _badgeType = badgeType[badgeTypeId];
-        BadgeTypeController storage _badgeTypeController = badgeTypeController[_badgeType.controllerName];
-        IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
+        BadgeModel storage _badgeModel = badgeModel[badgeModelId];
+        BadgeModelController storage _badgeModelController = badgeModelController[_badgeModel.controllerName];
+        IBadgeController controller = IBadgeController(badgeModelController[_badgeModel.controllerName].controller);
 
-        if (_badgeType.creator == address(0)) {
-            revert TheBadge__requestBadge_badgeTypeNotFound();
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__requestBadge_badgeModelNotFound();
         }
 
-        if (msg.value < mintValue(badgeTypeId)) {
+        if (msg.value < mintValue(badgeModelId)) {
             revert TheBadge__requestBadge_wrongValue();
         }
 
-        if (_badgeType.paused) {
+        if (_badgeModel.paused) {
             revert TheBadge__requestBadge_isPaused();
         }
 
-        if (_badgeTypeController.paused) {
+        if (_badgeModelController.paused) {
             revert TheBadge__requestBadge_controllerIsPaused();
         }
 
         // distribute fees
-        if (_badgeType.mintCreatorFee > 0) {
-            uint256 theBadgeFee = calculateFee(_badgeType.mintCreatorFee, _badgeType.mintProtocolFee);
+        if (_badgeModel.mintCreatorFee > 0) {
+            uint256 theBadgeFee = calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee);
             payable(feeCollector).transfer(theBadgeFee);
-            payable(_badgeType.creator).transfer(_badgeType.mintCreatorFee - theBadgeFee);
+            payable(_badgeModel.creator).transfer(_badgeModel.mintCreatorFee - theBadgeFee);
         }
 
         // save asset info
         uint256 badgeId = badgeIds.current();
         _setURI(badgeId, tokenURI);
         _mint(account, badgeId, 1, "0x");
-        uint256 validFor = _badgeType.validFor == 0 ? 0 : block.timestamp + _badgeType.validFor;
-        badge[badgeId] = Badge(badgeTypeId, account, validFor);
-        badgeTypesByAccount[badgeTypeId][account].push(badgeId);
+        uint256 validFor = _badgeModel.validFor == 0 ? 0 : block.timestamp + _badgeModel.validFor;
+        badge[badgeId] = Badge(badgeModelId, account, validFor);
+        badgeModelsByAccount[badgeModelId][account].push(badgeId);
 
-        // delegate to badgeType controller the creation of a new badge.
-        controller.mint{ value: (msg.value - _badgeType.mintCreatorFee) }(_msgSender(), badgeTypeId, badgeId, data);
+        controller.mint{ value: (msg.value - _badgeModel.mintCreatorFee) }(_msgSender(), badgeModelId, badgeId, data);
 
         badgeIds.increment();
     }
@@ -134,12 +133,12 @@ contract TheBadge is
     function balanceOf(address account, uint256 badgeId) public view override returns (uint256) {
         Badge memory _badge = badge[badgeId];
 
-        if (_badge.badgeTypeId == 0 || _badge.account != account) {
+        if (_badge.badgeModelId == 0 || _badge.account != account) {
             return 0;
         }
 
-        BadgeType memory _badgeType = badgeType[_badge.badgeTypeId];
-        IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
+        BadgeModel memory _badgeModel = badgeModel[_badge.badgeModelId];
+        IBadgeController controller = IBadgeController(badgeModelController[_badgeModel.controllerName].controller);
 
         return controller.isAssetActive(badgeId) ? 1 : 0;
     }
@@ -151,10 +150,9 @@ contract TheBadge is
      */
 
     function uri(
-        uint256
+        uint256 badgeId
     ) public view virtual override(ERC1155URIStorageUpgradeable, ERC1155Upgradeable) returns (string memory) {
-        // TODO: return token uri per badge
-        return "";
+        return super.uri(badgeId);
     }
 
     function _setApprovalForAll(address, address, bool) internal pure override {

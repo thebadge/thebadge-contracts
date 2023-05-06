@@ -38,7 +38,7 @@ contract KlerosController is Initializable, IBadgeController {
      * @param mintCost The cost for minting a badge, it goes to the emitter.
      * @param validFor The time in seconds of how long the badge is valid. (cero for infinite)
      */
-    struct CreateBadgeType {
+    struct CreateBadgeModel {
         address governor;
         address admin;
         uint256 courtId;
@@ -57,7 +57,7 @@ contract KlerosController is Initializable, IBadgeController {
     /**
      * @param tcrList The TCR List created for a particular badge type
      */
-    struct KlerosBadgeType {
+    struct KlerosBadgeModel {
         address tcrList;
     }
 
@@ -78,7 +78,7 @@ contract KlerosController is Initializable, IBadgeController {
      * =========================
      */
 
-    mapping(uint256 => KlerosBadgeType) public klerosBadgeType;
+    mapping(uint256 => KlerosBadgeModel) public klerosBadgeModel;
     mapping(uint256 => KlerosBadge) public klerosBadge;
 
     /**
@@ -86,7 +86,7 @@ contract KlerosController is Initializable, IBadgeController {
      * Events
      * =========================
      */
-    event NewKlerosBadgeType(uint256 indexed badgeTypeId, address indexed tcrAddress, string metadataUri);
+    event NewKlerosBadgeModel(uint256 indexed badgeModelId, address indexed tcrAddress, string metadataUri);
     event mintKlerosBadge(uint256 indexed badgeId, string evidence);
     event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
 
@@ -95,14 +95,14 @@ contract KlerosController is Initializable, IBadgeController {
      * Errors
      * =========================
      */
-    error KlerosBadgeTypeController__createBadgeType_badgeTypeAlreadyCreated();
-    error KlerosBadgeTypeController__onlyTheBadge_senderNotTheBadge();
-    error KlerosBadgeTypeController__mintBadge_alreadyMinted();
-    error KlerosBadgeTypeController__mintBadge_wrongBadgeType();
-    error KlerosBadgeTypeController__mintBadge_isPaused();
-    error KlerosBadgeTypeController__mintBadge_wrongValue();
-    error KlerosBadgeTypeController__claimBadge_insufficientBalance();
-    error KlerosBadgeTypeController__createBadgeType_TCRListAddressZero();
+    error KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
+    error KlerosBadgeModelController__onlyTheBadge_senderNotTheBadge();
+    error KlerosBadgeModelController__mintBadge_alreadyMinted();
+    error KlerosBadgeModelController__mintBadge_wrongBadgeModel();
+    error KlerosBadgeModelController__mintBadge_isPaused();
+    error KlerosBadgeModelController__mintBadge_wrongValue();
+    error KlerosBadgeModelController__claimBadge_insufficientBalance();
+    error KlerosBadgeModelController__createBadgeModel_TCRListAddressZero();
 
     /**
      * =========================
@@ -112,7 +112,7 @@ contract KlerosController is Initializable, IBadgeController {
 
     modifier onlyTheBadge() {
         if (address(theBadge) != msg.sender) {
-            revert KlerosBadgeTypeController__onlyTheBadge_senderNotTheBadge();
+            revert KlerosBadgeModelController__onlyTheBadge_senderNotTheBadge();
         }
         _;
     }
@@ -131,20 +131,20 @@ contract KlerosController is Initializable, IBadgeController {
 
     /**
      * @notice Allows to create off-chain kleros strategies for registered entities
-     * @param badgeTypeId from TheBadge contract
+     * @param badgeModelId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
-    function createBadgeType(uint256 badgeTypeId, bytes calldata data) public onlyTheBadge {
+    function createBadgeModel(uint256 badgeModelId, bytes calldata data) public onlyTheBadge {
         // TODO: set TCR admin to an address that we control, so we can call "removeItem"
 
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
-        if (_klerosBadgeType.tcrList != address(0)) {
-            revert KlerosBadgeTypeController__createBadgeType_badgeTypeAlreadyCreated();
+        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+        if (_klerosBadgeModel.tcrList != address(0)) {
+            revert KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
         }
 
         ILightGTCRFactory lightGTCRFactory = ILightGTCRFactory(tcrFactory);
 
-        CreateBadgeType memory args = abi.decode(data, (CreateBadgeType));
+        CreateBadgeModel memory args = abi.decode(data, (CreateBadgeModel));
 
         lightGTCRFactory.deploy(
             IArbitrator(arbitrator),
@@ -163,22 +163,22 @@ contract KlerosController is Initializable, IBadgeController {
         uint256 index = lightGTCRFactory.count() - 1;
         address klerosTcrListAddress = address(lightGTCRFactory.instances(index));
         if (klerosTcrListAddress == address(0)) {
-            revert KlerosBadgeTypeController__createBadgeType_TCRListAddressZero();
+            revert KlerosBadgeModelController__createBadgeModel_TCRListAddressZero();
         }
 
-        klerosBadgeType[badgeTypeId] = KlerosBadgeType(klerosTcrListAddress);
+        klerosBadgeModel[badgeModelId] = KlerosBadgeModel(klerosTcrListAddress);
 
-        emit NewKlerosBadgeType(badgeTypeId, klerosTcrListAddress, args.registrationMetaEvidence);
+        emit NewKlerosBadgeModel(badgeModelId, klerosTcrListAddress, args.registrationMetaEvidence);
     }
 
     /**
      * @notice Returns the cost for minting a badge for a kleros strategy
      * It sums kleros base deposit + kleros arbitration cost
      */
-    function mintValue(uint256 badgeTypeId) public view returns (uint256) {
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
+    function mintValue(uint256 badgeModelId) public view returns (uint256) {
+        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
 
-        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
+        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
 
         uint256 arbitrationCost = arbitrator.arbitrationCost(lightGeneralizedTCR.arbitratorExtraData());
         uint256 baseDeposit = lightGeneralizedTCR.submissionBaseDeposit();
@@ -196,15 +196,15 @@ contract KlerosController is Initializable, IBadgeController {
     /**
      * @notice mint badge for kleros strategy
      */
-    function mint(address callee, uint256 badgeTypeId, uint256 badgeId, bytes calldata data) public payable {
+    function mint(address callee, uint256 badgeModelId, uint256 badgeId, bytes calldata data) public payable {
         // check value
-        uint256 mintCost = mintValue(badgeTypeId);
+        uint256 mintCost = mintValue(badgeModelId);
         if (msg.value != mintCost) {
-            revert KlerosBadgeTypeController__mintBadge_wrongValue();
+            revert KlerosBadgeModelController__mintBadge_wrongValue();
         }
 
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
-        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
+        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
         MintParams memory args = abi.decode(data, (MintParams));
 
         lightGeneralizedTCR.addItem{ value: (msg.value) }(args.evidence);
@@ -222,9 +222,9 @@ contract KlerosController is Initializable, IBadgeController {
      */
     function getChallengeValue(uint256 badgeId) public view returns (uint256) {
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeTypeId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
-        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
+        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
+        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
 
         (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
         uint256 lastRequestIndex = requestCount - 1;
@@ -253,14 +253,14 @@ contract KlerosController is Initializable, IBadgeController {
      */
     function claim(uint256 badgeId) public payable {
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeTypeId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
+        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
+        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
 
-        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
+        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
         lightGeneralizedTCR.executeRequest(_klerosBadge.itemID);
 
         if (_klerosBadge.deposit > address(this).balance) {
-            revert KlerosBadgeTypeController__claimBadge_insufficientBalance();
+            revert KlerosBadgeModelController__claimBadge_insufficientBalance();
         }
 
         uint256 balanceToDeposit = _klerosBadge.deposit;
@@ -270,11 +270,11 @@ contract KlerosController is Initializable, IBadgeController {
 
     function isAssetActive(uint256 badgeId) public view returns (bool) {
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeTypeId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeType storage _klerosBadgeType = klerosBadgeType[badgeTypeId];
+        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
+        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
 
-        if (_klerosBadgeType.tcrList != address(0)) {
-            ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeType.tcrList);
+        if (_klerosBadgeModel.tcrList != address(0)) {
+            ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
             (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
             if (klerosItemStatus == 1 || klerosItemStatus == 3) {
                 return true;

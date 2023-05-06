@@ -8,7 +8,7 @@ import "../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgra
 
 import { TheBadge } from "../../src/TheBadge.sol";
 import { TheBadgeLogic } from "../../src/TheBadgeLogic.sol";
-import { KlerosController } from "../../src/badgeTypeControllers/kleros.sol";
+import { KlerosController } from "../../src/badgeModelControllers/kleros.sol";
 
 contract Config is Test {
     address public admin = vm.addr(1);
@@ -50,20 +50,20 @@ contract Config is Test {
         klerosController.initialize(address(theBadge), klerosArbitror, lightGTCRFactory);
 
         vm.prank(admin);
-        theBadge.setBadgeTypeController("kleros", address(klerosController));
+        theBadge.setBadgeModelController("kleros", address(klerosController));
     }
 
-    function getBaseBadgeType() public view returns (TheBadge.CreateBadgeType memory) {
-        TheBadge.CreateBadgeType memory badgeType = TheBadgeLogic.CreateBadgeType(
+    function getBaseBadgeModel() public view returns (TheBadge.CreateBadgeModel memory) {
+        TheBadge.CreateBadgeModel memory badgeModel = TheBadgeLogic.CreateBadgeModel(
             "ipfs/metadataForBadge.json",
             "kleros",
             0,
             oneYear
         );
-        return badgeType;
+        return badgeModel;
     }
 
-    function getKlerosBaseBadgeType() public pure returns (KlerosController.CreateBadgeType memory) {
+    function getKlerosBaseBadgeModel() public pure returns (KlerosController.CreateBadgeModel memory) {
         uint256[4] memory baseDeposits;
         baseDeposits[0] = 0.1 ether;
         baseDeposits[1] = 0.1 ether;
@@ -75,7 +75,7 @@ contract Config is Test {
         stakeMultipliers[1] = 1;
         stakeMultipliers[2] = 1;
 
-        KlerosController.CreateBadgeType memory strategy = KlerosController.CreateBadgeType(
+        KlerosController.CreateBadgeModel memory strategy = KlerosController.CreateBadgeModel(
             address(0), // governor
             address(0), // admin
             1, // court

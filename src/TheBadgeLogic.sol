@@ -8,14 +8,14 @@ import "./interfaces/IBadgeController.sol";
 contract TheBadgeLogic is TheBadgeRoles {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
-    CountersUpgradeable.Counter private badgeTypeIds;
+    CountersUpgradeable.Counter private badgeModelIds;
     uint256 public registerCreatorValue;
     uint256 public mintBadgeDefaultFee; // in bps
     // TODO: does this var makes sense? it was thought to define a min value to mint a badge.
     // For example, if the badge is going to have a cost (it can be free) it has to be bigger than this variable.
-    // badgeType1 = mint cost is 4 because minBadgeMintValue is 4.
+    // badgeModel1 = mint cost is 4 because minBadgeMintValue is 4.
     // uint256 public minBadgeMintValue;
-    uint256 public createBadgeTypeValue;
+    uint256 public createBadgeModelValue;
     address public feeCollector;
 
     /**
@@ -36,7 +36,7 @@ contract TheBadgeLogic is TheBadgeRoles {
      * @param controller the smart contract that controls a badge type.
      * @param paused if the controller is paused, no operations can be done
      */
-    struct BadgeTypeController {
+    struct BadgeModelController {
         address controller;
         bool paused;
     }
@@ -44,7 +44,7 @@ contract TheBadgeLogic is TheBadgeRoles {
     /**
      * Struct to use as arg to create a badge type
      */
-    struct CreateBadgeType {
+    struct CreateBadgeModel {
         string metadata;
         string controllerName;
         uint256 mintCreatorFee;
@@ -54,7 +54,7 @@ contract TheBadgeLogic is TheBadgeRoles {
     /**
      * Struct to store generic information of a badge type.
      */
-    struct BadgeType {
+    struct BadgeModel {
         address creator;
         string controllerName;
         bool paused;
@@ -64,7 +64,7 @@ contract TheBadgeLogic is TheBadgeRoles {
     }
 
     struct Badge {
-        uint256 badgeTypeId;
+        uint256 badgeModelId;
         address account;
         uint256 dueDate;
     }
@@ -76,10 +76,10 @@ contract TheBadgeLogic is TheBadgeRoles {
      */
 
     mapping(address => Creator) public creators;
-    mapping(string => BadgeTypeController) public badgeTypeController;
-    mapping(uint256 => BadgeType) public badgeType;
+    mapping(string => BadgeModelController) public badgeModelController;
+    mapping(uint256 => BadgeModel) public badgeModel;
     mapping(uint256 => Badge) public badge;
-    mapping(uint256 => mapping(address => uint256[])) public badgeTypesByAccount;
+    mapping(uint256 => mapping(address => uint256[])) public badgeModelsByAccount;
 
     /**
      * =========================
@@ -88,7 +88,7 @@ contract TheBadgeLogic is TheBadgeRoles {
      */
     event CreatorRegistered(address indexed creator, string metadata);
     event CreatorUpdated(address indexed creator, string metadata);
-    event BadgeTypeCreated(uint256 indexed badgeTypeID, string metadata);
+    event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
 
     /**
      * =========================
@@ -100,16 +100,16 @@ contract TheBadgeLogic is TheBadgeRoles {
     error TheBadge__onlyController_senderIsNotTheController();
     error TheBadge__registerCreator_wrongValue();
     error TheBadge__registerCreator_alreadyRegistered();
-    error TheBadge__setBadgeTypeController_emptyName();
-    error TheBadge__setBadgeTypeController_notFound();
-    error TheBadge__setBadgeTypeController_alreadySet();
+    error TheBadge__setBadgeModelController_emptyName();
+    error TheBadge__setBadgeModelController_notFound();
+    error TheBadge__setBadgeModelController_alreadySet();
     error TheBadge__setControllerStatus_notFound();
-    error TheBadge__createBadgeType_invalidController();
-    error TheBadge__createBadgeType_controllerIsPaused();
-    error TheBadge__createBadgeType_wrongValue();
-    error TheBadge__updateBadgeType_notBadgeTypeOwner();
-    error TheBadge__updateBadgeType_badgeTypeNotFound();
-    error TheBadge__updateBadgeTypeFee_badgeTypeNotFound();
+    error TheBadge__createBadgeModel_invalidController();
+    error TheBadge__createBadgeModel_controllerIsPaused();
+    error TheBadge__createBadgeModel_wrongValue();
+    error TheBadge__updateBadgeModel_notBadgeModelOwner();
+    error TheBadge__updateBadgeModel_badgeModelNotFound();
+    error TheBadge__updateBadgeModelFee_badgeModelNotFound();
     error TheBadge__updateCreator_notFound();
 
     /**
@@ -118,7 +118,7 @@ contract TheBadgeLogic is TheBadgeRoles {
      * =========================
      */
 
-    modifier onlyBadgeTypeCreator() {
+    modifier onlyBadgeModelCreator() {
         Creator storage creator = creators[msg.sender];
         if (bytes(creator.metadata).length == 0) {
             revert TheBadge__onlyCreator_senderIsNotACreator();
@@ -127,8 +127,8 @@ contract TheBadgeLogic is TheBadgeRoles {
     }
 
     modifier onlyController(address sender, uint256 badgeId) {
-        BadgeType storage _badgeType = badgeType[badgeId];
-        if (sender != badgeTypeController[_badgeType.controllerName].controller) {
+        BadgeModel storage _badgeModel = badgeModel[badgeId];
+        if (sender != badgeModelController[_badgeModel.controllerName].controller) {
             revert TheBadge__onlyController_senderIsNotTheController();
         }
         _;
@@ -150,57 +150,53 @@ contract TheBadgeLogic is TheBadgeRoles {
 
     function updateProtocolValues(
         uint256 _mintBadgeDefaultFee,
-        uint256 _createBadgeTypeValue,
+        uint256 _createBadgeModelValue,
         uint256 _registerCreatorValue
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         mintBadgeDefaultFee = _mintBadgeDefaultFee;
-        createBadgeTypeValue = _createBadgeTypeValue;
+        createBadgeModelValue = _createBadgeModelValue;
         registerCreatorValue = _registerCreatorValue;
     }
 
-    /**
-     * @notice Sets the controller address for a badgeType.
-     * Once set, can not be modified to avoid losing controller internal state.
-     */
-    function setBadgeTypeController(
+    function setBadgeModelController(
         string memory controllerName,
         address controllerAddress
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        BadgeTypeController storage _badgeTypeController = badgeTypeController[controllerName];
+        BadgeModelController storage _badgeModelController = badgeModelController[controllerName];
 
         if (bytes(controllerName).length == 0) {
-            revert TheBadge__setBadgeTypeController_emptyName();
+            revert TheBadge__setBadgeModelController_emptyName();
         }
 
         if (controllerAddress == address(0)) {
-            revert TheBadge__setBadgeTypeController_notFound();
+            revert TheBadge__setBadgeModelController_notFound();
         }
 
-        if (_badgeTypeController.controller != address(0)) {
-            revert TheBadge__setBadgeTypeController_alreadySet();
+        if (_badgeModelController.controller != address(0)) {
+            revert TheBadge__setBadgeModelController_alreadySet();
         }
 
-        badgeTypeController[controllerName] = BadgeTypeController(controllerAddress, false);
+        badgeModelController[controllerName] = BadgeModelController(controllerAddress, false);
     }
 
     /**
      * @notice pause/unpause controller
      */
     function setControllerStatus(string memory controllerName, bool isPaused) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        BadgeTypeController storage _badgeTypeController = badgeTypeController[controllerName];
+        BadgeModelController storage _badgeModelController = badgeModelController[controllerName];
 
-        if (_badgeTypeController.controller == address(0)) {
+        if (_badgeModelController.controller == address(0)) {
             revert TheBadge__setControllerStatus_notFound();
         }
 
-        _badgeTypeController.paused = isPaused;
+        _badgeModelController.paused = isPaused;
     }
 
     /**
      * @notice Register a new badge type creator
      * @param _metadata IPFS url
      */
-    function registerBadgeTypeCreator(string memory _metadata) public payable {
+    function registerBadgeModelCreator(string memory _metadata) public payable {
         if (msg.value != registerCreatorValue) {
             revert TheBadge__registerCreator_wrongValue();
         }
@@ -219,11 +215,7 @@ contract TheBadgeLogic is TheBadgeRoles {
         emit CreatorRegistered(_msgSender(), creator.metadata);
     }
 
-    /**
-     * @dev Allow to update some creator's attributes for the admin
-     * @param _creator The creator address
-     */
-    function updateBadgeTypeCreator(address _creator, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateBadgeModelCreator(address _creator, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
         Creator storage creator = creators[_creator];
 
         if (bytes(creator.metadata).length == 0) {
@@ -238,24 +230,24 @@ contract TheBadgeLogic is TheBadgeRoles {
     }
 
     // TODO: suspend/remove creator
-    // TODO: suspend/remove badgeType creator
+    // TODO: suspend/remove badgeModel creator
 
     /**
      * @notice Creates a badge type that will allow users to mint badges of this type.
      */
-    function createBadgeType(CreateBadgeType memory args, bytes memory data) public payable onlyBadgeTypeCreator {
+    function createBadgeModel(CreateBadgeModel memory args, bytes memory data) public payable onlyBadgeModelCreator {
         // check values
-        if (msg.value != createBadgeTypeValue) {
-            revert TheBadge__createBadgeType_wrongValue();
+        if (msg.value != createBadgeModelValue) {
+            revert TheBadge__createBadgeModel_wrongValue();
         }
 
         // verify valid controller
-        BadgeTypeController storage _badgeTypeController = badgeTypeController[args.controllerName];
-        if (_badgeTypeController.controller == address(0)) {
-            revert TheBadge__createBadgeType_invalidController();
+        BadgeModelController storage _badgeModelController = badgeModelController[args.controllerName];
+        if (_badgeModelController.controller == address(0)) {
+            revert TheBadge__createBadgeModel_invalidController();
         }
-        if (_badgeTypeController.paused) {
-            revert TheBadge__createBadgeType_controllerIsPaused();
+        if (_badgeModelController.paused) {
+            revert TheBadge__createBadgeModel_controllerIsPaused();
         }
 
         // move fees to collector
@@ -263,7 +255,7 @@ contract TheBadgeLogic is TheBadgeRoles {
             payable(feeCollector).transfer(msg.value);
         }
 
-        badgeType[badgeTypeIds.current()] = BadgeType(
+        badgeModel[badgeModelIds.current()] = BadgeModel(
             _msgSender(),
             args.controllerName,
             false,
@@ -272,67 +264,58 @@ contract TheBadgeLogic is TheBadgeRoles {
             mintBadgeDefaultFee
         );
 
-        emit BadgeTypeCreated(badgeTypeIds.current(), args.metadata);
-        IBadgeController(_badgeTypeController.controller).createBadgeType(badgeTypeIds.current(), data);
+        emit BadgeModelCreated(badgeModelIds.current(), args.metadata);
+        IBadgeController(_badgeModelController.controller).createBadgeModel(badgeModelIds.current(), data);
 
-        badgeTypeIds.increment();
+        badgeModelIds.increment();
     }
 
-    /**
-     * @notice Edit some attributes of a badgeType
-     */
-    function updateBadgeType(uint256 badgeTypeId, uint256 mintCreatorFee, uint256 validFor, bool paused) public {
-        BadgeType storage _badgeType = badgeType[badgeTypeId];
+    function updateBadgeModel(uint256 badgeModelId, uint256 mintCreatorFee, uint256 validFor, bool paused) public {
+        BadgeModel storage _badgeModel = badgeModel[badgeModelId];
 
-        if (_badgeType.creator == address(0)) {
-            revert TheBadge__updateBadgeType_badgeTypeNotFound();
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__updateBadgeModel_badgeModelNotFound();
         }
 
-        if (_msgSender() != _badgeType.creator) {
-            revert TheBadge__updateBadgeType_notBadgeTypeOwner();
+        if (_msgSender() != _badgeModel.creator) {
+            revert TheBadge__updateBadgeModel_notBadgeModelOwner();
         }
 
-        _badgeType.mintCreatorFee = mintCreatorFee;
-        _badgeType.validFor = validFor;
-        _badgeType.paused = paused;
+        _badgeModel.mintCreatorFee = mintCreatorFee;
+        _badgeModel.validFor = validFor;
+        _badgeModel.paused = paused;
     }
 
-    // TODO: suspend badgeType ?
+    // TODO: suspend badgeModel. I think we don't as we might want to use a Kleros list to handle the creations of lists. 
 
-    /**
-     * @notice Allows the admin to modify the platform fee when a user mints a badge of a specific badgeType
-     */
-    function updateBadgeTypeFee(uint256 badgeTypeId, uint256 feeInBps) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        BadgeType storage _badgeType = badgeType[badgeTypeId];
+    function updateBadgeModelFee(uint256 badgeModelId, uint256 feeInBps) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        BadgeModel storage _badgeModel = badgeModel[badgeModelId];
 
-        if (_badgeType.creator == address(0)) {
-            revert TheBadge__updateBadgeTypeFee_badgeTypeNotFound();
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__updateBadgeModelFee_badgeModelNotFound();
         }
 
-        _badgeType.mintProtocolFee = feeInBps;
+        _badgeModel.mintProtocolFee = feeInBps;
     }
 
-    /**
-     * @notice returns the cost for minting a badge of a badgeType
-     */
-    function mintValue(uint256 badgeTypeId) public view returns (uint256) {
-        BadgeType storage _badgeType = badgeType[badgeTypeId];
-        IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
+    function mintValue(uint256 badgeModelId) public view returns (uint256) {
+        BadgeModel storage _badgeModel = badgeModel[badgeModelId];
+        IBadgeController controller = IBadgeController(badgeModelController[_badgeModel.controllerName].controller);
 
-        return controller.mintValue(badgeTypeId) + _badgeType.mintCreatorFee;
+        return controller.mintValue(badgeModelId) + _badgeModel.mintCreatorFee;
     }
 
-    function balanceOfBadgeType(address account, uint256 badgeTypeId) public view returns (uint256) {
-        if (badgeTypesByAccount[badgeTypeId][account].length == 0) {
+    function balanceOfBadgeModel(address account, uint256 badgeModelId) public view returns (uint256) {
+        if (badgeModelsByAccount[badgeModelId][account].length == 0) {
             return 0;
         }
 
-        BadgeType memory _badgeType = badgeType[badgeTypeId];
-        IBadgeController controller = IBadgeController(badgeTypeController[_badgeType.controllerName].controller);
+        BadgeModel memory _badgeModel = badgeModel[badgeModelId];
+        IBadgeController controller = IBadgeController(badgeModelController[_badgeModel.controllerName].controller);
 
         uint256 balance = 0;
-        for (uint i = 0; i < badgeTypesByAccount[badgeTypeId][account].length; i++) {
-            if (controller.isAssetActive(badgeTypesByAccount[badgeTypeId][account][i])) {
+        for (uint i = 0; i < badgeModelsByAccount[badgeModelId][account].length; i++) {
+            if (controller.isAssetActive(badgeModelsByAccount[badgeModelId][account][i])) {
                 balance++;
             }
         }
