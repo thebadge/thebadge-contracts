@@ -75,7 +75,8 @@ contract TheBadgeTestCore is Config {
         assertEq(itemID, keccak256(abi.encodePacked(evidenceUri)));
         assertEq(mintCallee, goku);
         assertEq(deposit, mintValue - badgeModel.mintCreatorFee);
-        assertEq(theBadge.balanceOf(goku, badgeId), 0); // balanceOf is 0 until challenge period ends and claimKlerosBadge is called
+        assertEq(theBadge.balanceOf(goku, badgeId), 0); // balanceOf is 0 until challenge period ends and
+        //claimKlerosBadge is called
 
         // move timestamp 1 unit after the challenge period has due.
         address tcrList = klerosController.klerosBadgeModel(badgeModelId);
