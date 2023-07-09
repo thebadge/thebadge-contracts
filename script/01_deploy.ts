@@ -50,3 +50,6 @@ main(hre).catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+// TheBadge: 0x856a42E48b6e5044F409af58bca209aE1BBF3c34
+// klerosBadgeTypeController: 0x3aF4A7dE2303fed507b1Af0A1652dCb22F0D7D8e

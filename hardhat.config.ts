@@ -35,12 +35,12 @@ const config: HardhatUserConfig = {
     sources: "./src",
   },
   networks: {
-    // goerli: {
-    //   url: process.env.GOERLI_URL || "",
-    //   accounts: accounts,
-    //   timeout: 100000,
-    //   //  gasPrice: 400000000000,
-    // },
+    goerli: {
+      url: process.env.GOERLI_URL || "",
+      accounts: accounts,
+      timeout: 100000,
+      //gasPrice: 400000000000,
+    },
     gnosis: {
       url: process.env.GNOSIS_URL || "",
       accounts: accounts,

@@ -4,7 +4,7 @@
     "forge": "forge",
     "build": "forge build",
     "clean": "forge clean",
-    "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/gnosis --fork-block-number 19592773",
+    "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/gnosis",
     "test:all": "yarn forge test -vv --fork-url https://eth-goerli.alchemyapi.io/v2/QUuY7K6TSAGYCMXLBQiKwO43O9lLyrEE --fork-block-number 5744491",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json \"src/**/*.sol\"",
@@ -13,9 +13,10 @@
     "prettier:check": "prettier --check --config ./.prettierrc.yaml \"**/*.{js,json,md,sol,ts,yaml,yml}\"",
     "deploy:goerli": "hardhat run --network goerli ./script/01_deploy.ts",
     "upgrade:goerli": "hardhat run --network goerli ./script/02_upgrade.ts",
-    "deploy:gnosis": "hardhat run --network gnosis ./script/00_deploy.ts"
+    "deploy:gnosis": "hardhat run --network gnosis ./script/01_deploy.ts"
   },
   "dependencies": {
+    "@gnosis.pm/safe-deployments": "^1.19.0",
     "@kleros/erc-792": "^8.0.0",
     "@kleros/kathari": "^0.25.0",
     "@openzeppelin/contracts-upgradeable": "^4.8.0"
@@ -44,7 +45,6 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "ethers": "^5.7.2",
     "hardhat": "^2.10.1",
     "hardhat-gas-reporter": "^1.0.9",
     "prettier": "^2.6.2",

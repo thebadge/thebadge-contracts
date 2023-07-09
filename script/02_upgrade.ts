@@ -1,4 +1,3 @@
-import * as dotenv from "dotenv";
 import hre, { upgrades } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
