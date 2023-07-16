@@ -25,6 +25,9 @@ contract Config is Test {
     TheBadge public theBadge;
     KlerosController public klerosController;
 
+    //TODO:
+    // TheBadgeLogic public theBadgeLogic;
+
     // GBC:
     address lightGTCRFactory = 0x08e58Bc26CFB0d346bABD253A1799866F269805a;
     address klerosArbitror = 0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002;
@@ -45,6 +48,11 @@ contract Config is Test {
         address proxy = ClonesUpgradeable.clone(imp);
         theBadge = TheBadge(payable(proxy));
         theBadge.initialize(admin, feeCollector, minter);
+
+        //TODO:
+        // address impLogic = address(new TheBadgeLogic());
+        // address proxyLogic = ClonesUpgradeable.clone(impLogic);
+        // theBadgeLogic = TheBadgeLogic(payable(proxyLogic));
 
         klerosController = new KlerosController();
         klerosController.initialize(address(theBadge), klerosArbitror, lightGTCRFactory);
