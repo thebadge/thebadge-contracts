@@ -220,11 +220,17 @@ contract KlerosController is Initializable, IBadgeController {
      * @notice get the arbitration cost for a submission or a remove. If the badge is in other state it will return wrong information
      * @param badgeId the badge id
      */
-    function getChallengeValue(uint256 badgeId) public view returns (uint256) {
+
+    function getLightGeneralizedTCR(uint256 badgeId) public view returns (ILightGeneralizedTCR) {
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
         (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
         KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
+        return lightGeneralizedTCR;
+    }
+
+    function getChallengeValue(uint256 badgeId) public view returns (uint256) {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
 
         (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
         uint256 lastRequestIndex = requestCount - 1;
@@ -235,16 +241,57 @@ contract KlerosController is Initializable, IBadgeController {
         );
 
         uint256 arbitrationCost = arbitrator.arbitrationCost(requestArbitratorExtraData);
+        uint256 challengeCost = arbitrationCost + lightGeneralizedTCR.arbitrationCostMultiplier() * lightGeneralizedTCR.submissionBaseDeposit();
 
-        uint256 challengerBaseDeposit = lightGeneralizedTCR.submissionChallengeBaseDeposit();
-
-        // TODO: fix this. as TCR using itemID
-        // theBadge.badge(badgeId, account).status == BadgeStatus.InReview
-        //     ? lightGeneralizedTCR.submissionChallengeBaseDeposit()
-        //     : lightGeneralizedTCR.removalChallengeBaseDeposit();
-
-        return arbitrationCost.addCap(challengerBaseDeposit);
+        return challengeCost;
     }
+
+    function getRemovalChallengeBaseDeposit (uint256 badgeId) public view returns (uint256) {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
+
+        //++++++++
+         (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
+        uint256 lastRequestIndex = requestCount - 1;
+
+        (, , , , , , , , bytes memory requestArbitratorExtraData, ) = lightGeneralizedTCR.getRequestInfo(
+            _klerosBadge.itemID,
+            lastRequestIndex
+        );
+        //++++++++
+        //Can we change this to lightGeneralizedTCR.arbitratorExtraData()? to avoid all the above code
+
+        uint256 arbitrationCost = arbitrator.arbitrationCost(requestArbitratorExtraData);
+        uint256 removaleChallengeBaseDeposit = lightGeneralizedTCR.removalBaseDeposit() + arbitrationCost;
+        return removaleChallengeBaseDeposit;
+
+    }
+
+    // ++++OLD CODE++++
+    // function getChallengeValue(uint256 badgeId) public view returns (uint256) {
+    //     KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
+    //     (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
+    //     KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+    //     ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
+
+    //     (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
+    //     uint256 lastRequestIndex = requestCount - 1;
+
+    //     (, , , , , , , , bytes memory requestArbitratorExtraData, ) = lightGeneralizedTCR.getRequestInfo(
+    //         _klerosBadge.itemID,
+    //         lastRequestIndex
+    //     );
+
+    //     uint256 arbitrationCost = arbitrator.arbitrationCost(requestArbitratorExtraData);
+
+    //     uint256 challengerBaseDeposit = lightGeneralizedTCR.submissionChallengeBaseDeposit();
+
+    //     // TODO: fix this. as TCR using itemID
+    //     // theBadge.badge(badgeId, account).status == BadgeStatus.InReview
+    //     //     ? lightGeneralizedTCR.submissionChallengeBaseDeposit()
+    //     //     : lightGeneralizedTCR.removalChallengeBaseDeposit();
+
+    //     return arbitrationCost.addCap(challengerBaseDeposit);
+    // }
 
     /**
      * @notice claim a badge from a TCR list
