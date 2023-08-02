@@ -226,16 +226,15 @@ contract KlerosController is Initializable, IBadgeController {
     }
 
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
-        KlerosBadge storage _klerosBadge =  getKlerosBadge(badgeId);
         (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+        KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModel[badgeModelId];
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
         return lightGeneralizedTCR;
     }
 
     function getChallengeValue(uint256 badgeId) public view returns (uint256) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
-        KlerosBadge storage _klerosBadge =  getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = getKlerosBadge(badgeId);
 
         (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
         uint256 lastRequestIndex = requestCount - 1;
@@ -248,15 +247,14 @@ contract KlerosController is Initializable, IBadgeController {
         uint256 arbitrationCost = arbitrator.arbitrationCost(requestArbitratorExtraData);
         uint256 challengerBaseDeposit = lightGeneralizedTCR.submissionChallengeBaseDeposit();
 
-        return  arbitrationCost.addCap(challengerBaseDeposit);
+        return arbitrationCost.addCap(challengerBaseDeposit);
     }
 
-    function getRemovalChallengeBaseDeposit (uint256 badgeId) public view returns (uint256) {
+    function getRemovalChallengeBaseDeposit(uint256 badgeId) public view returns (uint256) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
-        KlerosBadge storage _klerosBadge =  getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = getKlerosBadge(badgeId);
 
-   
-         (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
+        (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
         uint256 lastRequestIndex = requestCount - 1;
 
         (, , , , , , , , bytes memory requestArbitratorExtraData, ) = lightGeneralizedTCR.getRequestInfo(
@@ -265,9 +263,8 @@ contract KlerosController is Initializable, IBadgeController {
         );
 
         uint256 arbitrationCost = arbitrator.arbitrationCost(requestArbitratorExtraData);
-        uint256 removalChallengeBaseDeposit = lightGeneralizedTCR.removalBaseDeposit();
+        uint256 removalChallengeBaseDeposit = lightGeneralizedTCR.removalChallengeBaseDeposit();
         return arbitrationCost.addCap(removalChallengeBaseDeposit);
-
     }
 
     //     // TODO: fix this. as TCR using itemID
