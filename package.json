@@ -13,7 +13,8 @@
     "prettier:check": "prettier --check --config ./.prettierrc.yaml \"**/*.{js,json,md,sol,ts,yaml,yml}\"",
     "deploy:goerli": "hardhat run --network goerli ./script/01_deploy.ts",
     "upgrade:goerli": "hardhat run --network goerli ./script/02_upgrade.ts",
-    "deploy:gnosis": "hardhat run --network gnosis ./script/00_deploy.ts"
+    "deploy:gnosis": "hardhat run --network gnosis ./script/00_deploy.ts",
+    "compile": "hardhat compile"
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",
