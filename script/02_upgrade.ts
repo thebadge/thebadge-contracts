@@ -6,13 +6,13 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const { ethers } = hre;
 
   // const TheBadge = await ethers.getContractFactory("TheBadge");
-  const KlerosController = await ethers.getContractFactory("KlerosBadgeTypeController");
+  const KlerosController = await ethers.getContractFactory("KlerosBadgeModelController");
 
   // console.log("Deploying TheBadge...");
   // const theBadge = await upgrades.upgradeProxy("0x059a97A4ad4D148B39209Fa9Be262E6E00E97804", TheBadge);
   // await theBadge.deployed();
 
-  console.log("Deploying KlerosBadgeTypeController...");
+  console.log("Upgrading KlerosBadgeModelController...");
   const klerosController = await upgrades.upgradeProxy("0x21bDD74A233339Ee96e6f208b118f29FbF27BdEA", KlerosController);
   await klerosController.deployed();
 

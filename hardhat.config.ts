@@ -39,17 +39,21 @@ const config: HardhatUserConfig = {
       url: process.env.GOERLI_URL || "",
       accounts: accounts,
       timeout: 100000,
+      chainId: 5,
       //  gasPrice: 400000000000,
     },
-    gnosis: {
-      url: process.env.GNOSIS_URL || "",
-      accounts: accounts,
-    },
+    // gnosis: {
+    //   url: process.env.GNOSIS_URL || "",
+    //   accounts: accounts,
+    // },
   },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    apiKey: process.env.YOUR_ETHERSCAN_API_KEY,
+    apiKey: {
+      goerli: process.env.ETHERSCAN_API_KEY || "",
+      gnosis: process.env.ETHERSCAN_API_KEY || "",
+    },
   },
 };
 

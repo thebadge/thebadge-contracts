@@ -50,7 +50,7 @@ MNEMONIC=
 
 A collection of the different contract deployments and their addresses can be found in the [TheBadge deployments](./deployments.md) file.
 
-## Deploy
+## Deploy with hardhat
 
 ### Prerequisites
 
@@ -60,7 +60,7 @@ A collection of the different contract deployments and their addresses can be fo
 WALLET_PRIVATE_KEY=
 GOERLI_URL=https://goerli.infura.io/v3/
 GNOSIS_URL=https://rpc.gnosischain.com/
-YOUR_ETHERSCAN_API_KEY=
+ETHERSCAN_API_KEY=
 ```
 
 #### Install Rust & Cargo
