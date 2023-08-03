@@ -1,24 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import { ILightGeneralizedTCR } from "../interfaces/ILightGeneralizedTCR.sol";
-import { ILightGTCRFactory } from "../interfaces/ILightGTCRFactory.sol";
-import { IArbitrator } from "../../lib/erc-792/contracts/IArbitrator.sol";
+import { ILightGeneralizedTCR } from "../../interfaces/ILightGeneralizedTCR.sol";
+import { ILightGTCRFactory } from "../../interfaces/ILightGTCRFactory.sol";
+import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 
-import "../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import "../interfaces/IBadgeController.sol";
-import {TheBadgeFactory} from "../TheBadgeFactory.sol";
-import "../utils/CappedMath.sol";
+import "../../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import "../../interfaces/IBadgeController.sol";
+import { TheBadge } from "../thebadge/TheBadge.sol";
+import "../../utils/CappedMath.sol";
 
 contract KlerosController is Initializable, IBadgeController {
-    TheBadgeFactory public theBadge;
+    TheBadge public theBadge;
     IArbitrator public arbitrator;
     address public tcrFactory;
 
     using CappedMath for uint256;
 
     /**
-     * Struct to use as args to create a Kleros badge model strategy.
+     * Struct to use as args to create a Kleros badge type strategy.
      *  @param governor An address with permission to updates parameters of the list. Use Kleros governor for full decentralization.
      *  @param admin The address with permission to add/remove items directly.
      *  @param courtId The ID of the kleros's court.
@@ -55,7 +55,7 @@ contract KlerosController is Initializable, IBadgeController {
     }
 
     /**
-     * @param tcrList The TCR List created for a particular badge model
+     * @param tcrList The TCR List created for a particular badge type
      */
     struct KlerosBadgeModel {
         address tcrList;
@@ -124,14 +124,14 @@ contract KlerosController is Initializable, IBadgeController {
      */
 
     function initialize(address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
-        theBadge = TheBadgeFactory(payable(_theBadge));
+        theBadge = TheBadge(payable(_theBadge));
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
     }
 
     /**
      * @notice Allows to create off-chain kleros strategies for registered entities
-     * @param badgeModelId from TheBadgeFactory.sol contract
+     * @param badgeModelId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
     function createBadgeModel(uint256 badgeModelId, bytes calldata data) public onlyTheBadge {
