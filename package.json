@@ -1,6 +1,6 @@
 {
   "name": "hardhat-project",
-  "license": "LGPL-3.0",
+  "license": "BSL 1.1",
   "scripts": {
     "forge": "forge",
     "build": "forge build",
