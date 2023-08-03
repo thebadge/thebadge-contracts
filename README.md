@@ -13,11 +13,10 @@
 
 For questions or request information reach out via [Discord](https://discord.gg/tVP75NqVuC).
 
-TheBadge Contracts
-==============
+# TheBadge Contracts
 
-Usage
------
+## Usage
+
 ### Install requirements with yarn:
 
 ```bash
@@ -51,7 +50,6 @@ MNEMONIC=
 
 A collection of the different contract deployments and their addresses can be found in the [TheBadge deployments](./deployments.md) file.
 
-
 ## Deploy
 
 ### Prerequisites
@@ -64,7 +62,9 @@ GOERLI_URL=https://goerli.infura.io/v3/
 GNOSIS_URL=https://rpc.gnosischain.com/
 YOUR_ETHERSCAN_API_KEY=
 ```
+
 #### Install Rust & Cargo
+
 ```
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
@@ -73,18 +73,20 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ```
 1) curl -L https://foundry.paradigm.xyz/ | bash
-2) bash foundryup 
+2) bash foundryup
 3) foundryup --branch master
 ```
+
 ```
 3) git submodule init para inicializar los submódulos
 4 - git submodule update para actualizar los submódulos y descargar sus contenidos
 5- yarn install para el repo principal, y luego yarn install para cada submodulo.
 ```
+
 For troubleshooting check the [fountry installation](https://book.getfoundry.sh/getting-started/installation) official guide.
 
-
 ### Deploy
+
 ```
 yarn deploy:goerli
 ```
@@ -92,16 +94,19 @@ yarn deploy:goerli
 ### Verify contract
 
 This command will use the deployment artifacts to compile the contracts and compare them to the onchain code
+
 ```bash
 yarn hardhat --network <network> local-verify
 ```
 
 This command will upload the contract source to Etherescan
+
 ```bash
 yarn hardhat --network <network> etherscan-verify
 ```
 
 ## Security and Liability
+
 All contracts are WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ## Contributing

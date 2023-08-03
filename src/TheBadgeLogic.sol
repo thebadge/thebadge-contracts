@@ -286,7 +286,7 @@ contract TheBadgeLogic is TheBadgeRoles {
         _badgeModel.paused = paused;
     }
 
-    // TODO: suspend badgeModel. I think we don't as we might want to use a Kleros list to handle the creations of lists. 
+    // TODO: suspend badgeModel. I think we don't as we might want to use a Kleros list to handle the creations of lists.
 
     function updateBadgeModelFee(uint256 badgeModelId, uint256 feeInBps) public onlyRole(DEFAULT_ADMIN_ROLE) {
         BadgeModel storage _badgeModel = badgeModel[badgeModelId];
