@@ -10,10 +10,10 @@ dotenv.config();
 tdly.setup();
 
 let accounts: any[] = [];
-if (process.env.PRIVATE_KEY !== undefined) {
-  accounts = [process.env.PRIVATE_KEY];
+if (process.env.WALLET_PRIVATE_KEY !== undefined) {
+  accounts = [process.env.WALLET_PRIVATE_KEY];
 } else {
-  throw new Error(`PRIVATE_KEY not set`);
+  throw new Error(`WALLET_PRIVATE_KEY not set`);
 }
 
 const config: HardhatUserConfig = {
