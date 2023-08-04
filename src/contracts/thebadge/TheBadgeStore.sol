@@ -92,6 +92,7 @@ contract TheBadgeStore is TheBadgeRoles {
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     // TODO: Check if this is needed or can be removed
     event BadgeRequested(uint256 indexed badgeModelID, uint256 indexed badgeID, address indexed wallet);
+    // TODO: we need an event when the protocol pays to someone, it should contain the recipientAddress, the amount and maybe the cause? (deposit return, mint fees, curation fees?, etc)
 
     /**
      * =========================

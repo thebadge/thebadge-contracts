@@ -35,16 +35,16 @@ contract KlerosBadgeModelController is Initializable, IBadgeController, KlerosBa
         CreateBadgeModel memory args = abi.decode(data, (CreateBadgeModel));
 
         lightGTCRFactory.deploy(
-            IArbitrator(arbitrator),
-            bytes.concat(abi.encodePacked(args.courtId), abi.encodePacked(args.numberOfJurors)),
-            address(0), // TODO: check this.
-            args.registrationMetaEvidence,
-            args.clearingMetaEvidence,
-            args.governor,
-            args.baseDeposits,
-            args.challengePeriodDuration,
-            args.stakeMultipliers,
-            args.admin
+            IArbitrator(arbitrator), // Arbitrator address
+            bytes.concat(abi.encodePacked(args.courtId), abi.encodePacked(args.numberOfJurors)), // ArbitratorExtraData
+            address(0), // TODO: check this. The address of the TCR that stores related TCR addresses. This parameter can be left empty.
+            args.registrationMetaEvidence, // The URI of the meta evidence object for registration requests.
+            args.clearingMetaEvidence, // The URI of the meta evidence object for clearing requests.
+            args.governor, // The trusted governor of this contract.
+            args.baseDeposits, // The base deposits for requests/challenges (4 values: submit, remove, challenge and removal request)
+            args.challengePeriodDuration, // The time in seconds parties have to challenge a request.
+            args.stakeMultipliers, // Multipliers of the arbitration cost in basis points (see LightGeneralizedTCR MULTIPLIER_DIVISOR)
+            args.admin // The address of the relay contract to add/remove items directly.
         );
 
         // Get the address for the kleros badge model created

@@ -101,6 +101,9 @@ contract TheBadge is
         // save asset info
         uint256 badgeId = badgeIds.current();
         _setURI(badgeId, tokenURI);
+        // Account: badge recipient; badgeId: the id of the badge; value: amount of badges to create (always 1), data: data of the badge (always null)
+        // This creates a new badge with id: badgeId
+        // For details check: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/token/ERC1155/ERC1155Upgradeable.sol#L303C72-L303C76
         _mint(account, badgeId, 1, "0x");
         uint256 validFor = _badgeModel.validFor == 0 ? 0 : block.timestamp + _badgeModel.validFor;
         badge[badgeId] = Badge(badgeModelId, account, validFor);
