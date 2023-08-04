@@ -195,7 +195,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
                 balance++;
             }
         }
-        // TODO: this should check if the badge didn't expired?
+        // TODO: this should check if the badge didn't expired? => or it can be done directly inside controller.isAssetActive
 
         return balance;
     }
