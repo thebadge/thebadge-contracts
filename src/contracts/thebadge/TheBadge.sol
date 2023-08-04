@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./TheBadgeRoles.sol";
 import "./TheBadgeStore.sol";
 import "./TheBadgeModels.sol";
+import "../../interfaces/ITheBadge.sol";
 
 // TODO: save storage for upgradeability?
 
@@ -22,7 +23,8 @@ contract TheBadge is
     PausableUpgradeable,
     UUPSUpgradeable,
     TheBadgeRoles,
-    TheBadgeModels
+    TheBadgeModels,
+    ITheBadge
 {
     // Allows to use current() and increment() for badgeModelIds or badgeIds
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -48,14 +50,6 @@ contract TheBadge is
         registerCreatorValue = uint256(0);
         createBadgeModelValue = uint256(0);
         mintBadgeDefaultFee = uint256(5000); // in bps
-    }
-
-    function pause() public onlyRole(PAUSER_ROLE) {
-        _pause();
-    }
-
-    function unpause() public onlyRole(PAUSER_ROLE) {
-        _unpause();
     }
 
     /*
@@ -119,7 +113,10 @@ contract TheBadge is
      * @param account address of the user
      * @param badgeId identifier of the badge inside a badgeModel
      */
-    function balanceOf(address account, uint256 badgeId) public view override returns (uint256) {
+    function balanceOf(
+        address account,
+        uint256 badgeId
+    ) public view override(ERC1155Upgradeable, ITheBadge) returns (uint256) {
         Badge memory _badge = badge[badgeId];
 
         if (_badge.badgeModelId == 0 || _badge.account != account) {
@@ -158,6 +155,14 @@ contract TheBadge is
         registerCreatorValue = _registerCreatorValue;
     }
 
+    function pause() public onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    function unpause() public onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+
     /**
      * =========================
      * Overrides
@@ -170,7 +175,13 @@ contract TheBadge is
      */
     function uri(
         uint256 badgeId
-    ) public view virtual override(ERC1155URIStorageUpgradeable, ERC1155Upgradeable) returns (string memory) {
+    )
+        public
+        view
+        virtual
+        override(ERC1155URIStorageUpgradeable, ERC1155Upgradeable, ITheBadge)
+        returns (string memory)
+    {
         return super.uri(badgeId);
     }
 

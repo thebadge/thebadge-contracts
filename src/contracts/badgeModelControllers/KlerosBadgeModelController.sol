@@ -135,7 +135,29 @@ contract KlerosBadgeModelController is Initializable, IBadgeController, KlerosBa
      * @notice Badge can be minted if it was never requested for the address or if it has a due date before now
      */
     function canMint(uint256, address) public pure returns (bool) {
+        // TODO: implementation missing?
         return true;
+    }
+
+    /**
+     * @notice Checks the status of the badge within the Kleros TCR, returns true if the status is (1 = registered or 3 = clearing/removal requested)
+     * It returns false for the other statuses (0 = absent; 2 = registration requested)
+     * @param badgeId the klerosBadgeId
+     */
+    function isAssetActive(uint256 badgeId) public view returns (bool) {
+        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
+        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
+        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+
+        if (_klerosBadgeModel.tcrList != address(0)) {
+            ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
+            (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
+            if (klerosItemStatus == 1 || klerosItemStatus == 3) {
+                return true;
+            }
+        }
+        // TODO: should this check the badge dueDate?,
+        return false;
     }
 
     /**
@@ -166,27 +188,6 @@ contract KlerosBadgeModelController is Initializable, IBadgeController, KlerosBa
         //     : lightGeneralizedTCR.removalChallengeBaseDeposit();
 
         return arbitrationCost.addCap(challengerBaseDeposit);
-    }
-
-    /**
-     * @notice Checks the status of the badge within the Kleros TCR, returns true if the status is (1 = registered or 3 = clearing/removal requested)
-     * It returns false for the other statuses (0 = absent; 2 = registration requested)
-     * @param badgeId the klerosBadgeId
-     */
-    function isAssetActive(uint256 badgeId) public view returns (bool) {
-        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
-
-        if (_klerosBadgeModel.tcrList != address(0)) {
-            ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
-            (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
-            if (klerosItemStatus == 1 || klerosItemStatus == 3) {
-                return true;
-            }
-        }
-        // TODO: should this check the badge dueDate?,
-        return false;
     }
 
     /**
