@@ -50,7 +50,7 @@ MNEMONIC=
 
 A collection of the different contract deployments and their addresses can be found in the [TheBadge deployments](./deployments.md) file.
 
-## Deploy with hardhat
+## Deploy with foundry
 
 ### Prerequisites
 
@@ -104,6 +104,12 @@ This command will upload the contract source to Etherescan
 ```bash
 yarn hardhat --network <network> etherscan-verify
 ```
+
+## Documentation
+
+- You can check our badges architecture [here](./ERC1155-721%20Architecture.md)
+
+- If you want to learn more give a look to our [docs](https://docs.thebadge.xyz/)
 
 ## Security and Liability
 
