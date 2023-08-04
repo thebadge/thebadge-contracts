@@ -7,8 +7,9 @@ import { ILightGTCRFactory } from "../../interfaces/ILightGTCRFactory.sol";
 import "../../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "../../interfaces/IBadgeModelController.sol";
 import "./KleroBadgeModelControllerStore.sol";
+import "../../interfaces/IKlerosBadgeModelController.sol";
 
-contract KlerosBadgeModelController is Initializable, IBadgeModelController, KlerosBadgeModelControllerStore {
+contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelController, KlerosBadgeModelControllerStore {
     using CappedMath for uint256;
 
     function initialize(address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
