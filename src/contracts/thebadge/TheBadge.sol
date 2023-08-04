@@ -85,6 +85,13 @@ contract TheBadge is
         _unpause();
     }
 
+    /*
+     * @notice Receives a badgeModel, and user account, the token data ipfsURI and the controller's data and mints the badge for the user
+     * @param badgeModelId id of theBadgeModel
+     * @param account user address
+     * @param tokenURI url of the data of the token stored in IPFS
+     * @param data metaEvidence for the controller
+     */
     function mint(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data) external payable {
         // +++++++++++++++++++++
         // +++++++++++++++++++++
@@ -131,6 +138,11 @@ contract TheBadge is
         badgeIds.increment();
     }
 
+    /*
+     * @notice Given an user account and a badgeId, returns 1 if the user has the badge or 0 if not
+     * @param account address of the user
+     * @param badgeId identifier of the badge inside a badgeModel
+     */
     function balanceOf(address account, uint256 badgeId) public view override returns (uint256) {
         Badge memory _badge = badge[badgeId];
 
@@ -144,18 +156,51 @@ contract TheBadge is
         return controller.isAssetActive(badgeId) ? 1 : 0;
     }
 
+    /*
+     * @notice Receives the mintCreatorFee and the mintProtocolFee in bps and returns how much is the protocol fee
+     * @param mintCreatorFee fee that the creator charges for each mint
+     * @param mintProtocolFeeInBps fee that TheBadge protocol charges from the creator revenue
+     */
+    function calculateFee(uint256 mintCreatorFee, uint256 mintProtocolFeeInBps) internal pure returns (uint256) {
+        require((mintCreatorFee * mintProtocolFeeInBps) >= 10_000);
+        return (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
+    }
+
+    /*
+     * @notice Updates values of the protocol: _mintBadgeDefaultFee; _createBadgeModelValue and _registerCreatorValue
+     * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
+     * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
+     * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
+     */
+    function updateProtocolValues(
+        uint256 _mintBadgeDefaultFee,
+        uint256 _createBadgeModelValue,
+        uint256 _registerCreatorValue
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        mintBadgeDefaultFee = _mintBadgeDefaultFee;
+        createBadgeModelValue = _createBadgeModelValue;
+        registerCreatorValue = _registerCreatorValue;
+    }
+
     /**
      * =========================
      * Overrides
      * =========================
      */
 
+    /*
+     * @notice Given a badgeId returns the uri of the erc115 badge token
+     * @param badgeId id of a badge inside a model
+     */
     function uri(
         uint256 badgeId
     ) public view virtual override(ERC1155URIStorageUpgradeable, ERC1155Upgradeable) returns (string memory) {
         return super.uri(badgeId);
     }
 
+    /**
+     * @notice ERC1155 _setApprovalForAll method, returns a soul-bonded token revert message
+     */
     function _setApprovalForAll(address, address, bool) internal pure override {
         revert TheBadge__SBT();
     }

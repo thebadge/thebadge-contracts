@@ -143,32 +143,6 @@ contract TheBadgeStore is TheBadgeRoles {
      * =========================
      */
 
-    /*
-     * @notice Receives the mintCreatorFee and the mintProtocolFee in bps and returns how much is the protocol fee
-     * @param mintCreatorFee fee that the creator charges for each mint
-     * @param mintProtocolFeeInBps fee that TheBadge protocol charges from the creator revenue
-     */
-    function calculateFee(uint256 mintCreatorFee, uint256 mintProtocolFeeInBps) internal pure returns (uint256) {
-        require((mintCreatorFee * mintProtocolFeeInBps) >= 10_000);
-        return (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
-    }
-
-    /*
-     * @notice Updates values of the protocol: _mintBadgeDefaultFee; _createBadgeModelValue and _registerCreatorValue
-     * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
-     * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
-     * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
-     */
-    function updateProtocolValues(
-        uint256 _mintBadgeDefaultFee,
-        uint256 _createBadgeModelValue,
-        uint256 _registerCreatorValue
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        mintBadgeDefaultFee = _mintBadgeDefaultFee;
-        createBadgeModelValue = _createBadgeModelValue;
-        registerCreatorValue = _registerCreatorValue;
-    }
-
     // TODO: check if this is secure
     /*
      * @notice Increments the amount of badgeModelsIds in 1, should be called only by internal contracts.

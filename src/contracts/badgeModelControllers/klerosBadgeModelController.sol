@@ -280,7 +280,7 @@ contract KlerosController is Initializable, IBadgeController {
                 return true;
             }
         }
-
+        // TODO: should this check the badge dueDate?
         return false;
     }
 
