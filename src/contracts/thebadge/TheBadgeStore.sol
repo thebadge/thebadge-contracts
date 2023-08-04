@@ -9,6 +9,7 @@ contract TheBadgeStore is TheBadgeRoles {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter internal badgeModelIds;
+    CountersUpgradeable.Counter internal badgeIds;
     uint256 public registerCreatorValue;
     uint256 public mintBadgeDefaultFee; // in bps
     // TODO: does this var makes sense? it was thought to define a min value to mint a badge.
@@ -144,29 +145,6 @@ contract TheBadgeStore is TheBadgeRoles {
         }
         _;
     }
-
-    /**
-     * =========================
-     * Methods
-     * =========================
-     */
-
-    // TODO: check if this is secure
-    /*
-     * @notice Increments the amount of badgeModelsIds in 1, should be called only by internal contracts.
-     */
-    function updateBadgeModelsTotalSupply() internal {
-        badgeModelIds.increment();
-    }
-
-    /*
-     * @notice Returns the amount of badgeModelIds
-     */
-    function badgeModelsTotalSupply() internal view returns (uint256) {
-        return badgeModelIds.current();
-    }
-
-    // TODO: suspend badgeModel. I think we don't as we might want to use a Kleros list to handle the creations of lists.
 
     receive() external payable {}
 }

@@ -24,9 +24,8 @@ contract TheBadge is
     TheBadgeRoles,
     TheBadgeModels
 {
+    // Allows to use current() and increment() for badgeModelIds or badgeIds
     using CountersUpgradeable for CountersUpgradeable.Counter;
-
-    CountersUpgradeable.Counter internal badgeIds;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

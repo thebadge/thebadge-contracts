@@ -10,6 +10,8 @@ import "./TheBadgeRoles.sol";
 import "./TheBadgeStore.sol";
 
 contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
+    // Allows to use current() and increment() for badgeModelIds or badgeIds
+    using CountersUpgradeable for CountersUpgradeable.Counter;
     /**
      * @notice Sets the controller for the given badgeModel
      * @param controllerName - name of the controller (for instance: Kleros)
@@ -113,7 +115,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
             payable(feeCollector).transfer(msg.value);
         }
 
-        badgeModel[badgeModelsTotalSupply()] = BadgeModel(
+        badgeModel[badgeModelIds.current()] = BadgeModel(
             _msgSender(),
             args.controllerName,
             false,
@@ -122,11 +124,11 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
             mintBadgeDefaultFee
         );
 
-        emit BadgeModelCreated(badgeModelsTotalSupply(), args.metadata);
-        IBadgeController(_badgeModelController.controller).createBadgeModel(badgeModelsTotalSupply(), data);
+        emit BadgeModelCreated(badgeModelIds.current(), args.metadata);
+        IBadgeController(_badgeModelController.controller).createBadgeModel(badgeModelIds.current(), data);
         // TODO emit BadgeRequested(badgeModelID, badgeID, wallet)?
 
-        updateBadgeModelsTotalSupply();
+        badgeModelIds.increment();
     }
 
     /*
