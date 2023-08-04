@@ -8,10 +8,12 @@ pragma solidity ^0.8.17;
 import "../../interfaces/IBadgeModelController.sol";
 import "./TheBadgeRoles.sol";
 import "./TheBadgeStore.sol";
+import "../../interfaces/ITheBadgeModels.sol";
 
-contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
+contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
     // Allows to use current() and increment() for badgeModelIds or badgeIds
     using CountersUpgradeable for CountersUpgradeable.Counter;
+
     /**
      * @notice Sets the controller for the given badgeModel
      * @param controllerName - name of the controller (for instance: Kleros)
@@ -187,7 +189,9 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
         }
 
         BadgeModel memory _badgeModel = badgeModel[badgeModelId];
-        IBadgeModelController controller = IBadgeModelController(badgeModelController[_badgeModel.controllerName].controller);
+        IBadgeModelController controller = IBadgeModelController(
+            badgeModelController[_badgeModel.controllerName].controller
+        );
 
         uint256 balance = 0;
         for (uint i = 0; i < badgeModelsByAccount[badgeModelId][account].length; i++) {
@@ -206,7 +210,9 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
      */
     function mintValue(uint256 badgeModelId) public view returns (uint256) {
         BadgeModel storage _badgeModel = badgeModel[badgeModelId];
-        IBadgeModelController controller = IBadgeModelController(badgeModelController[_badgeModel.controllerName].controller);
+        IBadgeModelController controller = IBadgeModelController(
+            badgeModelController[_badgeModel.controllerName].controller
+        );
 
         return controller.mintValue(badgeModelId) + _badgeModel.mintCreatorFee;
     }

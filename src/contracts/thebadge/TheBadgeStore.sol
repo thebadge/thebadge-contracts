@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./TheBadgeRoles.sol";
 import "../../interfaces/IBadgeModelController.sol";
 
+// TODO: Maybe we can use abstract classes to type the store
 contract TheBadgeStore is TheBadgeRoles {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
