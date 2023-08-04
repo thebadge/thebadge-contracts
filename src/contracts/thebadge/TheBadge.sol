@@ -28,32 +28,6 @@ contract TheBadge is
 
     CountersUpgradeable.Counter internal badgeIds;
 
-    /**
-     * =========================
-     * Events
-     * =========================
-     */
-
-    event BadgeRequested(uint256 indexed badgeModelID, uint256 indexed badgeID, address indexed wallet);
-
-    /**
-     * =========================
-     * Errors
-     * =========================
-     */
-
-    error TheBadge__SBT();
-    error TheBadge__requestBadge_badgeModelNotFound();
-    error TheBadge__requestBadge_wrongValue();
-    error TheBadge__requestBadge_isPaused();
-    error TheBadge__requestBadge_controllerIsPaused();
-
-    /**
-     * =========================
-     * Methods
-     * =========================
-     */
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();

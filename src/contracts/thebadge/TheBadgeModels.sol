@@ -113,7 +113,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
             payable(feeCollector).transfer(msg.value);
         }
 
-        badgeModel[totalSupply()] = BadgeModel(
+        badgeModel[badgeModelsTotalSupply()] = BadgeModel(
             _msgSender(),
             args.controllerName,
             false,
@@ -122,10 +122,11 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
             mintBadgeDefaultFee
         );
 
-        emit BadgeModelCreated(totalSupply(), args.metadata);
-        IBadgeController(_badgeModelController.controller).createBadgeModel(totalSupply(), data);
+        emit BadgeModelCreated(badgeModelsTotalSupply(), args.metadata);
+        IBadgeController(_badgeModelController.controller).createBadgeModel(badgeModelsTotalSupply(), data);
+        // TODO emit BadgeRequested(badgeModelID, badgeID, wallet)?
 
-        updateTotalSupply();
+        updateBadgeModelsTotalSupply();
     }
 
     /*

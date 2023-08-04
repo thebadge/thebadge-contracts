@@ -89,6 +89,8 @@ contract TheBadgeStore is TheBadgeRoles {
     event CreatorRegistered(address indexed creator, string metadata);
     event CreatorUpdated(address indexed creator, string metadata);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
+    // TODO: Check if this is needed or can be removed
+    event BadgeRequested(uint256 indexed badgeModelID, uint256 indexed badgeID, address indexed wallet);
 
     /**
      * =========================
@@ -112,6 +114,12 @@ contract TheBadgeStore is TheBadgeRoles {
     error TheBadge__updateBadgeModel_badgeModelNotFound();
     error TheBadge__updateBadgeModelFee_badgeModelNotFound();
     error TheBadge__updateCreator_notFound();
+
+    error TheBadge__SBT();
+    error TheBadge__requestBadge_badgeModelNotFound();
+    error TheBadge__requestBadge_wrongValue();
+    error TheBadge__requestBadge_isPaused();
+    error TheBadge__requestBadge_controllerIsPaused();
 
     error TheBadge__method_not_supported();
 
@@ -147,14 +155,14 @@ contract TheBadgeStore is TheBadgeRoles {
     /*
      * @notice Increments the amount of badgeModelsIds in 1, should be called only by internal contracts.
      */
-    function updateTotalSupply() internal {
+    function updateBadgeModelsTotalSupply() internal {
         badgeModelIds.increment();
     }
 
     /*
      * @notice Returns the amount of badgeModelIds
      */
-    function totalSupply() internal view returns (uint256) {
+    function badgeModelsTotalSupply() internal view returns (uint256) {
         return badgeModelIds.current();
     }
 
