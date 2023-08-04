@@ -67,7 +67,7 @@ contract TheBadge is
         // +++++++++++++++++++++
         BadgeModel storage _badgeModel = badgeModel[badgeModelId];
         BadgeModelController storage _badgeModelController = badgeModelController[_badgeModel.controllerName];
-        IBadgeController controller = IBadgeController(badgeModelController[_badgeModel.controllerName].controller);
+        IBadgeModelController controller = IBadgeModelController(badgeModelController[_badgeModel.controllerName].controller);
 
         if (_badgeModel.creator == address(0)) {
             revert TheBadge__requestBadge_badgeModelNotFound();
@@ -124,7 +124,7 @@ contract TheBadge is
         }
 
         BadgeModel memory _badgeModel = badgeModel[_badge.badgeModelId];
-        IBadgeController controller = IBadgeController(badgeModelController[_badgeModel.controllerName].controller);
+        IBadgeModelController controller = IBadgeModelController(badgeModelController[_badgeModel.controllerName].controller);
 
         return controller.isAssetActive(badgeId) ? 1 : 0;
     }

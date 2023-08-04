@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.17;
 
-interface IBadgeController {
+interface IBadgeModelController {
     function createBadgeModel(uint256 badgeModelId, bytes calldata data) external;
 
     function mint(address callee, uint256 badgeModelId, uint256 badgeId, bytes calldata data) external payable;

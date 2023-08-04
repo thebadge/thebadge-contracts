@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "./TheBadgeRoles.sol";
-import "../../interfaces/IBadgeController.sol";
+import "../../interfaces/IBadgeModelController.sol";
 
 contract TheBadgeStore is TheBadgeRoles {
     using CountersUpgradeable for CountersUpgradeable.Counter;

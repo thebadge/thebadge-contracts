@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
  * =========================
  */
 
-import "../../interfaces/IBadgeController.sol";
+import "../../interfaces/IBadgeModelController.sol";
 import "./TheBadgeRoles.sol";
 import "./TheBadgeStore.sol";
 
@@ -125,7 +125,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
         );
 
         emit BadgeModelCreated(badgeModelIds.current(), args.metadata);
-        IBadgeController(_badgeModelController.controller).createBadgeModel(badgeModelIds.current(), data);
+        IBadgeModelController(_badgeModelController.controller).createBadgeModel(badgeModelIds.current(), data);
         // TODO emit BadgeRequested(badgeModelID, badgeID, wallet)?
 
         badgeModelIds.increment();
@@ -187,7 +187,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
         }
 
         BadgeModel memory _badgeModel = badgeModel[badgeModelId];
-        IBadgeController controller = IBadgeController(badgeModelController[_badgeModel.controllerName].controller);
+        IBadgeModelController controller = IBadgeModelController(badgeModelController[_badgeModel.controllerName].controller);
 
         uint256 balance = 0;
         for (uint i = 0; i < badgeModelsByAccount[badgeModelId][account].length; i++) {
@@ -206,7 +206,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore {
      */
     function mintValue(uint256 badgeModelId) public view returns (uint256) {
         BadgeModel storage _badgeModel = badgeModel[badgeModelId];
-        IBadgeController controller = IBadgeController(badgeModelController[_badgeModel.controllerName].controller);
+        IBadgeModelController controller = IBadgeModelController(badgeModelController[_badgeModel.controllerName].controller);
 
         return controller.mintValue(badgeModelId) + _badgeModel.mintCreatorFee;
     }
