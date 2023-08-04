@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 
 // import { AddressUpgradeable } from "../lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol";
 import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol";
-import { Config, TheBadge, TheBadgeLogic, KlerosController } from "./utils/Config.sol";
+import { Config, TheBadge, TheBadgeStore, KlerosController } from "./utils/Config.sol";
 
 contract TheBadgeTestCore is Config {
     function test_createKlerosBadgeModel_shouldWork() public {

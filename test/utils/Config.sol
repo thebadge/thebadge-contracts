@@ -7,7 +7,7 @@ import "../../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgr
 import "../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 
 import { TheBadge } from "../../src/contracts/thebadge/TheBadge.sol";
-import { TheBadgeLogic } from "../../src/contracts/thebadge/TheBadgeLogic.sol";
+import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
 import { KlerosController } from "../../src/contracts/badgeModelControllers/klerosBadgeModelController.sol";
 
 contract Config is Test {
@@ -54,7 +54,7 @@ contract Config is Test {
     }
 
     function getBaseBadgeModel() public view returns (TheBadge.CreateBadgeModel memory) {
-        TheBadge.CreateBadgeModel memory badgeModel = TheBadgeLogic.CreateBadgeModel(
+        TheBadge.CreateBadgeModel memory badgeModel = TheBadgeStore.CreateBadgeModel(
             "ipfs/metadataForBadge.json",
             "kleros",
             0,

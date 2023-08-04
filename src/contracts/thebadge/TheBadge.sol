@@ -9,7 +9,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 import "./TheBadgeRoles.sol";
-import "./TheBadgeLogic.sol";
+import "./TheBadgeStore.sol";
+import "./TheBadgeModels.sol";
 
 // TODO: save storage for upgradeability?
 
@@ -21,7 +22,7 @@ contract TheBadge is
     PausableUpgradeable,
     UUPSUpgradeable,
     TheBadgeRoles,
-    TheBadgeLogic
+    TheBadgeModels
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
