@@ -115,6 +115,10 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
         uint256 balanceToDeposit = _klerosBadge.deposit;
         _klerosBadge.deposit = 0;
         payable(_klerosBadge.callee).transfer(balanceToDeposit);
+
+        (bool badgeDepositSent, ) = payable(_klerosBadge.callee).call{ value: balanceToDeposit }("");
+        require(badgeDepositSent, "Failed to return the deposit");
+        emit DepositReturned(_klerosBadge.callee, balanceToDeposit);
     }
 
     /**
@@ -162,15 +166,51 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
     }
 
     /**
-     * @notice get the arbitration cost for a submission or a remove. If the badge is in other state it will return wrong information
+     * @notice Get the cost of generating a challengeRequest in kleros TCR to the given badgeId
      * @param badgeId the klerosBadgeId
      */
-    function getChallengeValue(uint256 badgeId) public view returns (uint256) {
-        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
-        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
+    function getChallengeDepositValue(uint256 badgeId) public view returns (uint256) {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
 
+        uint256 arbitrationCost = getBadgeIdArbitrationCosts(badgeId);
+
+        uint256 challengerBaseDeposit = lightGeneralizedTCR.submissionChallengeBaseDeposit();
+
+        return arbitrationCost.addCap(challengerBaseDeposit);
+    }
+
+    /**
+     * @notice Get the cost of generating a removalRequest in kleros TCR to the given badgeId
+     * @param badgeId the klerosBadgeId
+     */
+    function getRemovalDepositValue(uint256 badgeId) public view returns (uint256) {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
+
+        uint256 arbitrationCost = getBadgeIdArbitrationCosts(badgeId);
+
+        uint256 removalChallengeBaseDeposit = lightGeneralizedTCR.removalChallengeBaseDeposit();
+
+        return arbitrationCost.addCap(removalChallengeBaseDeposit);
+    }
+
+    /**
+     * @notice Internal function that returns the TCR contract instance for a given klerosBadgeModel
+     * @param badgeId the klerosBadgeId
+     */
+    function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
+        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
+        KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
+        return lightGeneralizedTCR;
+    }
+
+    /**
+     * @notice Internal function that the current arbitration cost of a request for the given badgeId
+     * @param badgeId the klerosBadgeId
+     */
+    function getBadgeIdArbitrationCosts(uint256 badgeId) internal view returns (uint256) {
+        KlerosBadge memory _klerosBadge = klerosBadge[badgeId];
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
         uint256 lastRequestIndex = requestCount - 1;
 
@@ -179,16 +219,7 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
             lastRequestIndex
         );
 
-        uint256 arbitrationCost = arbitrator.arbitrationCost(requestArbitratorExtraData);
-
-        uint256 challengerBaseDeposit = lightGeneralizedTCR.submissionChallengeBaseDeposit();
-
-        // TODO: fix this. as TCR using itemID
-        // theBadge.badge(badgeId, account).status == BadgeStatus.InReview
-        //     ? lightGeneralizedTCR.submissionChallengeBaseDeposit()
-        //     : lightGeneralizedTCR.removalChallengeBaseDeposit();
-
-        return arbitrationCost.addCap(challengerBaseDeposit);
+        return arbitrator.arbitrationCost(requestArbitratorExtraData);
     }
 
     /**
