@@ -80,7 +80,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
             creator.metadata = _metadata;
         }
 
-        emit CreatorUpdated(_creator, _metadata);
+        emit UpdatedCreatorMetadata(_creator, _metadata);
     }
 
     function suspendBadgeModelCreator() public view onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -129,8 +129,6 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
 
         emit BadgeModelCreated(badgeModelIds.current(), args.metadata);
         IBadgeModelController(_badgeModelController.controller).createBadgeModel(badgeModelIds.current(), data);
-        // TODO emit BadgeRequested(badgeModelID, badgeID, wallet)?
-
         badgeModelIds.increment();
     }
 
@@ -156,6 +154,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
         _badgeModel.mintCreatorFee = mintCreatorFee;
         _badgeModel.validFor = validFor;
         _badgeModel.paused = paused;
+        emit BadgeModelUpdated(badgeModelId);
     }
 
     function suspendBadgeModel() public view onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -177,6 +176,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
         }
 
         _badgeModel.mintProtocolFee = feeInBps;
+        emit BadgeModelProtocolFeeUpdated(badgeModelId, feeInBps);
     }
 
     /*
