@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import hre, { upgrades } from "hardhat";
+import hre, { run, upgrades } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 dotenv.config();
@@ -12,7 +12,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   // https://docs.openzeppelin.com/learn/upgrading-smart-contracts#upgrading-a-contract-via-plugins
 
   const TheBadge = await ethers.getContractFactory("TheBadge");
-  const KlerosController = await ethers.getContractFactory("KlerosController");
+  const KlerosController = await ethers.getContractFactory("KlerosBadgeModelController");
 
   // GBC:
   // const lightGTCRFactory = "0x08e58Bc26CFB0d346bABD253A1799866F269805a";
@@ -26,7 +26,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const theBadge = await upgrades.deployProxy(TheBadge, [deployer.address, deployer.address, deployer.address]);
   await theBadge.deployed();
 
-  console.log("Deploying KlerosBadgeTypeController...");
+  console.log("Deploying KlerosBadgeModelController...");
   const klerosController = await upgrades.deployProxy(KlerosController, [
     theBadge.address,
     klerosArbitror,
@@ -38,10 +38,20 @@ async function main(hre: HardhatRuntimeEnvironment) {
   theBadge.connect(deployer);
   await theBadge.setBadgeModelController("kleros", klerosController.address);
 
-  // TODO: set kleros controller
-
   console.log("TheBadge:", theBadge.address);
-  console.log("klerosBadgeTypeController:", klerosController.address);
+  console.log("klerosBadgeModelController:", klerosController.address);
+
+  console.log("Verifying TheBadge contract on Etherscan...");
+  await run(`verify:verify`, {
+    address: theBadge.address,
+    constructorArguments: [],
+  });
+
+  console.log("Verifying KlerosBadgeModelController contract on Etherscan...");
+  await run(`verify:verify`, {
+    address: klerosController.address,
+    constructorArguments: [],
+  });
 }
 
 // We recommend this pattern to be able to use async/await everywhere
