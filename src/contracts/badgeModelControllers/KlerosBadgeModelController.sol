@@ -45,7 +45,7 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
             args.baseDeposits, // The base deposits for requests/challenges (4 values: submit, remove, challenge and removal request)
             args.challengePeriodDuration, // The time in seconds parties have to challenge a request.
             args.stakeMultipliers, // Multipliers of the arbitration cost in basis points (see LightGeneralizedTCR MULTIPLIER_DIVISOR)
-            args.admin // The address of the relay contract to add/remove items directly.
+            args.admin // The address of the relay contract to add/remove items directly. // TODO: set TCR admin to an address that we control, so we can call "removeItem", only for Third-party badges
         );
 
         // Get the address for the kleros badge model created

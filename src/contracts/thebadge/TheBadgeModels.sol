@@ -128,6 +128,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
         );
 
         emit BadgeModelCreated(badgeModelIds.current(), args.metadata);
+        // TODO: According to the type of controller, modify the data.admin value
         IBadgeModelController(_badgeModelController.controller).createBadgeModel(badgeModelIds.current(), data);
         badgeModelIds.increment();
     }
