@@ -60,9 +60,9 @@ contract TheBadgeStore is TheBadgeRoles {
         address creator;
         string controllerName;
         bool paused;
-        uint256 mintCreatorFee;
+        uint256 mintCreatorFee;  // in bps (%). It is taken from mintCreatorFee
         uint256 validFor;
-        uint256 mintProtocolFee; // in bps. It is taken from mintCreatorFee
+        uint256 mintProtocolFee; // amount that the protocol will charge for this
     }
 
     struct Badge {
@@ -71,11 +71,10 @@ contract TheBadgeStore is TheBadgeRoles {
         uint256 dueDate;
     }
 
-    /**
-     * =========================
-     * Store
-     * =========================
-     */
+    enum PaymentType {
+        ProtocolFee,
+        CreatorFee
+    }
 
     mapping(address => Creator) public creators;
     mapping(string => BadgeModelController) public badgeModelController;
@@ -89,11 +88,14 @@ contract TheBadgeStore is TheBadgeRoles {
      * =========================
      */
     event CreatorRegistered(address indexed creator, string metadata);
-    event CreatorUpdated(address indexed creator, string metadata);
+    event UpdatedCreatorMetadata(address indexed creator, string metadata);
+    event SuspendedCreator(address indexed creator, bool suspended);
+    event RemovedCreator(address indexed creator, bool deleted);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
-    // TODO: Check if this is needed or can be removed
-    event BadgeRequested(uint256 indexed badgeModelID, uint256 indexed badgeID, address indexed wallet);
-    // TODO: we need an event when the protocol pays to someone, it should contain the recipientAddress, the amount and maybe the cause? (deposit return, mint fees, curation fees?, etc)
+    event BadgeModelUpdated(uint256 indexed badgeModelId);
+    event PaymentMade(address indexed recipient, uint256 indexed amount, PaymentType indexed paymentType);
+    event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelID, uint256 indexed newAmountInBps);
+    event ProtocolSettingsUpdated(uint256 indexed mintBadgeDefaultFee, uint256 indexed createBadgeModelValue, uint256 indexed registerCreatorValue);
 
     /**
      * =========================
