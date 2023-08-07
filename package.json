@@ -1,6 +1,6 @@
 {
   "name": "hardhat-project",
-  "license": "BSL 1.1",
+  "license": "BUSL-1.1",
   "scripts": {
     "forge": "forge",
     "build": "forge build",
