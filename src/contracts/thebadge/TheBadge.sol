@@ -49,7 +49,7 @@ contract TheBadge is
 
         registerCreatorValue = uint256(0);
         createBadgeModelValue = uint256(0);
-        mintBadgeDefaultFee = uint256(5000); // in bps
+        mintBadgeDefaultFee = uint256(1000); // in bps (= 10%)
     }
 
     /*
@@ -67,7 +67,9 @@ contract TheBadge is
         // +++++++++++++++++++++
         BadgeModel storage _badgeModel = badgeModel[badgeModelId];
         BadgeModelController storage _badgeModelController = badgeModelController[_badgeModel.controllerName];
-        IBadgeModelController controller = IBadgeModelController(badgeModelController[_badgeModel.controllerName].controller);
+        IBadgeModelController controller = IBadgeModelController(
+            badgeModelController[_badgeModel.controllerName].controller
+        );
 
         if (_badgeModel.creator == address(0)) {
             revert TheBadge__requestBadge_badgeModelNotFound();
@@ -88,8 +90,15 @@ contract TheBadge is
         // distribute fees
         if (_badgeModel.mintCreatorFee > 0) {
             uint256 theBadgeFee = calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee);
-            payable(feeCollector).transfer(theBadgeFee);
-            payable(_badgeModel.creator).transfer(_badgeModel.mintCreatorFee - theBadgeFee);
+            uint256 creatorPayment =  _badgeModel.mintCreatorFee - theBadgeFee;
+
+            (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
+            require(protocolFeeSent, "Failed to pay protocol fees");
+            emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee);
+
+            (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment}("");
+            require(creatorFeeSent, "Failed to pay creator fees");
+            emit PaymentMade(_badgeModel.creator, theBadgeFee, PaymentType.CreatorFee);
         }
 
         // save asset info
@@ -124,7 +133,9 @@ contract TheBadge is
         }
 
         BadgeModel memory _badgeModel = badgeModel[_badge.badgeModelId];
-        IBadgeModelController controller = IBadgeModelController(badgeModelController[_badgeModel.controllerName].controller);
+        IBadgeModelController controller = IBadgeModelController(
+            badgeModelController[_badgeModel.controllerName].controller
+        );
 
         return controller.isAssetActive(badgeId) ? 1 : 0;
     }
@@ -153,6 +164,7 @@ contract TheBadge is
         mintBadgeDefaultFee = _mintBadgeDefaultFee;
         createBadgeModelValue = _createBadgeModelValue;
         registerCreatorValue = _registerCreatorValue;
+        emit ProtocolSettingsUpdated(_mintBadgeDefaultFee, _createBadgeModelValue, _registerCreatorValue);
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {
