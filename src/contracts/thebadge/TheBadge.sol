@@ -34,7 +34,7 @@ contract TheBadge is
         _disableInitializers();
     }
 
-    function initialize(address admin, address feeCollector, address minter) public initializer {
+    function initialize(address admin, address _feeCollector, address minter) public initializer {
         __ERC1155_init("");
         __AccessControl_init();
         __Pausable_init();
@@ -45,8 +45,7 @@ contract TheBadge is
         _grantRole(MINTER_ROLE, minter);
         _grantRole(UPGRADER_ROLE, msg.sender);
 
-        feeCollector = feeCollector;
-
+        feeCollector = _feeCollector;
         registerCreatorValue = uint256(0);
         createBadgeModelValue = uint256(0);
         mintBadgeDefaultFee = uint256(1000); // in bps (= 10%)
