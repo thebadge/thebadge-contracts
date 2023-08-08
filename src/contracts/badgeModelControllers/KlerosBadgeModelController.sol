@@ -4,15 +4,31 @@ pragma solidity 0.8.17;
 import { ILightGeneralizedTCR } from "../../interfaces/ILightGeneralizedTCR.sol";
 import { ILightGTCRFactory } from "../../interfaces/ILightGTCRFactory.sol";
 
-import "../../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../../interfaces/IBadgeModelController.sol";
 import "./KleroBadgeModelControllerStore.sol";
 import "../../interfaces/IKlerosBadgeModelController.sol";
+import "../thebadge/TheBadgeRoles.sol";
 
-contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelController, KlerosBadgeModelControllerStore {
+contract KlerosBadgeModelController is
+    Initializable,
+    IKlerosBadgeModelController,
+    KlerosBadgeModelControllerStore,
+    UUPSUpgradeable,
+    TheBadgeRoles
+{
     using CappedMath for uint256;
 
-    function initialize(address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
+    constructor() initializer {}
+
+    function initialize(address admin, address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(PAUSER_ROLE, msg.sender);
+        _grantRole(UPGRADER_ROLE, msg.sender);
+
         theBadge = TheBadge(payable(_theBadge));
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
@@ -97,13 +113,15 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
 
     /**
      * @notice After the review period ends, the items on the tcr list should be claimed using this function
-     * It Transfers deposit to badge's callee and sets badge's callee deposit to 0
+     * returns the badge's mint callee deposit and set the internal value to 0 again
+     * the internal value is not the deposit, is just a counter to know how much money belongs to the deposit
      * @param badgeId the klerosBadgeId
      */
+    // TODO: review, this should be payable and should call executeRequest() directly in order to get the money back
     function claim(uint256 badgeId) public payable {
-        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
+        KlerosBadge memory _klerosBadge = klerosBadge[badgeId];
         (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+        KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModel[badgeModelId];
 
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
         lightGeneralizedTCR.executeRequest(_klerosBadge.itemID);
@@ -221,6 +239,14 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
 
         return arbitrator.arbitrationCost(requestArbitratorExtraData);
     }
+
+    /**
+     * =========================
+     * Overrides
+     * =========================
+     */
+    /// Required by the OZ UUPS module
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**
      * @notice we need a receive function to receive deposits devolution from kleros
