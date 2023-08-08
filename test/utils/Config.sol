@@ -49,7 +49,7 @@ contract Config is Test {
         theBadge.initialize(admin, feeCollector, minter);
 
         klerosBadgeModelController = new KlerosBadgeModelController();
-        klerosBadgeModelController.initialize(address(theBadge), klerosArbitror, lightGTCRFactory);
+        klerosBadgeModelController.initialize(admin, address(theBadge), klerosArbitror, lightGTCRFactory);
 
         vm.prank(admin);
         theBadge.setBadgeModelController("kleros", address(klerosBadgeModelController));
