@@ -84,7 +84,12 @@ contract KlerosBadgeModelController is
      * @param data the klerosBadgeId
      */
     // TODO: should this use public onlyTheBadge? (but it won't allow to have a relayer)
-    function mint(address callee, uint256 badgeModelId, uint256 badgeId, bytes calldata data) public payable {
+    function mint(
+        address callee,
+        uint256 badgeModelId,
+        uint256 badgeId,
+        bytes calldata data
+    ) public payable returns (uint256) {
         // check value
         uint256 mintCost = mintValue(badgeModelId);
         if (msg.value != mintCost) {
@@ -109,6 +114,7 @@ contract KlerosBadgeModelController is
         klerosBadge[badgeId] = KlerosBadge(klerosItemID, callee, msg.value);
 
         emit MintKlerosBadge(badgeId, args.evidence);
+        return uint256(klerosItemID);
     }
 
     /**
@@ -117,23 +123,22 @@ contract KlerosBadgeModelController is
      * the internal value is not the deposit, is just a counter to know how much money belongs to the deposit
      * @param badgeId the klerosBadgeId
      */
-    // TODO: review, this should be payable and should call executeRequest() directly in order to get the money back
-    function claim(uint256 badgeId) public payable {
+    function claim(uint256 badgeId) public {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         KlerosBadge memory _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModel[badgeModelId];
 
-        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
+        // This changes the state of the item from Requested to Accepted and returns the deposit to our contract
         lightGeneralizedTCR.executeRequest(_klerosBadge.itemID);
 
+        // If this contract (KlerosBadgeModelController) didn't received the deposit, we throw an error
         if (_klerosBadge.deposit > address(this).balance) {
             revert KlerosBadgeModelController__claimBadge_insufficientBalance();
         }
 
         uint256 balanceToDeposit = _klerosBadge.deposit;
         _klerosBadge.deposit = 0;
-        payable(_klerosBadge.callee).transfer(balanceToDeposit);
-
+        // Then we return the deposit from within our contract to the callee address
+        // TODO: review if this is safe enough
         (bool badgeDepositSent, ) = payable(_klerosBadge.callee).call{ value: balanceToDeposit }("");
         require(badgeDepositSent, "Failed to return the deposit");
         emit DepositReturned(_klerosBadge.callee, balanceToDeposit, badgeId);
@@ -168,16 +173,12 @@ contract KlerosBadgeModelController is
      * @param badgeId the klerosBadgeId
      */
     function isAssetActive(uint256 badgeId) public view returns (bool) {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
 
-        if (_klerosBadgeModel.tcrList != address(0)) {
-            ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
-            (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
-            if (klerosItemStatus == 1 || klerosItemStatus == 3) {
-                return true;
-            }
+        (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
+        if (klerosItemStatus == 1 || klerosItemStatus == 3) {
+            return true;
         }
         // TODO: should this check the badge dueDate?,
         return false;
@@ -218,6 +219,7 @@ contract KlerosBadgeModelController is
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
         (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
         KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+        require(_klerosBadgeModel.tcrList != address(0), "Valid klerosBadgeModelId required for TCR!");
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
         return lightGeneralizedTCR;
     }
