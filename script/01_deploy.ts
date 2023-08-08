@@ -23,18 +23,22 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const klerosArbitror = "0x1128ed55ab2d796fa92d2f8e1f336d745354a77a";
 
   console.log("Deploying TheBadge...");
-  const theBadge = await upgrades.deployProxy(TheBadge, [deployer.address, deployer.address, deployer.address]);
+  const theBadge = await upgrades.deployProxy(TheBadge, [deployer.address, deployer.address, deployer.address], {
+    useDeployedImplementation: true,
+  });
   await theBadge.deployed();
 
   console.log("Deploying KlerosBadgeModelController...");
-  const klerosController = await upgrades.deployProxy(KlerosController, [
-    theBadge.address,
-    klerosArbitror,
-    lightGTCRFactory,
-  ]);
+  const klerosController = await upgrades.deployProxy(
+    KlerosController,
+    [theBadge.address, klerosArbitror, lightGTCRFactory],
+    {
+      useDeployedImplementation: true,
+    },
+  );
   await klerosController.deployed();
 
-  console.log("Assign Kleros Controller...");
+  console.log("Adding KlerosBadgeModelController...");
   theBadge.connect(deployer);
   await theBadge.setBadgeModelController("kleros", klerosController.address);
 
