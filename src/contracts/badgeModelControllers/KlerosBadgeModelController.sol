@@ -92,7 +92,7 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
         // save deposit amount for callee as it has to be returned if it was not challenged.
         klerosBadge[badgeId] = KlerosBadge(klerosItemID, callee, msg.value);
 
-        emit mintKlerosBadge(badgeId, args.evidence);
+        emit MintKlerosBadge(badgeId, args.evidence);
     }
 
     /**
@@ -118,7 +118,7 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
 
         (bool badgeDepositSent, ) = payable(_klerosBadge.callee).call{ value: balanceToDeposit }("");
         require(badgeDepositSent, "Failed to return the deposit");
-        emit DepositReturned(_klerosBadge.callee, balanceToDeposit);
+        emit DepositReturned(_klerosBadge.callee, balanceToDeposit, badgeId);
     }
 
     /**
