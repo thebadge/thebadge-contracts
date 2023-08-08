@@ -103,6 +103,7 @@ contract TheBadgeStore is TheBadgeRoles {
     );
     event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelId, uint256 newAmountInBps);
     event ProtocolSettingsUpdated();
+    event BadgeRequested(uint256 indexed badgeModelID, uint256 indexed badgeID, address indexed recipient, address controller, uint256 controllerBadgeId);
 
     /**
      * =========================
