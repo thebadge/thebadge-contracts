@@ -34,7 +34,7 @@ contract TheBadgeTestCore is Config {
         assertEq(paused, false);
         assertEq(mintCreatorFee, badgeModel.mintCreatorFee);
         assertEq(validFor, badgeModel.validFor);
-        assertEq(mintProtocolFee, theBadge.mintBadgeDefaultFee());
+        assertEq(mintProtocolFee, theBadge.mintBadgeProtocolDefaultFeeInBps());
         assertFalse(tcrList == address(0));
     }
 

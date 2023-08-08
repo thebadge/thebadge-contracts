@@ -11,13 +11,14 @@ contract TheBadgeStore is TheBadgeRoles {
 
     CountersUpgradeable.Counter internal badgeModelIds;
     CountersUpgradeable.Counter internal badgeIds;
-    uint256 public registerCreatorValue;
-    uint256 public mintBadgeDefaultFee; // in bps
+
     // TODO: does this var makes sense? it was thought to define a min value to mint a badge.
     // For example, if the badge is going to have a cost (it can be free) it has to be bigger than this variable.
     // badgeModel1 = mint cost is 4 because minBadgeMintValue is 4.
     // uint256 public minBadgeMintValue;
-    uint256 public createBadgeModelValue;
+    uint256 public registerCreatorProtocolFee;
+    uint256 public createBadgeModelProtocolFee;
+    uint256 public mintBadgeProtocolDefaultFeeInBps;
     address public feeCollector;
 
     /**
@@ -60,7 +61,7 @@ contract TheBadgeStore is TheBadgeRoles {
         address creator;
         string controllerName;
         bool paused;
-        uint256 mintCreatorFee;  // in bps (%). It is taken from mintCreatorFee
+        uint256 mintCreatorFee; // in bps (%). It is taken from mintCreatorFee
         uint256 validFor;
         uint256 mintProtocolFee; // amount that the protocol will charge for this
     }
@@ -87,15 +88,25 @@ contract TheBadgeStore is TheBadgeRoles {
      * Events
      * =========================
      */
+    event Initialize(address indexed admin, address indexed minter);
     event CreatorRegistered(address indexed creator, string metadata);
     event UpdatedCreatorMetadata(address indexed creator, string metadata);
     event SuspendedCreator(address indexed creator, bool suspended);
     event RemovedCreator(address indexed creator, bool deleted);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     event BadgeModelUpdated(uint256 indexed badgeModelId);
-    event PaymentMade(address indexed recipient, uint256 indexed amount, PaymentType indexed paymentType);
-    event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelID, uint256 indexed newAmountInBps);
-    event ProtocolSettingsUpdated(uint256 indexed mintBadgeDefaultFee, uint256 indexed createBadgeModelValue, uint256 indexed registerCreatorValue);
+    event PaymentMade(
+        address indexed recipient,
+        uint256 amount,
+        PaymentType indexed paymentType,
+        uint256 indexed badgeModelId
+    );
+    event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelId, uint256 indexed newAmountInBps);
+    event ProtocolSettingsUpdated(
+        uint256 indexed mintBadgeDefaultFee,
+        uint256 indexed createBadgeModelValue,
+        uint256 indexed registerCreatorValue
+    );
 
     /**
      * =========================

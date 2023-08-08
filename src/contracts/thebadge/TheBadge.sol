@@ -46,9 +46,10 @@ contract TheBadge is
         _grantRole(UPGRADER_ROLE, msg.sender);
 
         feeCollector = _feeCollector;
-        registerCreatorValue = uint256(0);
-        createBadgeModelValue = uint256(0);
-        mintBadgeDefaultFee = uint256(1000); // in bps (= 10%)
+        registerCreatorProtocolFee = uint256(0);
+        createBadgeModelProtocolFee = uint256(0);
+        mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
+        emit Initialize(admin, minter);
     }
 
     /*
@@ -93,11 +94,11 @@ contract TheBadge is
 
             (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
             require(protocolFeeSent, "Failed to pay protocol fees");
-            emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee);
+            emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee, badgeModelId);
 
             (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment}("");
             require(creatorFeeSent, "Failed to pay creator fees");
-            emit PaymentMade(_badgeModel.creator, theBadgeFee, PaymentType.CreatorFee);
+            emit PaymentMade(_badgeModel.creator, theBadgeFee, PaymentType.CreatorFee, badgeModelId);
         }
 
         // save asset info
@@ -160,9 +161,9 @@ contract TheBadge is
         uint256 _createBadgeModelValue,
         uint256 _registerCreatorValue
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        mintBadgeDefaultFee = _mintBadgeDefaultFee;
-        createBadgeModelValue = _createBadgeModelValue;
-        registerCreatorValue = _registerCreatorValue;
+        mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
+        createBadgeModelProtocolFee = _createBadgeModelValue;
+        registerCreatorProtocolFee = _registerCreatorValue;
         emit ProtocolSettingsUpdated(_mintBadgeDefaultFee, _createBadgeModelValue, _registerCreatorValue);
     }
 

@@ -46,7 +46,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
      * @param _metadata IPFS url
      */
     function registerBadgeModelCreator(string memory _metadata) public payable {
-        if (msg.value != registerCreatorValue) {
+        if (msg.value != registerCreatorProtocolFee) {
             revert TheBadge__registerCreator_wrongValue();
         }
 
@@ -100,7 +100,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
      */
     function createBadgeModel(CreateBadgeModel memory args, bytes memory data) public payable onlyBadgeModelCreator {
         // check values
-        if (msg.value != createBadgeModelValue) {
+        if (msg.value != createBadgeModelProtocolFee) {
             revert TheBadge__createBadgeModel_wrongValue();
         }
 
@@ -124,7 +124,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
             false,
             args.mintCreatorFee,
             args.validFor,
-            mintBadgeDefaultFee
+            mintBadgeProtocolDefaultFeeInBps
         );
 
         emit BadgeModelCreated(badgeModelIds.current(), args.metadata);
