@@ -101,12 +101,8 @@ contract TheBadgeStore is TheBadgeRoles {
         PaymentType indexed paymentType,
         uint256 indexed badgeModelId
     );
-    event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelId, uint256 indexed newAmountInBps);
-    event ProtocolSettingsUpdated(
-        uint256 indexed mintBadgeDefaultFee,
-        uint256 indexed createBadgeModelValue,
-        uint256 indexed registerCreatorValue
-    );
+    event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelId, uint256 newAmountInBps);
+    event ProtocolSettingsUpdated();
 
     /**
      * =========================

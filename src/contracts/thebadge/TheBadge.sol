@@ -90,13 +90,13 @@ contract TheBadge is
         // distribute fees
         if (_badgeModel.mintCreatorFee > 0) {
             uint256 theBadgeFee = calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee);
-            uint256 creatorPayment =  _badgeModel.mintCreatorFee - theBadgeFee;
+            uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeFee;
 
             (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
             require(protocolFeeSent, "Failed to pay protocol fees");
             emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee, badgeModelId);
 
-            (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment}("");
+            (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
             require(creatorFeeSent, "Failed to pay creator fees");
             emit PaymentMade(_badgeModel.creator, theBadgeFee, PaymentType.CreatorFee, badgeModelId);
         }
@@ -164,7 +164,7 @@ contract TheBadge is
         mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
         createBadgeModelProtocolFee = _createBadgeModelValue;
         registerCreatorProtocolFee = _registerCreatorValue;
-        emit ProtocolSettingsUpdated(_mintBadgeDefaultFee, _createBadgeModelValue, _registerCreatorValue);
+        emit ProtocolSettingsUpdated();
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {
