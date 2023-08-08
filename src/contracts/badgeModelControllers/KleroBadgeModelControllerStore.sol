@@ -110,6 +110,4 @@ contract KlerosBadgeModelControllerStore {
         }
         _;
     }
-
-
 }

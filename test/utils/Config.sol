@@ -11,7 +11,6 @@ import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
 import { KlerosBadgeModelController } from "../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
 import { KlerosBadgeModelControllerStore } from "../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
 
-
 contract Config is Test {
     address public admin = vm.addr(1);
     address public vegeta = vm.addr(2);

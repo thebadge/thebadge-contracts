@@ -5,5 +5,6 @@ import "./IBadgeModelController.sol";
 
 interface IKlerosBadgeModelController is IBadgeModelController {
     function getChallengeDepositValue(uint256 badgeId) external view returns (uint256);
+
     function getRemovalDepositValue(uint256 badgeId) external view returns (uint256);
 }

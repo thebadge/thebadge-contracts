@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.17;
 
-import  "../contracts/thebadge/TheBadgeStore.sol";
+import "../contracts/thebadge/TheBadgeStore.sol";
 
 interface ITheBadgeModels {
     function setBadgeModelController(string memory controllerName, address controllerAddress) external;

@@ -25,7 +25,7 @@ TheBadge needs to track two types of information: BadgeModels and Badges. BadgeM
 
 ### Our Solution: Mixing Standards
 
-We propose a solution that combines the benefits of both ERC721 and ERC1155 standards. The BadgeModels will be represented with the token ID (unique auto-incremental) and well  each Badge will have its own unique auto-incremental ID. Although the minting process will be treated as ERC1155, the events triggered will be sent as if we were using an ERC721 standard, where each asset is unique. This modification will require us to make some conceptual changes to the ERC1155 standard.
+We propose a solution that combines the benefits of both ERC721 and ERC1155 standards. The BadgeModels will be represented with the token ID (unique auto-incremental) and well each Badge will have its own unique auto-incremental ID. Although the minting process will be treated as ERC1155, the events triggered will be sent as if we were using an ERC721 standard, where each asset is unique. This modification will require us to make some conceptual changes to the ERC1155 standard.
 
 ### Conceptual Changes:
 

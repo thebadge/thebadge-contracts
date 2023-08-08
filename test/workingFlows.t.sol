@@ -58,7 +58,9 @@ contract TheBadgeTestCore is Config {
         // goku mints badgeModelId
         uint256 mintValue = theBadge.mintValue(badgeModelId);
         string memory evidenceUri = "ipfs://evidence.json";
-        KlerosBadgeModelController.MintParams memory badgeInfo = KlerosBadgeModelControllerStore.MintParams(evidenceUri);
+        KlerosBadgeModelController.MintParams memory badgeInfo = KlerosBadgeModelControllerStore.MintParams(
+            evidenceUri
+        );
         vm.prank(goku);
         theBadge.mint{ value: mintValue }(badgeModelId, goku, evidenceUri, abi.encode(badgeInfo));
 
