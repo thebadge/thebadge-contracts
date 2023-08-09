@@ -38,7 +38,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
             revert TheBadge__setBadgeModelController_alreadySet();
         }
 
-        badgeModelController[controllerName] = BadgeModelController(controllerAddress, false);
+        badgeModelController[controllerName] = BadgeModelController(controllerAddress, false, true);
     }
 
     /**
@@ -60,6 +60,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
         }
 
         creator.metadata = _metadata;
+        creator.initialized = true;
 
         emit CreatorRegistered(_msgSender(), creator.metadata);
     }
@@ -124,7 +125,8 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
             false,
             args.mintCreatorFee,
             args.validFor,
-            mintBadgeProtocolDefaultFeeInBps
+            mintBadgeProtocolDefaultFeeInBps,
+            true
         );
 
         emit BadgeModelCreated(badgeModelIds.current(), args.metadata);
@@ -178,32 +180,6 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
 
         _badgeModel.mintProtocolFee = feeInBps;
         emit BadgeModelProtocolFeeUpdated(badgeModelId, feeInBps);
-    }
-
-    /*
-     * @notice given an account address and a badgeModelId returns 1 if the users owns the badge or if it's not expired, otherwise returns 0
-     * @param account user address
-     * @param badgeModelId ID of the badgeModel
-     */
-    function balanceOfBadgeModel(address account, uint256 badgeModelId) public view returns (uint256) {
-        if (badgeModelsByAccount[badgeModelId][account].length == 0) {
-            return 0;
-        }
-
-        BadgeModel memory _badgeModel = badgeModel[badgeModelId];
-        IBadgeModelController controller = IBadgeModelController(
-            badgeModelController[_badgeModel.controllerName].controller
-        );
-
-        uint256 balance = 0;
-        for (uint i = 0; i < badgeModelsByAccount[badgeModelId][account].length; i++) {
-            if (controller.isAssetActive(badgeModelsByAccount[badgeModelId][account][i])) {
-                balance++;
-            }
-        }
-        // TODO: this should check if the badge didn't expired? => or it can be done directly inside controller.isAssetActive
-
-        return balance;
     }
 
     /*
