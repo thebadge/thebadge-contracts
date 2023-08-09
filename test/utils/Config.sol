@@ -60,7 +60,8 @@ contract Config is Test {
             "ipfs/metadataForBadge.json",
             "kleros",
             0,
-            oneYear
+            oneYear,
+            true
         );
         return badgeModel;
     }
@@ -86,7 +87,8 @@ contract Config is Test {
             "ipfs/clearingMetaEvidence.json",
             100, // challengePeriodDuration
             baseDeposits,
-            stakeMultipliers
+            stakeMultipliers,
+    true
         );
         return strategy;
     }

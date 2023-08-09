@@ -22,7 +22,5 @@ interface ITheBadgeModels {
 
     function updateBadgeModelFee(uint256 badgeModelId, uint256 feeInBps) external;
 
-    function balanceOfBadgeModel(address account, uint256 badgeModelId) external view returns (uint256);
-
     function mintValue(uint256 badgeModelId) external view returns (uint256);
 }

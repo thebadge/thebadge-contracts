@@ -33,6 +33,7 @@ contract TheBadgeStore is TheBadgeRoles {
      */
     struct Creator {
         string metadata;
+        bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
     /**
@@ -42,6 +43,7 @@ contract TheBadgeStore is TheBadgeRoles {
     struct BadgeModelController {
         address controller;
         bool paused;
+        bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
     /**
@@ -52,6 +54,7 @@ contract TheBadgeStore is TheBadgeRoles {
         string controllerName;
         uint256 mintCreatorFee;
         uint256 validFor;
+        bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
     /**
@@ -64,12 +67,14 @@ contract TheBadgeStore is TheBadgeRoles {
         uint256 mintCreatorFee; // in bps (%). It is taken from mintCreatorFee
         uint256 validFor;
         uint256 mintProtocolFee; // amount that the protocol will charge for this
+        bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
     struct Badge {
         uint256 badgeModelId;
         address account;
         uint256 dueDate;
+        bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
     enum PaymentType {
@@ -103,7 +108,13 @@ contract TheBadgeStore is TheBadgeRoles {
     );
     event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelId, uint256 newAmountInBps);
     event ProtocolSettingsUpdated();
-    event BadgeRequested(uint256 indexed badgeModelID, uint256 indexed badgeID, address indexed recipient, address controller, uint256 controllerBadgeId);
+    event BadgeRequested(
+        uint256 indexed badgeModelID,
+        uint256 indexed badgeID,
+        address indexed recipient,
+        address controller,
+        uint256 controllerBadgeId
+    );
 
     /**
      * =========================

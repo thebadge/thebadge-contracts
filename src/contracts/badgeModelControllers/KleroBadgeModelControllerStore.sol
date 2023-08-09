@@ -41,6 +41,7 @@ contract KlerosBadgeModelControllerStore {
         uint256 challengePeriodDuration;
         uint256[4] baseDeposits;
         uint256[3] stakeMultipliers;
+        bool initialized;
     }
 
     struct MintParams {
@@ -63,6 +64,7 @@ contract KlerosBadgeModelControllerStore {
         bytes32 itemID;
         address callee;
         uint256 deposit;
+        bool initialized;
     }
 
     /**
@@ -97,6 +99,8 @@ contract KlerosBadgeModelControllerStore {
     error KlerosBadgeModelController__mintBadge_wrongValue();
     error KlerosBadgeModelController__claimBadge_insufficientBalance();
     error KlerosBadgeModelController__createBadgeModel_TCRListAddressZero();
+
+    error KlerosBadgeModelController__badge__notInChallengeableStatus();
 
     /**
      * =========================

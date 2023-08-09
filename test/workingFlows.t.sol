@@ -24,7 +24,8 @@ contract TheBadgeTestCore is Config {
             bool paused,
             uint256 mintCreatorFee,
             uint256 validFor,
-            uint256 mintProtocolFee
+            uint256 mintProtocolFee,
+
         ) = theBadge.badgeModel(0);
 
         address tcrList = klerosBadgeModelController.klerosBadgeModel(0);
@@ -72,7 +73,7 @@ contract TheBadgeTestCore is Config {
         assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 0);
 
         // check status on KlerosBadgeModelController
-        (bytes32 itemID, address mintCallee, uint256 deposit) = klerosBadgeModelController.klerosBadge(badgeId);
+        (bytes32 itemID, address mintCallee, uint256 deposit,) = klerosBadgeModelController.klerosBadge(badgeId);
         assertEq(itemID, keccak256(abi.encodePacked(evidenceUri)));
         assertEq(mintCallee, goku);
         assertEq(deposit, mintValue - badgeModel.mintCreatorFee);
