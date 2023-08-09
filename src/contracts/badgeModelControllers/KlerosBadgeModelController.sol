@@ -40,8 +40,6 @@ contract KlerosBadgeModelController is
      * @param data Encoded data required to create a Kleros TCR list
      */
     function createBadgeModel(uint256 badgeModelId, bytes calldata data) public onlyTheBadge {
-        // TODO: set TCR admin to an address that we control, so we can call "removeItem"
-
         KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
         if (_klerosBadgeModel.tcrList != address(0)) {
             revert KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
@@ -111,7 +109,7 @@ contract KlerosBadgeModelController is
         // Its needed on the subgraph to check the disputes status for that item
         bytes32 klerosItemID = keccak256(abi.encodePacked(args.evidence));
         // save deposit amount for callee as it has to be returned if it was not challenged.
-        klerosBadge[badgeId] = KlerosBadge(klerosItemID, callee, msg.value);
+        klerosBadge[badgeId] = KlerosBadge(klerosItemID, callee, msg.value, true);
 
         emit MintKlerosBadge(badgeId, args.evidence);
         return uint256(klerosItemID);
@@ -180,7 +178,7 @@ contract KlerosBadgeModelController is
         if (klerosItemStatus == 1 || klerosItemStatus == 3) {
             return true;
         }
-        // TODO: should this check the badge dueDate?,
+
         return false;
     }
 
@@ -190,12 +188,20 @@ contract KlerosBadgeModelController is
      */
     function getChallengeDepositValue(uint256 badgeId) public view returns (uint256) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
-
         uint256 arbitrationCost = getBadgeIdArbitrationCosts(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadge[badgeId];
+        (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
 
-        uint256 challengerBaseDeposit = lightGeneralizedTCR.submissionChallengeBaseDeposit();
+        // Status 1: The item is awaiting to be registered and the request if to challenge the registration
+        if (klerosItemStatus == 1) {
+            return arbitrationCost.addCap(lightGeneralizedTCR.submissionChallengeBaseDeposit());
+        }
+        // Status 3: The item is inside the list and the request if to remove it from the list
+        if (klerosItemStatus == 3) {
+            return arbitrationCost.addCap(lightGeneralizedTCR.removalChallengeBaseDeposit());
+        }
 
-        return arbitrationCost.addCap(challengerBaseDeposit);
+        revert KlerosBadgeModelController__badge__notInChallengeableStatus();
     }
 
     /**
@@ -207,9 +213,9 @@ contract KlerosBadgeModelController is
 
         uint256 arbitrationCost = getBadgeIdArbitrationCosts(badgeId);
 
-        uint256 removalChallengeBaseDeposit = lightGeneralizedTCR.removalChallengeBaseDeposit();
+        uint256 removalBaseDeposit = lightGeneralizedTCR.removalBaseDeposit();
 
-        return arbitrationCost.addCap(removalChallengeBaseDeposit);
+        return arbitrationCost.addCap(removalBaseDeposit);
     }
 
     /**
@@ -217,7 +223,7 @@ contract KlerosBadgeModelController is
      * @param badgeId the klerosBadgeId
      */
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
-        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
+        (uint256 badgeModelId, , , ) = theBadge.badge(badgeId);
         KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModel[badgeModelId];
         require(_klerosBadgeModel.tcrList != address(0), "Valid klerosBadgeModelId required for TCR!");
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
