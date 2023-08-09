@@ -95,7 +95,7 @@ contract TheBadge is
 
             (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
             require(creatorFeeSent, "Failed to pay creator fees");
-            emit PaymentMade(_badgeModel.creator, theBadgeFee, PaymentType.CreatorFee, badgeModelId);
+            emit PaymentMade(_badgeModel.creator, creatorPayment, PaymentType.CreatorFee, badgeModelId);
         }
 
         // save asset info
