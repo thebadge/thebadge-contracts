@@ -13,8 +13,6 @@ import "./TheBadgeStore.sol";
 import "./TheBadgeModels.sol";
 import "../../interfaces/ITheBadge.sol";
 
-// TODO: save storage for upgradeability?
-
 /// @custom:security-contact hello@thebadge.com
 contract TheBadge is
     Initializable,
@@ -67,9 +65,8 @@ contract TheBadge is
         // +++++++++++++++++++++
         BadgeModel storage _badgeModel = badgeModel[badgeModelId];
         BadgeModelController storage _badgeModelController = badgeModelController[_badgeModel.controllerName];
-        IBadgeModelController controller = IBadgeModelController(
-            badgeModelController[_badgeModel.controllerName].controller
-        );
+        address controllerAddress = badgeModelController[_badgeModel.controllerName].controller;
+        IBadgeModelController controller = IBadgeModelController(controllerAddress);
 
         if (_badgeModel.creator == address(0)) {
             revert TheBadge__requestBadge_badgeModelNotFound();
@@ -108,16 +105,23 @@ contract TheBadge is
         // This creates a new badge with id: badgeId
         // For details check: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/token/ERC1155/ERC1155Upgradeable.sol#L303C72-L303C76
         _mint(account, badgeId, 1, "0x");
-        uint256 validFor = _badgeModel.validFor == 0 ? 0 : block.timestamp + _badgeModel.validFor;
-        badge[badgeId] = Badge(badgeModelId, account, validFor);
+        uint256 dueDate = _badgeModel.validFor == 0 ? 0 : block.timestamp + _badgeModel.validFor;
+        badge[badgeId] = Badge(badgeModelId, account, dueDate, true);
         badgeModelsByAccount[badgeModelId][account].push(badgeId);
 
-        controller.mint{ value: (msg.value - _badgeModel.mintCreatorFee) }(_msgSender(), badgeModelId, badgeId, data);
+        uint256 controllerBadgeId = controller.mint{ value: (msg.value - _badgeModel.mintCreatorFee) }(
+            _msgSender(),
+            badgeModelId,
+            badgeId,
+            data
+        );
 
         badgeIds.increment();
+        emit BadgeRequested(badgeModelId, badgeId, account, controllerAddress, controllerBadgeId);
     }
 
     /*
+     * ERC-20
      * @notice Given an user account and a badgeId, returns 1 if the user has the badge or 0 if not
      * @param account address of the user
      * @param badgeId identifier of the badge inside a badgeModel
@@ -128,7 +132,11 @@ contract TheBadge is
     ) public view override(ERC1155Upgradeable, ITheBadge) returns (uint256) {
         Badge memory _badge = badge[badgeId];
 
-        if (_badge.badgeModelId == 0 || _badge.account != account) {
+        if (_badge.initialized == false || _badge.account != account) {
+            return 0;
+        }
+
+        if (isExpired(badgeId) == true) {
             return 0;
         }
 
@@ -138,6 +146,53 @@ contract TheBadge is
         );
 
         return controller.isAssetActive(badgeId) ? 1 : 0;
+    }
+
+    /*
+     * @notice given an account address and a badgeModelId returns how many badges of each model owns the user
+     * @param account user address
+     * @param badgeModelId ID of the badgeModel
+     */
+    function balanceOfBadgeModel(address account, uint256 badgeModelId) public view returns (uint256) {
+        if (badgeModelsByAccount[badgeModelId][account].length == 0) {
+            return 0;
+        }
+
+        BadgeModel memory _badgeModel = badgeModel[badgeModelId];
+        IBadgeModelController controller = IBadgeModelController(
+            badgeModelController[_badgeModel.controllerName].controller
+        );
+
+        uint256 balance = 0;
+        for (uint i = 0; i < badgeModelsByAccount[badgeModelId][account].length; i++) {
+            uint256 badgeId = badgeModelsByAccount[badgeModelId][account][i];
+            if (isExpired(badgeId) == false && controller.isAssetActive(badgeId)) {
+                balance++;
+            }
+        }
+
+        return balance;
+    }
+
+    /*
+     * @notice Given a badgeId, returns true if the badge has expired (dueDate <= currentTime)
+     * if the badge is configured as an all-time badge or if the dueTime didn't arrived yet, returns false
+     * @param account address of the user
+     * @param badgeId identifier of the badge inside a badgeModel
+     */
+    function isExpired(uint256 badgeId) public view returns (bool) {
+        Badge memory _badge = badge[badgeId];
+
+        if (_badge.initialized == false) {
+            return false;
+        }
+
+        // Badge configured to be life-time
+        if (_badge.dueDate == 0) {
+            return false;
+        }
+
+        return _badge.dueDate <= block.timestamp ? true : false;
     }
 
     /*
@@ -223,7 +278,7 @@ contract TheBadge is
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(ERC1155Upgradeable, AccessControlUpgradeable) returns (bool) {
+    ) public view override(ERC1155Upgradeable, AccessControlUpgradeable, ITheBadge) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
