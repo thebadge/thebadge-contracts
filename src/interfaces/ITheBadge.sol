@@ -11,11 +11,11 @@ interface ITheBadge is IERC1155Upgradeable {
 
     function isExpired(uint256 badgeId) external view returns (bool);
 
-    function updateProtocolValues(
-        uint256 _mintBadgeDefaultFee,
-        uint256 _createBadgeModelValue,
-        uint256 _registerCreatorValue
-    ) external;
+    function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) external;
+
+    function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) external;
+
+    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) external;
 
     function pause() external;
 
