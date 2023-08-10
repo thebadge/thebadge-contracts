@@ -57,31 +57,27 @@ contract TheBadge is
      * @param tokenURI url of the data of the token stored in IPFS
      * @param data metaEvidence for the controller
      */
-    function mint(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data) external payable {
+    function mint(
+        uint256 badgeModelId,
+        address account,
+        string memory tokenURI,
+        bytes memory data
+    ) external payable onlyBadgeModelMintable(badgeModelId) {
         // +++++++++++++++++++++
         // +++++++++++++++++++++
         // TODO: add onlyRole(MINTER_ROLE) before going prod
         // +++++++++++++++++++++
         // +++++++++++++++++++++
-        BadgeModel storage _badgeModel = badgeModel[badgeModelId];
-        BadgeModelController storage _badgeModelController = badgeModelController[_badgeModel.controllerName];
-        address controllerAddress = badgeModelController[_badgeModel.controllerName].controller;
-        IBadgeModelController controller = IBadgeModelController(controllerAddress);
+        // Re-declaring variables reduces the stack tree and avoid compilation errors
+        uint256 _badgeModelId = badgeModelId;
+        bytes memory _data = data;
+        address _account = account;
+        BadgeModel storage _badgeModel = badgeModels[_badgeModelId];
+        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
+        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        if (_badgeModel.creator == address(0)) {
-            revert TheBadge__requestBadge_badgeModelNotFound();
-        }
-
-        if (msg.value < mintValue(badgeModelId)) {
+        if (msg.value < mintValue(_badgeModelId)) {
             revert TheBadge__requestBadge_wrongValue();
-        }
-
-        if (_badgeModel.paused) {
-            revert TheBadge__requestBadge_isPaused();
-        }
-
-        if (_badgeModelController.paused) {
-            revert TheBadge__requestBadge_controllerIsPaused();
         }
 
         // distribute fees
@@ -91,33 +87,33 @@ contract TheBadge is
 
             (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
             require(protocolFeeSent, "Failed to pay protocol fees");
-            emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee, badgeModelId);
+            emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee, _badgeModelId);
 
             (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
             require(creatorFeeSent, "Failed to pay creator fees");
-            emit PaymentMade(_badgeModel.creator, creatorPayment, PaymentType.CreatorFee, badgeModelId);
+            emit PaymentMade(_badgeModel.creator, creatorPayment, PaymentType.CreatorFee, _badgeModelId);
         }
 
         // save asset info
-        uint256 badgeId = badgeIds.current();
+        uint256 badgeId = badgeIdsCounter.current();
         _setURI(badgeId, tokenURI);
         // Account: badge recipient; badgeId: the id of the badge; value: amount of badges to create (always 1), data: data of the badge (always null)
         // This creates a new badge with id: badgeId
         // For details check: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/token/ERC1155/ERC1155Upgradeable.sol#L303C72-L303C76
-        _mint(account, badgeId, 1, "0x");
+        _mint(_account, badgeId, 1, "0x");
         uint256 dueDate = _badgeModel.validFor == 0 ? 0 : block.timestamp + _badgeModel.validFor;
-        badge[badgeId] = Badge(badgeModelId, account, dueDate, true);
-        badgeModelsByAccount[badgeModelId][account].push(badgeId);
+        badges[badgeId] = Badge(_badgeModelId, _account, dueDate, true);
+        badgeModelsByAccount[_badgeModelId][_account].push(badgeId);
 
         uint256 controllerBadgeId = controller.mint{ value: (msg.value - _badgeModel.mintCreatorFee) }(
             _msgSender(),
-            badgeModelId,
+            _badgeModelId,
             badgeId,
-            data
+            _data
         );
 
-        badgeIds.increment();
-        emit BadgeRequested(badgeModelId, badgeId, account, controllerAddress, controllerBadgeId);
+        badgeIdsCounter.increment();
+        emit BadgeRequested(_badgeModelId, badgeId, _account, _badgeModelController.controller, controllerBadgeId);
     }
 
     /*
@@ -130,7 +126,7 @@ contract TheBadge is
         address account,
         uint256 badgeId
     ) public view override(ERC1155Upgradeable, ITheBadge) returns (uint256) {
-        Badge memory _badge = badge[badgeId];
+        Badge memory _badge = badges[badgeId];
 
         if (_badge.initialized == false || _badge.account != account) {
             return 0;
@@ -140,9 +136,9 @@ contract TheBadge is
             return 0;
         }
 
-        BadgeModel memory _badgeModel = badgeModel[_badge.badgeModelId];
+        BadgeModel memory _badgeModel = badgeModels[_badge.badgeModelId];
         IBadgeModelController controller = IBadgeModelController(
-            badgeModelController[_badgeModel.controllerName].controller
+            badgeModelControllers[_badgeModel.controllerName].controller
         );
 
         return controller.isAssetActive(badgeId) ? 1 : 0;
@@ -158,9 +154,9 @@ contract TheBadge is
             return 0;
         }
 
-        BadgeModel memory _badgeModel = badgeModel[badgeModelId];
+        BadgeModel memory _badgeModel = badgeModels[badgeModelId];
         IBadgeModelController controller = IBadgeModelController(
-            badgeModelController[_badgeModel.controllerName].controller
+            badgeModelControllers[_badgeModel.controllerName].controller
         );
 
         uint256 balance = 0;
@@ -181,7 +177,7 @@ contract TheBadge is
      * @param badgeId identifier of the badge inside a badgeModel
      */
     function isExpired(uint256 badgeId) public view returns (bool) {
-        Badge memory _badge = badge[badgeId];
+        Badge memory _badge = badges[badgeId];
 
         if (_badge.initialized == false) {
             return false;
@@ -206,18 +202,28 @@ contract TheBadge is
     }
 
     /*
-     * @notice Updates values of the protocol: _mintBadgeDefaultFee; _createBadgeModelValue and _registerCreatorValue
+     * @notice Updates the value of the protocol: _mintBadgeDefaultFee
      * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
+     */
+    function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
+        emit ProtocolSettingsUpdated();
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _createBadgeModelValue
      * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
+     */
+    function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        createBadgeModelProtocolFee = _createBadgeModelValue;
+        emit ProtocolSettingsUpdated();
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _registerCreatorValue
      * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
      */
-    function updateProtocolValues(
-        uint256 _mintBadgeDefaultFee,
-        uint256 _createBadgeModelValue,
-        uint256 _registerCreatorValue
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
-        createBadgeModelProtocolFee = _createBadgeModelValue;
+    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
         registerCreatorProtocolFee = _registerCreatorValue;
         emit ProtocolSettingsUpdated();
     }
