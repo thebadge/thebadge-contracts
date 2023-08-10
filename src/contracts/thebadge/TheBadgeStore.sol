@@ -9,8 +9,8 @@ import "../../interfaces/IBadgeModelController.sol";
 contract TheBadgeStore is TheBadgeRoles {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
-    CountersUpgradeable.Counter internal badgeModelIds;
-    CountersUpgradeable.Counter internal badgeIds;
+    CountersUpgradeable.Counter internal badgeModelIdsCounter;
+    CountersUpgradeable.Counter internal badgeIdsCounter;
 
     // TODO: does this var makes sense? it was thought to define a min value to mint a badge.
     // For example, if the badge is going to have a cost (it can be free) it has to be bigger than this variable.
@@ -33,6 +33,7 @@ contract TheBadgeStore is TheBadgeRoles {
      */
     struct Creator {
         string metadata;
+        bool suspended; // If true, the creator is not allowed to do any actions and their badges are not minteable anymore.
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
@@ -54,7 +55,6 @@ contract TheBadgeStore is TheBadgeRoles {
         string controllerName;
         uint256 mintCreatorFee;
         uint256 validFor;
-        bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
     /**
@@ -83,9 +83,9 @@ contract TheBadgeStore is TheBadgeRoles {
     }
 
     mapping(address => Creator) public creators;
-    mapping(string => BadgeModelController) public badgeModelController;
-    mapping(uint256 => BadgeModel) public badgeModel;
-    mapping(uint256 => Badge) public badge;
+    mapping(string => BadgeModelController) public badgeModelControllers;
+    mapping(uint256 => BadgeModel) public badgeModels;
+    mapping(uint256 => Badge) public badges;
     mapping(uint256 => mapping(address => uint256[])) public badgeModelsByAccount;
 
     /**
@@ -123,7 +123,7 @@ contract TheBadgeStore is TheBadgeRoles {
      */
 
     error TheBadge__onlyCreator_senderIsNotACreator();
-    error TheBadge__onlyController_senderIsNotTheController();
+    error TheBadge__onlyCreator_creatorIsSuspended();
 
     error TheBadge__registerCreator_wrongValue();
     error TheBadge__registerCreator_alreadyRegistered();
@@ -136,11 +136,12 @@ contract TheBadgeStore is TheBadgeRoles {
     error TheBadge__createBadgeModel_wrongValue();
     error TheBadge__updateBadgeModel_notBadgeModelOwner();
     error TheBadge__updateBadgeModel_badgeModelNotFound();
-    error TheBadge__updateBadgeModelFee_badgeModelNotFound();
+    error TheBadge__badgeModel_badgeModelNotFound();
     error TheBadge__updateCreator_notFound();
 
     error TheBadge__SBT();
     error TheBadge__requestBadge_badgeModelNotFound();
+    error TheBadge__requestBadge_badgeModelIsSuspended();
     error TheBadge__requestBadge_wrongValue();
     error TheBadge__requestBadge_isPaused();
     error TheBadge__requestBadge_controllerIsPaused();
@@ -152,20 +153,55 @@ contract TheBadgeStore is TheBadgeRoles {
      * Modifiers
      * =========================
      */
-
-    modifier onlyBadgeModelCreator() {
-        Creator storage creator = creators[msg.sender];
+    modifier onlyRegisteredBadgeModelCreator() {
+        Creator storage creator = creators[_msgSender()];
         if (bytes(creator.metadata).length == 0) {
             revert TheBadge__onlyCreator_senderIsNotACreator();
         }
         _;
     }
 
-    modifier onlyController(address sender, uint256 badgeId) {
-        BadgeModel storage _badgeModel = badgeModel[badgeId];
-        if (sender != badgeModelController[_badgeModel.controllerName].controller) {
-            revert TheBadge__onlyController_senderIsNotTheController();
+    modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId) {
+        Creator storage creator = creators[_msgSender()];
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
+
+        if (bytes(creator.metadata).length == 0) {
+            revert TheBadge__onlyCreator_senderIsNotACreator();
         }
+        if (creator.suspended == true) {
+            revert TheBadge__onlyCreator_creatorIsSuspended();
+        }
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__updateBadgeModel_badgeModelNotFound();
+        }
+        if (_badgeModel.creator != _msgSender()) {
+            revert TheBadge__updateBadgeModel_notBadgeModelOwner();
+        }
+        _;
+    }
+
+    modifier onlyBadgeModelMintable(uint256 badgeModelId) {
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
+        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
+        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
+        Creator storage creator = creators[_badgeModel.creator];
+
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__requestBadge_badgeModelNotFound();
+        }
+
+        if (creator.suspended == true) {
+            revert TheBadge__requestBadge_badgeModelIsSuspended();
+        }
+
+        if (_badgeModel.paused) {
+            revert TheBadge__requestBadge_isPaused();
+        }
+
+        if (_badgeModelController.paused) {
+            revert TheBadge__requestBadge_controllerIsPaused();
+        }
+
         _;
     }
 
