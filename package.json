@@ -1,12 +1,12 @@
 {
   "name": "hardhat-project",
-  "license": "LGPL-3.0",
+  "license": "BUSL-1.1",
   "scripts": {
     "forge": "forge",
     "build": "forge build",
     "clean": "forge clean",
     "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/gnosis --fork-block-number 19592773",
-    "test:all": "yarn forge test -vv --fork-url https://eth-goerli.alchemyapi.io/v2/QUuY7K6TSAGYCMXLBQiKwO43O9lLyrEE --fork-block-number 5744491",
+    "test:all": "yarn forge test -vv --fork-block-number 5744491 --fork-url $(grep ALCHEMY_ENDPOINT_URL .env | cut -d '=' -f2) ",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json \"src/**/*.sol\"",
     "lint:ts": "eslint --config ./.eslintrc.js --ignore-path ./.eslintignore --ext .js,.ts .",

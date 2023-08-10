@@ -6,9 +6,11 @@ import "forge-std/Test.sol";
 import "../../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol";
 import "../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 
-import { TheBadge } from "../../src/TheBadge.sol";
-import { TheBadgeLogic } from "../../src/TheBadgeLogic.sol";
-import { KlerosController } from "../../src/badgeModelControllers/kleros.sol";
+import { TheBadge } from "../../src/contracts/thebadge/TheBadge.sol";
+import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
+import { KlerosBadgeModelController } from "../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
+import { KlerosBadgeModelControllerStore } from "../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
+
 
 contract Config is Test {
     address public admin = vm.addr(1);
@@ -23,7 +25,8 @@ contract Config is Test {
     uint256 oneYear = 60 * 60 * 24 * 365;
 
     TheBadge public theBadge;
-    KlerosController public klerosController;
+    KlerosBadgeModelController public klerosBadgeModelController;
+    KlerosBadgeModelControllerStore public klerosBadgeModelControllerStore;
 
     // GBC:
     address lightGTCRFactory = 0x08e58Bc26CFB0d346bABD253A1799866F269805a;
@@ -46,15 +49,15 @@ contract Config is Test {
         theBadge = TheBadge(payable(proxy));
         theBadge.initialize(admin, feeCollector, minter);
 
-        klerosController = new KlerosController();
-        klerosController.initialize(address(theBadge), klerosArbitror, lightGTCRFactory);
+        klerosBadgeModelController = new KlerosBadgeModelController();
+        klerosBadgeModelController.initialize(address(theBadge), klerosArbitror, lightGTCRFactory);
 
         vm.prank(admin);
-        theBadge.setBadgeModelController("kleros", address(klerosController));
+        theBadge.setBadgeModelController("kleros", address(klerosBadgeModelController));
     }
 
     function getBaseBadgeModel() public view returns (TheBadge.CreateBadgeModel memory) {
-        TheBadge.CreateBadgeModel memory badgeModel = TheBadgeLogic.CreateBadgeModel(
+        TheBadge.CreateBadgeModel memory badgeModel = TheBadgeStore.CreateBadgeModel(
             "ipfs/metadataForBadge.json",
             "kleros",
             0,
@@ -63,7 +66,7 @@ contract Config is Test {
         return badgeModel;
     }
 
-    function getKlerosBaseBadgeModel() public pure returns (KlerosController.CreateBadgeModel memory) {
+    function getKlerosBaseBadgeModel() public pure returns (KlerosBadgeModelController.CreateBadgeModel memory) {
         uint256[4] memory baseDeposits;
         baseDeposits[0] = 0.1 ether;
         baseDeposits[1] = 0.1 ether;
@@ -75,7 +78,7 @@ contract Config is Test {
         stakeMultipliers[1] = 1;
         stakeMultipliers[2] = 1;
 
-        KlerosController.CreateBadgeModel memory strategy = KlerosController.CreateBadgeModel(
+        KlerosBadgeModelController.CreateBadgeModel memory strategy = KlerosBadgeModelControllerStore.CreateBadgeModel(
             address(0), // governor
             address(0), // admin
             1, // court

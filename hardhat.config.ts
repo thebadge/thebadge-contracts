@@ -10,10 +10,10 @@ dotenv.config();
 tdly.setup();
 
 let accounts: any[] = [];
-if (process.env.PRIVATE_KEY !== undefined) {
-  accounts = [process.env.PRIVATE_KEY];
+if (process.env.WALLET_PRIVATE_KEY !== undefined) {
+  accounts = [process.env.WALLET_PRIVATE_KEY];
 } else {
-  throw new Error(`PRIVATE_KEY not set`);
+  throw new Error(`WALLET_PRIVATE_KEY not set`);
 }
 
 const config: HardhatUserConfig = {
@@ -35,22 +35,26 @@ const config: HardhatUserConfig = {
     sources: "./src",
   },
   networks: {
-    // goerli: {
-    //   url: process.env.GOERLI_URL || "",
-    //   accounts: accounts,
-    //   timeout: 100000,
-    //   //  gasPrice: 400000000000,
-    // },
-    gnosis: {
-      url: process.env.GNOSIS_URL || "",
+    goerli: {
+      url: process.env.GOERLI_URL || "",
       accounts: accounts,
+      timeout: 100000,
+      chainId: 5,
+      //  gasPrice: 400000000000,
+    },
+    // gnosis: {
+    //   url: process.env.GNOSIS_URL || "",
+    //   accounts: accounts,
+    // },
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: {
+      goerli: process.env.ETHERSCAN_API_KEY || "",
+      gnosis: process.env.ETHERSCAN_API_KEY || "",
     },
   },
-  // etherscan: {
-  //   // Your API key for Etherscan
-  //   // Obtain one at https://etherscan.io/
-  //   apiKey: process.env.YOUR_ETHERSCAN_API_KEY,
-  // },
 };
 
 export default config;

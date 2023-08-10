@@ -1,10 +1,20 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.17;
 
 interface ITheBadge {
-    struct Badge {
-        uint256 dueDate;
-    }
+    function mint(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data) external payable;
 
-    function badge(uint256 _badgeId, address _account) external view returns (Badge memory);
+    function balanceOf(address account, uint256 badgeId) external view returns (uint256);
+
+    function updateProtocolValues(
+        uint256 _mintBadgeDefaultFee,
+        uint256 _createBadgeModelValue,
+        uint256 _registerCreatorValue
+    ) external;
+
+    function pause() external;
+
+    function unpause() external;
+
+    function uri(uint256 badgeId) external view returns (string memory);
 }
