@@ -12,31 +12,33 @@ contract TheBadgeTestCore is Config {
         vm.prank(vegeta);
         theBadge.registerBadgeModelCreator("ipfs://creatorMetadata.json");
 
-        // Crete badge type
+        // Create badge model
         vm.prank(vegeta);
         TheBadge.CreateBadgeModel memory badgeModel = getBaseBadgeModel();
         KlerosBadgeModelController.CreateBadgeModel memory klerosBadgeModel = getKlerosBaseBadgeModel();
         theBadge.createBadgeModel(badgeModel, abi.encode(klerosBadgeModel));
 
         (
-            address emitter,
+            address creator,
             string memory controllerName,
             bool paused,
             uint256 mintCreatorFee,
             uint256 validFor,
             uint256 mintProtocolFee,
-
-        ) = theBadge.badgeModel(0);
+            bool initialized
+        ) = theBadge.badgeModels(0);
 
         address tcrList = klerosBadgeModelController.klerosBadgeModel(0);
 
-        assertEq(vegeta, emitter);
+        assertEq(vegeta, creator);
         assertEq(controllerName, badgeModel.controllerName);
         assertEq(paused, false);
         assertEq(mintCreatorFee, badgeModel.mintCreatorFee);
         assertEq(validFor, badgeModel.validFor);
         assertEq(mintProtocolFee, theBadge.mintBadgeProtocolDefaultFeeInBps());
         assertFalse(tcrList == address(0));
+        assertTrue(initialized);
+        // TODO assert creation event
     }
 
     function test_mintKlerosBadge_shouldWork() public {
