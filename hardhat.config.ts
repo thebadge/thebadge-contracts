@@ -38,9 +38,9 @@ const config: HardhatUserConfig = {
     goerli: {
       url: process.env.GOERLI_URL || "",
       accounts: accounts,
-      timeout: 100000,
+      timeout: 100000000,
       chainId: 5,
-      //  gasPrice: 400000000000,
+      gasPrice: 5000000000,
     },
     // gnosis: {
     //   url: process.env.GNOSIS_URL || "",

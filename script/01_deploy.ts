@@ -23,11 +23,9 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const klerosArbitror = "0x1128ed55ab2d796fa92d2f8e1f336d745354a77a";
 
   console.log("Deploying TheBadge...");
-  const theBadge = await upgrades.deployProxy(TheBadge, [deployer.address, deployer.address, deployer.address], {
-    useDeployedImplementation: true,
-  });
+  const theBadge = await upgrades.deployProxy(TheBadge, [deployer.address, deployer.address, deployer.address]);
   await theBadge.deployed();
-  console.log(`TheBadge deployed with address: ${theBadge.address}...`);
+  console.log(`TheBadge deployed with address: ${theBadge.address}`);
 
   console.log("Deploying KlerosBadgeModelController...");
   // The admin that is allowed to upgrade the contracts
@@ -39,11 +37,11 @@ async function main(hre: HardhatRuntimeEnvironment) {
     lightGTCRFactory,
   ]);
   await klerosBadgeModelController.deployed();
-  console.log(`KlerosBadgeModelController deployed with address: ${klerosBadgeModelController.address}...`);
+  console.log(`KlerosBadgeModelController deployed with address: ${klerosBadgeModelController.address}`);
 
   console.log("Adding KlerosBadgeModelController to TheBadge...");
   theBadge.connect(deployer);
-  await theBadge.setBadgeModelController("kleros", klerosBadgeModelController.address);
+  await theBadge.addBadgeModelController("kleros", klerosBadgeModelController.address);
 
   console.log("///////// Deployment finished /////////");
   console.log("TheBadge:", theBadge.address);

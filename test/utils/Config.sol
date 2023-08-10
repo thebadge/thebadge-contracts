@@ -28,12 +28,12 @@ contract Config is Test {
     KlerosBadgeModelControllerStore public klerosBadgeModelControllerStore;
 
     // GBC:
-    address lightGTCRFactory = 0x08e58Bc26CFB0d346bABD253A1799866F269805a;
-    address klerosArbitror = 0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002;
+    //    address lightGTCRFactory = 0x08e58Bc26CFB0d346bABD253A1799866F269805a;
+    //    address klerosArbitror = 0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002;
 
     // Goerli
-    //address lightGTCRFactory = 0x55A3d9Bd99F286F1817CAFAAB124ddDDFCb0F314;
-    //address klerosArbitror = 0x1128eD55ab2d796fa92D2F8E1f336d745354a77A;
+    address lightGTCRFactory = 0x55A3d9Bd99F286F1817CAFAAB124ddDDFCb0F314;
+    address klerosArbitror = 0x1128eD55ab2d796fa92D2F8E1f336d745354a77A;
 
     constructor() {
         vm.deal(admin, 100 ether);
@@ -43,16 +43,19 @@ contract Config is Test {
         vm.deal(feeCollector, 100 ether);
         vm.deal(creator, 100 ether);
 
-        address imp = address(new TheBadge());
-        address proxy = ClonesUpgradeable.clone(imp);
-        theBadge = TheBadge(payable(proxy));
+        address theBadgeImp = address(new TheBadge());
+        address theBadgeProxy = ClonesUpgradeable.clone(theBadgeImp);
+        theBadge = TheBadge(payable(theBadgeProxy));
         theBadge.initialize(admin, feeCollector, minter);
 
-        klerosBadgeModelController = new KlerosBadgeModelController();
+        address klerosBadgeModelControllerImp = address(new KlerosBadgeModelController());
+        address klerosBadgeModelControllerProxy = ClonesUpgradeable.clone(klerosBadgeModelControllerImp);
+
+        klerosBadgeModelController = KlerosBadgeModelController(payable(klerosBadgeModelControllerProxy));
         klerosBadgeModelController.initialize(admin, address(theBadge), klerosArbitror, lightGTCRFactory);
 
         vm.prank(admin);
-        theBadge.setBadgeModelController("kleros", address(klerosBadgeModelController));
+        theBadge.addBadgeModelController("kleros", address(klerosBadgeModelController));
     }
 
     function getBaseBadgeModel() public view returns (TheBadge.CreateBadgeModel memory) {
@@ -60,8 +63,7 @@ contract Config is Test {
             "ipfs/metadataForBadge.json",
             "kleros",
             0,
-            oneYear,
-            true
+            oneYear
         );
         return badgeModel;
     }
@@ -78,19 +80,19 @@ contract Config is Test {
         stakeMultipliers[1] = 1;
         stakeMultipliers[2] = 1;
 
-        KlerosBadgeModelController.CreateBadgeModel memory strategy = KlerosBadgeModelControllerStore.CreateBadgeModel(
-            address(0), // governor
-            address(0), // admin
-            1, // court
-            1, // jurors
-            "ipfs/registrationMetaEvidence.json",
-            "ipfs/clearingMetaEvidence.json",
-            100, // challengePeriodDuration
-            baseDeposits,
-            stakeMultipliers,
-    true
-        );
-        return strategy;
+        KlerosBadgeModelController.CreateBadgeModel memory badgeModel = KlerosBadgeModelControllerStore
+            .CreateBadgeModel(
+                address(0), // governor
+                address(0), // admin
+                1, // court
+                1, // jurors
+                "ipfs/registrationMetaEvidence.json",
+                "ipfs/clearingMetaEvidence.json",
+                100, // challengePeriodDuration
+                baseDeposits,
+                stakeMultipliers
+            );
+        return badgeModel;
     }
 
     function _bytesToAddress(bytes memory bys) public pure returns (address addr) {
