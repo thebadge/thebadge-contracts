@@ -143,6 +143,50 @@ contract TheBadge is
         controller.claim(badgeId, data);
     }
 
+    /**
+     * @notice Given a badgeId, returns the cost to challenge the item
+     * @param badgeId the id of the badge
+     */
+    function getChallengeDepositValue(uint256 badgeId) public view override(ITheBadge) returns (uint256) {
+        Badge storage _badge = badges[badgeId];
+
+        if (_badge.initialized == false) {
+            revert TheBadge__requestBadge_badgeNotFound();
+        }
+        BadgeModel storage _badgeModel = badgeModels[_badge.badgeModelId];
+
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
+        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
+
+        return controller.getChallengeDepositValue(badgeId);
+    }
+
+    /**
+     * @notice Given a badgeId, returns the cost to challenge to remove the item
+     * @param badgeId the id of the badge
+     */
+    function getRemovalDepositValue(uint256 badgeId) public view override(ITheBadge) returns (uint256) {
+        Badge storage _badge = badges[badgeId];
+
+        if (_badge.initialized == false) {
+            revert TheBadge__requestBadge_badgeNotFound();
+        }
+        BadgeModel storage _badgeModel = badgeModels[_badge.badgeModelId];
+
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
+        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
+
+        return controller.getRemovalDepositValue(badgeId);
+    }
+
     /*
      * ERC-20
      * @notice Given an user account and a badgeId, returns 1 if the user has the badge or 0 if not

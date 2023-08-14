@@ -8,15 +8,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../../interfaces/IBadgeModelController.sol";
 import "./KleroBadgeModelControllerStore.sol";
-import "../../interfaces/IKlerosBadgeModelController.sol";
 import "../thebadge/TheBadgeRoles.sol";
 
 contract KlerosBadgeModelController is
     Initializable,
-    IKlerosBadgeModelController,
     KlerosBadgeModelControllerStore,
     UUPSUpgradeable,
-    TheBadgeRoles
+    TheBadgeRoles,
+    IBadgeModelController
 {
     using CappedMath for uint256;
 

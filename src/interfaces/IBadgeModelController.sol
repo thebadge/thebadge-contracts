@@ -20,4 +20,8 @@ interface IBadgeModelController {
     function isClaimable(uint256 badgeId) external view returns (bool);
 
     function isAssetActive(uint256 badgeId) external view returns (bool);
+
+    function getChallengeDepositValue(uint256 badgeId) external view returns (uint256);
+
+    function getRemovalDepositValue(uint256 badgeId) external view returns (uint256);
 }
