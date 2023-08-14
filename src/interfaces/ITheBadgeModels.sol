@@ -21,6 +21,4 @@ interface ITheBadgeModels {
     function suspendBadgeModel() external view; // Method not implemented
 
     function updateBadgeModelProtocolFee(uint256 badgeModelId, uint256 feeInBps) external;
-
-    function mintValue(uint256 badgeModelId) external view returns (uint256);
 }

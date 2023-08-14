@@ -23,6 +23,8 @@ interface ITheBadge is IERC1155Upgradeable {
 
     function unpause() external;
 
+    function mintValue(uint256 badgeModelId) external view returns (uint256);
+
     function uri(uint256 badgeId) external view returns (string memory);
 
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
