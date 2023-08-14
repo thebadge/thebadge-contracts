@@ -146,6 +146,8 @@ contract TheBadgeStore is TheBadgeRoles {
     error TheBadge__requestBadge_wrongValue();
     error TheBadge__requestBadge_isPaused();
     error TheBadge__requestBadge_controllerIsPaused();
+    error TheBadge__requestBadge_badgeNotFound();
+    error TheBadge__requestBadge_badgeNotClaimable();
 
     error TheBadge__method_not_supported();
 
@@ -206,5 +208,14 @@ contract TheBadgeStore is TheBadgeRoles {
         _;
     }
 
+    modifier onlyExistingBadge(uint256 badgeId) {
+        Creator storage creator = creators[_msgSender()];
+        if (bytes(creator.metadata).length == 0) {
+            revert TheBadge__onlyCreator_senderIsNotACreator();
+        }
+        _;
+    }
+
+    // tslint:disable-next-line:no-empty
     receive() external payable {}
 }

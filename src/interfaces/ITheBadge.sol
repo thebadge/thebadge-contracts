@@ -5,6 +5,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.so
 interface ITheBadge is IERC1155Upgradeable {
     function mint(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data) external payable;
 
+    function claim(uint256 badgeId, bytes calldata data) external;
+
     function balanceOf(address account, uint256 badgeId) external view returns (uint256);
 
     function balanceOfBadgeModel(address account, uint256 badgeModelId) external view returns (uint256);

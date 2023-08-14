@@ -116,6 +116,33 @@ contract TheBadge is
         emit BadgeRequested(_badgeModelId, badgeId, _account, _badgeModelController.controller, controllerBadgeId);
     }
 
+    /**
+     * @notice Given a badge and data related to the claimer, claims the given badge to the claimr
+     * @param badgeId the id of the badge
+     * @param data containing information related to the claimer
+     */
+    function claim(uint256 badgeId, bytes calldata data) public {
+        Badge storage _badge = badges[badgeId];
+
+        if (_badge.initialized == false) {
+            revert TheBadge__requestBadge_badgeNotFound();
+        }
+        BadgeModel storage _badgeModel = badgeModels[_badge.badgeModelId];
+
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
+        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
+
+        if (controller.isClaimable(badgeId) == false) {
+            revert TheBadge__requestBadge_badgeNotClaimable();
+        }
+
+        controller.claim(badgeId, data);
+    }
+
     /*
      * ERC-20
      * @notice Given an user account and a badgeId, returns 1 if the user has the badge or 0 if not

@@ -88,7 +88,7 @@ contract TheBadgeTestCore is Config {
 
         // claim badge
         uint256 prevBalance = goku.balance;
-        klerosBadgeModelController.claim(badgeId);
+        klerosBadgeModelController.claim(badgeId, "0x");
         assertEq(goku.balance, prevBalance + deposit);
         assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 1);
     }
