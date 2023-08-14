@@ -38,8 +38,8 @@ Event URI: We will use the badge ID instead of the BadgeModeld.
 
 To distinguish between different badges of the same BadgeModel, TheBadge will issue each Badge with a unique Badge ID. We will use IPFS to store the Badge metadata off-chain, but it is not possible to link a Badge ID with a specific user handle on IPFS at a smart-contract level. To solve this problem, we will add a new public mapping that links each BadgeModel ID with a Badge External ID and an address. This mapping will track if a particular address has control over a specific user handle, as shown below:
 
-“map(Twitter => @nico => 0x345)”;
-“map(Twitter => @tina => 0x345)”
+“map(Twitter => @goku => 0x345)”;
+“map(Twitter => @vegeta => 0x345)”
 
 ### Here is a diagram of our architecture:
 
