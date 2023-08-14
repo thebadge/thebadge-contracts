@@ -39,6 +39,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
         }
 
         badgeModelControllers[controllerName] = BadgeModelController(controllerAddress, false, true);
+        emit BadgeModelControllerAdded(controllerName, controllerAddress);
     }
 
     /**

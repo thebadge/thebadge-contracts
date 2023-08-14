@@ -115,6 +115,7 @@ contract TheBadgeStore is TheBadgeRoles {
         address controller,
         uint256 controllerBadgeId
     );
+    event BadgeModelControllerAdded(string indexed controllerName, address indexed controllerAddress);
 
     /**
      * =========================
