@@ -7,17 +7,23 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const TheBadge = await ethers.getContractFactory("TheBadge");
   const KlerosController = await ethers.getContractFactory("KlerosBadgeModelController");
 
-  // console.log("Deploying TheBadge...");
-  // const theBadge = await upgrades.upgradeProxy("0x059a97A4ad4D148B39209Fa9Be262E6E00E97804", TheBadge);
-  const theBadge = await upgrades.upgradeProxy("0x5E7c648EE852241f145e1d480932C091979883D1", TheBadge);
+  const theBadgeDeployedAddress = "0xEe4683dC9D8A61938877Ac1aC3321138C9F4153A";
+  const klerosBadgeModelControllerDeployedAddress = "0x17e06B644B901630ee12dd9fdC8e4f8FDc913635";
+  console.log(`Upgrading TheBadge with address: ${theBadgeDeployedAddress}...`);
+  const theBadge = await upgrades.upgradeProxy(theBadgeDeployedAddress, TheBadge);
   await theBadge.deployed();
 
-  console.log("Upgrading KlerosBadgeModelController...");
-  const klerosController = await upgrades.upgradeProxy("0x17174F4B1DCd25183Bf53E675ee5AF37e2baa37a", KlerosController);
-  await klerosController.deployed();
+  console.log(`Upgrading KlerosBadgeModelController with address: ${klerosBadgeModelControllerDeployedAddress}...`);
+  const klerosBadgeModelController = await upgrades.upgradeProxy(
+    klerosBadgeModelControllerDeployedAddress,
+    KlerosController,
+  );
+  await klerosBadgeModelController.deployed();
 
-  // console.log("TheBadge:", theBadge.address);
-  console.log("klerosBadgeModelController:", klerosController.address);
+  console.log("///////// UPGRADE finished /////////");
+  console.log("TheBadge:", theBadge.address);
+  console.log("klerosBadgeModelController:", klerosBadgeModelController.address);
+  console.log("///////// UPGRADE finished /////////");
 
   console.log("Verifying TheBadge contract on Etherscan...");
   await run(`verify:verify`, {
@@ -27,7 +33,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   console.log("Verifying KlerosBadgeModelController contract on Etherscan...");
   await run(`verify:verify`, {
-    address: klerosController.address,
+    address: klerosBadgeModelController.address,
     constructorArguments: [],
   });
 }

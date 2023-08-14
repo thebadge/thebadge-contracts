@@ -4,15 +4,31 @@ pragma solidity 0.8.17;
 import { ILightGeneralizedTCR } from "../../interfaces/ILightGeneralizedTCR.sol";
 import { ILightGTCRFactory } from "../../interfaces/ILightGTCRFactory.sol";
 
-import "../../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../../interfaces/IBadgeModelController.sol";
 import "./KleroBadgeModelControllerStore.sol";
 import "../../interfaces/IKlerosBadgeModelController.sol";
+import "../thebadge/TheBadgeRoles.sol";
 
-contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelController, KlerosBadgeModelControllerStore {
+contract KlerosBadgeModelController is
+    Initializable,
+    IKlerosBadgeModelController,
+    KlerosBadgeModelControllerStore,
+    UUPSUpgradeable,
+    TheBadgeRoles
+{
     using CappedMath for uint256;
 
-    function initialize(address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
+    constructor() initializer {}
+
+    function initialize(address admin, address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(PAUSER_ROLE, msg.sender);
+        _grantRole(UPGRADER_ROLE, msg.sender);
+
         theBadge = TheBadge(payable(_theBadge));
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
@@ -24,8 +40,6 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
      * @param data Encoded data required to create a Kleros TCR list
      */
     function createBadgeModel(uint256 badgeModelId, bytes calldata data) public onlyTheBadge {
-        // TODO: set TCR admin to an address that we control, so we can call "removeItem"
-
         KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
         if (_klerosBadgeModel.tcrList != address(0)) {
             revert KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
@@ -45,7 +59,7 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
             args.baseDeposits, // The base deposits for requests/challenges (4 values: submit, remove, challenge and removal request)
             args.challengePeriodDuration, // The time in seconds parties have to challenge a request.
             args.stakeMultipliers, // Multipliers of the arbitration cost in basis points (see LightGeneralizedTCR MULTIPLIER_DIVISOR)
-            args.admin // The address of the relay contract to add/remove items directly.
+            args.admin // The address of the relay contract to add/remove items directly. // TODO: set TCR admin to an address that we control, so we can call "removeItem", only for Third-party badges
         );
 
         // Get the address for the kleros badge model created
@@ -68,7 +82,12 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
      * @param data the klerosBadgeId
      */
     // TODO: should this use public onlyTheBadge? (but it won't allow to have a relayer)
-    function mint(address callee, uint256 badgeModelId, uint256 badgeId, bytes calldata data) public payable {
+    function mint(
+        address callee,
+        uint256 badgeModelId,
+        uint256 badgeId,
+        bytes calldata data
+    ) public payable returns (uint256) {
         // check value
         uint256 mintCost = mintValue(badgeModelId);
         if (msg.value != mintCost) {
@@ -90,31 +109,37 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
         // Its needed on the subgraph to check the disputes status for that item
         bytes32 klerosItemID = keccak256(abi.encodePacked(args.evidence));
         // save deposit amount for callee as it has to be returned if it was not challenged.
-        klerosBadge[badgeId] = KlerosBadge(klerosItemID, callee, msg.value);
+        klerosBadge[badgeId] = KlerosBadge(klerosItemID, callee, msg.value, true);
 
-        emit mintKlerosBadge(badgeId, args.evidence);
+        emit MintKlerosBadge(badgeId, args.evidence);
+        return uint256(klerosItemID);
     }
 
     /**
      * @notice After the review period ends, the items on the tcr list should be claimed using this function
-     * It Transfers deposit to badge's callee and sets badge's callee deposit to 0
+     * returns the badge's mint callee deposit and set the internal value to 0 again
+     * the internal value is not the deposit, is just a counter to know how much money belongs to the deposit
      * @param badgeId the klerosBadgeId
      */
-    function claim(uint256 badgeId) public payable {
-        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+    function claim(uint256 badgeId) public {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadge[badgeId];
 
-        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
+        // This changes the state of the item from Requested to Accepted and returns the deposit to our contract
         lightGeneralizedTCR.executeRequest(_klerosBadge.itemID);
 
+        // If this contract (KlerosBadgeModelController) didn't received the deposit, we throw an error
         if (_klerosBadge.deposit > address(this).balance) {
             revert KlerosBadgeModelController__claimBadge_insufficientBalance();
         }
 
         uint256 balanceToDeposit = _klerosBadge.deposit;
         _klerosBadge.deposit = 0;
-        payable(_klerosBadge.callee).transfer(balanceToDeposit);
+        // Then we return the deposit from within our contract to the callee address
+        // TODO: review if this is safe enough
+        (bool badgeDepositSent, ) = payable(_klerosBadge.callee).call{ value: balanceToDeposit }("");
+        require(badgeDepositSent, "Failed to return the deposit");
+        emit DepositReturned(_klerosBadge.callee, balanceToDeposit, badgeId);
     }
 
     /**
@@ -146,31 +171,92 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
      * @param badgeId the klerosBadgeId
      */
     function isAssetActive(uint256 badgeId) public view returns (bool) {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
 
-        if (_klerosBadgeModel.tcrList != address(0)) {
-            ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
-            (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
-            if (klerosItemStatus == 1 || klerosItemStatus == 3) {
-                return true;
-            }
+        (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
+        if (klerosItemStatus == 1 || klerosItemStatus == 3) {
+            return true;
         }
-        // TODO: should this check the badge dueDate?,
+
         return false;
     }
 
     /**
-     * @notice get the arbitration cost for a submission or a remove. If the badge is in other state it will return wrong information
+     * @notice Get the cost of generating a challengeRequest in kleros TCR to the given badgeId
      * @param badgeId the klerosBadgeId
      */
-    function getChallengeValue(uint256 badgeId) public view returns (uint256) {
+    function getChallengeDepositValue(uint256 badgeId) public view returns (uint256) {
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
-        (uint256 badgeModelId, , ) = theBadge.badge(badgeId);
-        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
-        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
 
+        if (_klerosBadge.initialized == false) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        if (_klerosBadge.itemID == 0) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
+        (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
+        uint256 arbitrationCost = getBadgeIdArbitrationCosts(badgeId);
+
+        // Status 1: The item is awaiting to be registered and the request if to challenge the registration
+        if (klerosItemStatus == 1) {
+            return arbitrationCost.addCap(lightGeneralizedTCR.submissionChallengeBaseDeposit());
+        }
+
+        // Status 2: The item is registered and the request is to remove the item
+        if (klerosItemStatus == 2) {
+            return arbitrationCost.addCap(lightGeneralizedTCR.removalBaseDeposit());
+        }
+
+        // Status 2: The item is challenged, no costs involved.
+        if (klerosItemStatus == 3) {
+            return 0;
+        }
+
+        // Status 4: The item is inside the list but a request to remove it started, this is for challenge against that request
+        if (klerosItemStatus == 4) {
+            return arbitrationCost.addCap(lightGeneralizedTCR.removalChallengeBaseDeposit());
+        }
+
+        revert KlerosBadgeModelController__badge__notInChallengeableStatus();
+    }
+
+    /**
+     * @notice Get the cost of generating a removalRequest in kleros TCR to the given badgeId
+     * @param badgeId the klerosBadgeId
+     */
+    function getRemovalDepositValue(uint256 badgeId) public view returns (uint256) {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
+
+        uint256 arbitrationCost = getBadgeIdArbitrationCosts(badgeId);
+
+        uint256 removalBaseDeposit = lightGeneralizedTCR.removalBaseDeposit();
+
+        return arbitrationCost.addCap(removalBaseDeposit);
+    }
+
+    /**
+     * @notice Internal function that returns the TCR contract instance for a given klerosBadgeModel
+     * @param badgeId the klerosBadgeId
+     */
+    function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
+        (uint256 badgeModelId, , , ) = theBadge.badges(badgeId);
+        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
+        require(_klerosBadgeModel.tcrList != address(0), "Valid klerosBadgeModelId required for TCR!");
+        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
+        return lightGeneralizedTCR;
+    }
+
+    /**
+     * @notice Internal function that the current arbitration cost of a request for the given badgeId
+     * @param badgeId the klerosBadgeId
+     */
+    function getBadgeIdArbitrationCosts(uint256 badgeId) internal view returns (uint256) {
+        KlerosBadge memory _klerosBadge = klerosBadge[badgeId];
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
         uint256 lastRequestIndex = requestCount - 1;
 
@@ -179,17 +265,16 @@ contract KlerosBadgeModelController is Initializable, IKlerosBadgeModelControlle
             lastRequestIndex
         );
 
-        uint256 arbitrationCost = arbitrator.arbitrationCost(requestArbitratorExtraData);
-
-        uint256 challengerBaseDeposit = lightGeneralizedTCR.submissionChallengeBaseDeposit();
-
-        // TODO: fix this. as TCR using itemID
-        // theBadge.badge(badgeId, account).status == BadgeStatus.InReview
-        //     ? lightGeneralizedTCR.submissionChallengeBaseDeposit()
-        //     : lightGeneralizedTCR.removalChallengeBaseDeposit();
-
-        return arbitrationCost.addCap(challengerBaseDeposit);
+        return arbitrator.arbitrationCost(requestArbitratorExtraData);
     }
+
+    /**
+     * =========================
+     * Overrides
+     * =========================
+     */
+    /// Required by the OZ UUPS module
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**
      * @notice we need a receive function to receive deposits devolution from kleros

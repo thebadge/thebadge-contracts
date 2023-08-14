@@ -63,6 +63,7 @@ contract KlerosBadgeModelControllerStore {
         bytes32 itemID;
         address callee;
         uint256 deposit;
+        bool initialized;
     }
 
     /**
@@ -80,8 +81,9 @@ contract KlerosBadgeModelControllerStore {
      * =========================
      */
     event NewKlerosBadgeModel(uint256 indexed badgeModelId, address indexed tcrAddress, string metadataUri);
-    event mintKlerosBadge(uint256 indexed badgeId, string evidence);
+    event MintKlerosBadge(uint256 indexed badgeId, string evidence);
     event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
+    event DepositReturned(address indexed recipient, uint256 amount, uint256 indexed badgeId);
 
     /**
      * =========================
@@ -97,6 +99,9 @@ contract KlerosBadgeModelControllerStore {
     error KlerosBadgeModelController__claimBadge_insufficientBalance();
     error KlerosBadgeModelController__createBadgeModel_TCRListAddressZero();
 
+    error KlerosBadgeModelController__badge__notInChallengeableStatus();
+    error KlerosBadgeModelController__badge__klerosBadgeNotFound();
+
     /**
      * =========================
      * Modifiers
@@ -109,6 +114,4 @@ contract KlerosBadgeModelControllerStore {
         }
         _;
     }
-
-
 }

@@ -4,9 +4,14 @@ pragma solidity 0.8.17;
 interface IBadgeModelController {
     function createBadgeModel(uint256 badgeModelId, bytes calldata data) external;
 
-    function mint(address callee, uint256 badgeModelId, uint256 badgeId, bytes calldata data) external payable;
+    function mint(
+        address callee,
+        uint256 badgeModelId,
+        uint256 badgeId,
+        bytes calldata data
+    ) external payable returns (uint256);
 
-    function claim(uint256 badgeId) external payable;
+    function claim(uint256 badgeId) external;
 
     function mintValue(uint256 badgeModelId) external view returns (uint256);
 
