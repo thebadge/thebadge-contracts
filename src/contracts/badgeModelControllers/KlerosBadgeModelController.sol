@@ -81,13 +81,12 @@ contract KlerosBadgeModelController is
      * @param badgeId the klerosBadgeId
      * @param data the klerosBadgeId
      */
-    // TODO: should this use public onlyTheBadge? (but it won't allow to have a relayer)
     function mint(
         address callee,
         uint256 badgeModelId,
         uint256 badgeId,
         bytes calldata data
-    ) public payable returns (uint256) {
+    ) public payable onlyTheBadge returns (uint256) {
         // check value
         uint256 mintCost = mintValue(badgeModelId);
         if (msg.value != mintCost) {
@@ -121,7 +120,7 @@ contract KlerosBadgeModelController is
      * the internal value is not the deposit, is just a counter to know how much money belongs to the deposit
      * @param badgeId the klerosBadgeId
      */
-    function claim(uint256 badgeId) public {
+    function claim(uint256 badgeId, bytes calldata /*data*/) public onlyTheBadge {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         KlerosBadge memory _klerosBadge = klerosBadge[badgeId];
 
@@ -160,9 +159,43 @@ contract KlerosBadgeModelController is
     /**
      * @notice Badge can be minted if it was never requested for the address or if it has a due date before now
      */
-    function canMint(uint256, address) public pure returns (bool) {
+    function isMintable(uint256, address) public pure returns (bool) {
         // TODO: implementation missing?
         return true;
+    }
+
+    /**
+     * @notice Returns true if the badge is ready to be claimed (its status is RegistrationRequested and the challenge period ended), otherwise returns false
+     * @param badgeId the klerosBadgeId
+     */
+    function isClaimable(uint256 badgeId) public view returns (bool) {
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
+        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
+
+        if (_klerosBadge.initialized == false) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        if (_klerosBadge.itemID == 0) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
+        (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
+        uint256 lastRequestIndex = requestCount - 1;
+        (, , uint256 submissionTime, , , , , , , ) = lightGeneralizedTCR.getRequestInfo(
+            _klerosBadge.itemID,
+            lastRequestIndex
+        );
+        uint256 challengePeriodDuration = lightGeneralizedTCR.challengePeriodDuration();
+
+        // The status is RegistrationRequested
+        bool challengePeriodEnded = block.timestamp - submissionTime > challengePeriodDuration ? true : false;
+        if (klerosItemStatus == 2 && challengePeriodEnded == true) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -175,6 +208,7 @@ contract KlerosBadgeModelController is
         KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
 
         (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
+        // The status is REGISTERED or ClearingRequested
         if (klerosItemStatus == 1 || klerosItemStatus == 3) {
             return true;
         }
