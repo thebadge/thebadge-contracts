@@ -47,6 +47,10 @@ contract KlerosBadgeModelControllerStore {
         string evidence;
     }
 
+    struct AddEvidenceParams {
+        string evidence;
+    }
+
     /**
      * @param tcrList The TCR List created for a particular badge type
      */

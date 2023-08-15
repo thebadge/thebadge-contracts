@@ -161,9 +161,9 @@ contract KlerosBadgeModelController is
             revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
         }
 
-        string memory evidenceHash = abi.decode(data, (string));
+        AddEvidenceParams memory evidenceHash = abi.decode(data, (AddEvidenceParams));
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
-        lightGeneralizedTCR.challengeRequest{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash);
+        lightGeneralizedTCR.challengeRequest{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash.evidence);
     }
 
     /**
@@ -182,9 +182,9 @@ contract KlerosBadgeModelController is
             revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
         }
 
-        string memory evidenceHash = abi.decode(data, (string));
+        AddEvidenceParams memory evidenceHash = abi.decode(data, (AddEvidenceParams));
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
-        lightGeneralizedTCR.removeItem{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash);
+        lightGeneralizedTCR.removeItem{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash.evidence);
     }
 
     /**
@@ -203,9 +203,9 @@ contract KlerosBadgeModelController is
             revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
         }
 
-        string memory evidenceHash = abi.decode(data, (string));
+        AddEvidenceParams memory evidenceHash = abi.decode(data, (AddEvidenceParams));
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
-        lightGeneralizedTCR.submitEvidence(_klerosBadge.itemID, evidenceHash);
+        lightGeneralizedTCR.submitEvidence(_klerosBadge.itemID, evidenceHash.evidence);
     }
 
     /**
