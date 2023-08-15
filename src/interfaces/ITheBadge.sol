@@ -8,6 +8,12 @@ interface ITheBadge is IERC1155Upgradeable {
 
     function claim(uint256 badgeId, bytes calldata data) external;
 
+    function challenge(uint256 badgeId, bytes calldata data) external payable;
+
+    function removeItem(uint256 badgeId, bytes calldata data) external payable;
+
+    function submitEvidence(uint256 badgeId, bytes calldata data) external;
+
     function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) external;
 
     function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) external;

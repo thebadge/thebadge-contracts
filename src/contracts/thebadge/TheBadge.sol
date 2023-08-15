@@ -122,16 +122,8 @@ contract TheBadge is
      * @param data containing information related to the claimer
      */
     function claim(uint256 badgeId, bytes calldata data) public {
-        Badge storage _badge = badges[badgeId];
-
-        if (_badge.initialized == false) {
-            revert TheBadge__requestBadge_badgeNotFound();
-        }
-        BadgeModel storage _badgeModel = badgeModels[_badge.badgeModelId];
-
-        if (_badgeModel.creator == address(0)) {
-            revert TheBadge__badgeModel_badgeModelNotFound();
-        }
+        uint256 badgeModelId = getBadgeModelIdFromBadgeId(badgeId);
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 
         BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
@@ -144,47 +136,83 @@ contract TheBadge is
     }
 
     /**
-     * @notice Given a badgeId, returns the cost to challenge the item
+     * @notice Given a badge and the evidenceHash, submits a challenge against the controller
      * @param badgeId the id of the badge
+     * @param data encoded ipfs hash containing the evidence to generate the challenge
      */
-    function getChallengeDepositValue(uint256 badgeId) public view override(ITheBadge) returns (uint256) {
-        Badge storage _badge = badges[badgeId];
-
-        if (_badge.initialized == false) {
-            revert TheBadge__requestBadge_badgeNotFound();
-        }
-        BadgeModel storage _badgeModel = badgeModels[_badge.badgeModelId];
-
-        if (_badgeModel.creator == address(0)) {
-            revert TheBadge__badgeModel_badgeModelNotFound();
-        }
+    function challenge(uint256 badgeId, bytes calldata data) external payable {
+        uint256 badgeModelId = getBadgeModelIdFromBadgeId(badgeId);
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 
         BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        return controller.getChallengeDepositValue(badgeId);
+        controller.challenge{ value: (msg.value) }(badgeId, data);
     }
 
     /**
-     * @notice Given a badgeId, returns the cost to challenge to remove the item
+     * @notice Given a badge and the evidenceHash, submits a removal request against the controller
      * @param badgeId the id of the badge
+     * @param data encoded ipfs hash containing the evidence to generate the removal request
      */
-    function getRemovalDepositValue(uint256 badgeId) public view override(ITheBadge) returns (uint256) {
-        Badge storage _badge = badges[badgeId];
-
-        if (_badge.initialized == false) {
-            revert TheBadge__requestBadge_badgeNotFound();
-        }
-        BadgeModel storage _badgeModel = badgeModels[_badge.badgeModelId];
-
-        if (_badgeModel.creator == address(0)) {
-            revert TheBadge__badgeModel_badgeModelNotFound();
-        }
+    function removeItem(uint256 badgeId, bytes calldata data) external payable {
+        uint256 badgeModelId = getBadgeModelIdFromBadgeId(badgeId);
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 
         BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        return controller.getRemovalDepositValue(badgeId);
+        controller.removeItem{ value: (msg.value) }(badgeId, data);
+    }
+
+    /**
+     * @notice Given a badge and the evidenceHash, adds more evidence to a case
+     * @param badgeId the id of the badge
+     * @param data encoded ipfs hash adding more evidence to a submission
+     */
+    function submitEvidence(uint256 badgeId, bytes calldata data) external {
+        uint256 badgeModelId = getBadgeModelIdFromBadgeId(badgeId);
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
+
+        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
+        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
+
+        controller.submitEvidence(badgeId, data);
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _mintBadgeDefaultFee
+     * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
+     */
+    function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
+        emit ProtocolSettingsUpdated();
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _createBadgeModelValue
+     * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
+     */
+    function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        createBadgeModelProtocolFee = _createBadgeModelValue;
+        emit ProtocolSettingsUpdated();
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _registerCreatorValue
+     * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
+     */
+    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        registerCreatorProtocolFee = _registerCreatorValue;
+        emit ProtocolSettingsUpdated();
+    }
+
+    function pause() public onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    function unpause() public onlyRole(PAUSER_ROLE) {
+        _unpause();
     }
 
     /*
@@ -262,6 +290,34 @@ contract TheBadge is
         return _badge.dueDate <= block.timestamp ? true : false;
     }
 
+    /**
+     * @notice Given a badgeId, returns the cost to challenge the item
+     * @param badgeId the id of the badge
+     */
+    function getChallengeDepositValue(uint256 badgeId) public view override(ITheBadge) returns (uint256) {
+        uint256 badgeModelId = getBadgeModelIdFromBadgeId(badgeId);
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
+
+        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
+        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
+
+        return controller.getChallengeDepositValue(badgeId);
+    }
+
+    /**
+     * @notice Given a badgeId, returns the cost to challenge to remove the item
+     * @param badgeId the id of the badge
+     */
+    function getRemovalDepositValue(uint256 badgeId) public view override(ITheBadge) returns (uint256) {
+        uint256 badgeModelId = getBadgeModelIdFromBadgeId(badgeId);
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
+
+        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
+        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
+
+        return controller.getRemovalDepositValue(badgeId);
+    }
+
     /*
      * @notice Receives the mintCreatorFee and the mintProtocolFee in bps and returns how much is the protocol fee
      * @param mintCreatorFee fee that the creator charges for each mint
@@ -272,39 +328,18 @@ contract TheBadge is
         return (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
     }
 
-    /*
-     * @notice Updates the value of the protocol: _mintBadgeDefaultFee
-     * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
-     */
-    function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
-        emit ProtocolSettingsUpdated();
-    }
+    function getBadgeModelIdFromBadgeId(uint256 badgeId) internal view returns (uint256) {
+        Badge storage _badge = badges[badgeId];
 
-    /*
-     * @notice Updates the value of the protocol: _createBadgeModelValue
-     * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
-     */
-    function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        createBadgeModelProtocolFee = _createBadgeModelValue;
-        emit ProtocolSettingsUpdated();
-    }
+        if (_badge.initialized == false) {
+            revert TheBadge__requestBadge_badgeNotFound();
+        }
+        BadgeModel storage _badgeModel = badgeModels[_badge.badgeModelId];
 
-    /*
-     * @notice Updates the value of the protocol: _registerCreatorValue
-     * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
-     */
-    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        registerCreatorProtocolFee = _registerCreatorValue;
-        emit ProtocolSettingsUpdated();
-    }
-
-    function pause() public onlyRole(PAUSER_ROLE) {
-        _pause();
-    }
-
-    function unpause() public onlyRole(PAUSER_ROLE) {
-        _unpause();
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__badgeModel_badgeModelNotFound();
+        }
+        return _badge.badgeModelId;
     }
 
     /**
