@@ -4,12 +4,12 @@
   "rules": {
     "code-complexity": ["error", 7],
     "prettier/prettier": ["error", { "endOfLine": "auto" }],
-    "compiler-version": ["warn", "0.8.13"],
+    "compiler-version": ["warn", "0.8.17"],
     "not-rely-on-time": "off",
     "func-visibility": ["warn", { "ignoreConstructors": true }],
     "func-name-mixedcase": "off",
     "max-states-count": "off",
-    "max-line-length": ["error", 120],
+    "max-line-length": ["error", 200],
     "reason-string": ["warn", { "maxLength": 64 }]
   }
 }

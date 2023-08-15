@@ -68,6 +68,7 @@ contract TheBadgeStore is TheBadgeRoles {
         uint256 validFor;
         uint256 mintProtocolFee; // amount that the protocol will charge for this
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
+        string version; // The version of the badgeModel, used in case of updates.
     }
 
     struct Badge {
@@ -146,6 +147,8 @@ contract TheBadgeStore is TheBadgeRoles {
     error TheBadge__requestBadge_wrongValue();
     error TheBadge__requestBadge_isPaused();
     error TheBadge__requestBadge_controllerIsPaused();
+    error TheBadge__requestBadge_badgeNotFound();
+    error TheBadge__requestBadge_badgeNotClaimable();
 
     error TheBadge__method_not_supported();
 
@@ -206,5 +209,14 @@ contract TheBadgeStore is TheBadgeRoles {
         _;
     }
 
+    modifier onlyExistingBadge(uint256 badgeId) {
+        Creator storage creator = creators[_msgSender()];
+        if (bytes(creator.metadata).length == 0) {
+            revert TheBadge__onlyCreator_senderIsNotACreator();
+        }
+        _;
+    }
+
+    // tslint:disable-next-line:no-empty
     receive() external payable {}
 }

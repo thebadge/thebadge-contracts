@@ -25,7 +25,7 @@ contract TheBadgeTestCore is Config {
             uint256 mintCreatorFee,
             uint256 validFor,
             uint256 mintProtocolFee,
-            bool initialized
+            bool initialized,
         ) = theBadge.badgeModels(0);
 
         address tcrList = klerosBadgeModelController.klerosBadgeModel(0);
@@ -46,7 +46,7 @@ contract TheBadgeTestCore is Config {
         vm.prank(vegeta);
         theBadge.registerBadgeModelCreator("ipfs://creatorMetadata.json");
 
-        // Crete badge type
+        // Create badge model
         vm.prank(vegeta);
         TheBadge.CreateBadgeModel memory badgeModel = getBaseBadgeModel();
         KlerosBadgeModelController.CreateBadgeModel memory klerosBadgeModel = getKlerosBaseBadgeModel();
@@ -73,7 +73,6 @@ contract TheBadgeTestCore is Config {
         // check goku account has not balance for badgeModelId.
         // at this moment, the badge is in review period, so balance has to be still 0.
         assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 0);
-
         // check status on KlerosBadgeModelController
         (bytes32 itemID, address mintCallee, uint256 deposit,) = klerosBadgeModelController.klerosBadge(badgeId);
         assertEq(itemID, keccak256(abi.encodePacked(evidenceUri)));
@@ -85,10 +84,11 @@ contract TheBadgeTestCore is Config {
         address tcrList = klerosBadgeModelController.klerosBadgeModel(badgeModelId);
         uint256 challengePeriodDuration = ILightGeneralizedTCR(tcrList).challengePeriodDuration();
         vm.warp(block.timestamp + challengePeriodDuration + 1);
-
         // claim badge
         uint256 prevBalance = goku.balance;
-        klerosBadgeModelController.claim(badgeId);
+        // Changes the sender to TheBadge to be able to pass the modify onlyTheBadge
+        vm.prank( address(klerosBadgeModelController.theBadge()));
+        klerosBadgeModelController.claim(badgeId, "0x");
         assertEq(goku.balance, prevBalance + deposit);
         assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 1);
     }

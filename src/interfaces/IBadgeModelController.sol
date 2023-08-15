@@ -2,6 +2,7 @@
 pragma solidity 0.8.17;
 
 interface IBadgeModelController {
+    // Write
     function createBadgeModel(uint256 badgeModelId, bytes calldata data) external;
 
     function mint(
@@ -11,11 +12,24 @@ interface IBadgeModelController {
         bytes calldata data
     ) external payable returns (uint256);
 
-    function claim(uint256 badgeId) external;
+    function claim(uint256 badgeId, bytes calldata data) external;
 
+    function challenge(uint256 badgeId, bytes calldata data) external payable;
+
+    function removeItem(uint256 badgeId, bytes calldata data) external payable;
+
+    function submitEvidence(uint256 badgeId, bytes calldata data) external;
+
+    // Read
     function mintValue(uint256 badgeModelId) external view returns (uint256);
 
-    function canMint(uint256 badgeModelId, address account) external view returns (bool);
+    function isMintable(uint256 badgeId, address account) external view returns (bool);
+
+    function isClaimable(uint256 badgeId) external view returns (bool);
 
     function isAssetActive(uint256 badgeId) external view returns (bool);
+
+    function getChallengeDepositValue(uint256 badgeId) external view returns (uint256);
+
+    function getRemovalDepositValue(uint256 badgeId) external view returns (uint256);
 }

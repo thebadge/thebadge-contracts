@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 import "../contracts/thebadge/TheBadgeStore.sol";
 
 interface ITheBadgeModels {
+    // Write methods
     function addBadgeModelController(string memory controllerName, address controllerAddress) external;
 
     function registerBadgeModelCreator(string memory _metadata) external payable;
@@ -22,5 +23,8 @@ interface ITheBadgeModels {
 
     function updateBadgeModelProtocolFee(uint256 badgeModelId, uint256 feeInBps) external;
 
-    function mintValue(uint256 badgeModelId) external view returns (uint256);
+    // Read methods
+    function mintValue(uint256 badgeModelId) external returns (uint256);
+
+    function isBadgeModelSuspended(uint256 badgeModelId) external returns (bool);
 }
