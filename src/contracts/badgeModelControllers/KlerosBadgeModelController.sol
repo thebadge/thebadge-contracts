@@ -70,7 +70,12 @@ contract KlerosBadgeModelController is
 
         klerosBadgeModel[badgeModelId] = KlerosBadgeModel(klerosTcrListAddress);
 
-        emit NewKlerosBadgeModel(badgeModelId, klerosTcrListAddress, args.registrationMetaEvidence, args.clearingMetaEvidence);
+        emit NewKlerosBadgeModel(
+            badgeModelId,
+            klerosTcrListAddress,
+            args.registrationMetaEvidence,
+            args.clearingMetaEvidence
+        );
     }
 
     /**
@@ -138,6 +143,69 @@ contract KlerosBadgeModelController is
         (bool badgeDepositSent, ) = payable(_klerosBadge.callee).call{ value: balanceToDeposit }("");
         require(badgeDepositSent, "Failed to return the deposit");
         emit DepositReturned(_klerosBadge.callee, balanceToDeposit, badgeId);
+    }
+
+    /**
+     * @notice Given a badge and the evidenceHash, submits a challenge against the controller
+     * @param badgeId the id of the badge
+     * @param data encoded evidenceHash ipfs hash containing the evidence to generate the challenge
+     */
+    function challenge(uint256 badgeId, bytes calldata data) external payable onlyTheBadge {
+        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
+
+        if (_klerosBadge.initialized == false) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        if (_klerosBadge.itemID == 0) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        string memory evidenceHash = abi.decode(data, (string));
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
+        lightGeneralizedTCR.challengeRequest{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash);
+    }
+
+    /**
+     * @notice Given a badge and the evidenceHash, submits a removal request against the controller
+     * @param badgeId the id of the badge
+     * @param data encoded evidenceHash ipfs hash containing the evidence to generate the removal request
+     */
+    function removeItem(uint256 badgeId, bytes calldata data) external payable onlyTheBadge {
+        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
+
+        if (_klerosBadge.initialized == false) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        if (_klerosBadge.itemID == 0) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        string memory evidenceHash = abi.decode(data, (string));
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
+        lightGeneralizedTCR.removeItem{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash);
+    }
+
+    /**
+     * @notice Given a badge and the evidenceHash, adds more evidence to a case
+     * @param badgeId the id of the badge
+     * @param data encoded evidenceHash ipfs hash adding more evidence to a submission
+     */
+    function submitEvidence(uint256 badgeId, bytes calldata data) external onlyTheBadge {
+        KlerosBadge storage _klerosBadge = klerosBadge[badgeId];
+
+        if (_klerosBadge.initialized == false) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        if (_klerosBadge.itemID == 0) {
+            revert KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        string memory evidenceHash = abi.decode(data, (string));
+        ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
+        lightGeneralizedTCR.submitEvidence(_klerosBadge.itemID, evidenceHash);
     }
 
     /**
