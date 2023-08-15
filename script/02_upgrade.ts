@@ -1,5 +1,15 @@
 import hre, { run, upgrades } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import * as dotenv from "dotenv";
+
+dotenv.config();
+// Todo refactor to something more fancy
+const { GOERLI_THE_BADGE_CONTRACT_ADDRESS, GOERLI_KLEROS_BADGE_MODEL_CONTROLLER_CONTRACT_ADDRESS } = process.env;
+if (!GOERLI_THE_BADGE_CONTRACT_ADDRESS || !GOERLI_KLEROS_BADGE_MODEL_CONTROLLER_CONTRACT_ADDRESS) {
+  throw new Error(`Contract addresses not set!`);
+}
+const theBadgeDeployedAddress = GOERLI_THE_BADGE_CONTRACT_ADDRESS;
+const klerosBadgeModelControllerDeployedAddress = GOERLI_KLEROS_BADGE_MODEL_CONTROLLER_CONTRACT_ADDRESS;
 
 async function main(hre: HardhatRuntimeEnvironment) {
   const { ethers } = hre;
@@ -7,8 +17,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const TheBadge = await ethers.getContractFactory("TheBadge");
   const KlerosController = await ethers.getContractFactory("KlerosBadgeModelController");
 
-  const theBadgeDeployedAddress = "0xEe4683dC9D8A61938877Ac1aC3321138C9F4153A";
-  const klerosBadgeModelControllerDeployedAddress = "0x17e06B644B901630ee12dd9fdC8e4f8FDc913635";
+
   console.log(`Upgrading TheBadge with address: ${theBadgeDeployedAddress}...`);
   const theBadge = await upgrades.upgradeProxy(theBadgeDeployedAddress, TheBadge);
   await theBadge.deployed();

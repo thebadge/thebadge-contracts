@@ -4,6 +4,15 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 dotenv.config();
 
+// Todo refactor to something more fancy
+const { GOERLI_LIGHT_GTCR_FACTORY_CONTRACT_ADDRESS, GOERLI_KLEROS_ARBITROR_CONTRACT_ADDRESS } = process.env;
+if (!GOERLI_LIGHT_GTCR_FACTORY_CONTRACT_ADDRESS || !GOERLI_KLEROS_ARBITROR_CONTRACT_ADDRESS) {
+  throw new Error(`Contract addresses not set!`);
+}
+
+const lightGTCRFactory = GOERLI_LIGHT_GTCR_FACTORY_CONTRACT_ADDRESS;
+const klerosArbitror = GOERLI_KLEROS_ARBITROR_CONTRACT_ADDRESS;
+
 async function main(hre: HardhatRuntimeEnvironment) {
   const { ethers } = hre;
   const [deployer] = await ethers.getSigners();
@@ -17,10 +26,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
   // GBC:
   // const lightGTCRFactory = "0x08e58Bc26CFB0d346bABD253A1799866F269805a";
   // const klerosArbitror = "0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002";
-
-  // Goerli
-  const lightGTCRFactory = "0x55A3d9Bd99F286F1817CAFAAB124ddDDFCb0F314";
-  const klerosArbitror = "0x1128ed55ab2d796fa92d2f8e1f336d745354a77a";
 
   console.log("Deploying TheBadge...");
   const theBadge = await upgrades.deployProxy(TheBadge, [deployer.address, deployer.address, deployer.address]);
