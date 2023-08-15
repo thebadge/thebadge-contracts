@@ -68,6 +68,7 @@ contract TheBadgeStore is TheBadgeRoles {
         uint256 validFor;
         uint256 mintProtocolFee; // amount that the protocol will charge for this
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
+        string version; // The version of the badgeModel, used in case of updates.
     }
 
     struct Badge {

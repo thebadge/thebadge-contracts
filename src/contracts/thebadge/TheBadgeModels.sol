@@ -139,7 +139,8 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
             args.mintCreatorFee,
             args.validFor,
             mintBadgeProtocolDefaultFeeInBps,
-            true
+            true,
+            "v1.0.0"
         );
 
         emit BadgeModelCreated(badgeModelIdsCounter.current(), args.metadata);

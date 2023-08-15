@@ -25,7 +25,7 @@ contract TheBadgeTestCore is Config {
             uint256 mintCreatorFee,
             uint256 validFor,
             uint256 mintProtocolFee,
-            bool initialized
+            bool initialized,
         ) = theBadge.badgeModels(0);
 
         address tcrList = klerosBadgeModelController.klerosBadgeModel(0);
