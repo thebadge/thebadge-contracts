@@ -70,7 +70,7 @@ contract KlerosBadgeModelController is
 
         klerosBadgeModel[badgeModelId] = KlerosBadgeModel(klerosTcrListAddress);
 
-        emit NewKlerosBadgeModel(badgeModelId, klerosTcrListAddress, args.registrationMetaEvidence);
+        emit NewKlerosBadgeModel(badgeModelId, klerosTcrListAddress, args.registrationMetaEvidence, args.clearingMetaEvidence);
     }
 
     /**
