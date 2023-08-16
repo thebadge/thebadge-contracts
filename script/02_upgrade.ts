@@ -17,7 +17,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const TheBadge = await ethers.getContractFactory("TheBadge");
   const KlerosController = await ethers.getContractFactory("KlerosBadgeModelController");
 
-
   console.log(`Upgrading TheBadge with address: ${theBadgeDeployedAddress}...`);
   const theBadge = await upgrades.upgradeProxy(theBadgeDeployedAddress, TheBadge);
   await theBadge.deployed();
