@@ -26,6 +26,7 @@ contract TheBadgeTestCore is Config {
             uint256 validFor,
             uint256 mintProtocolFee,
             bool initialized,
+
         ) = theBadge.badgeModels(0);
 
         address tcrList = klerosBadgeModelController.klerosBadgeModel(0);
@@ -74,7 +75,7 @@ contract TheBadgeTestCore is Config {
         // at this moment, the badge is in review period, so balance has to be still 0.
         assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 0);
         // check status on KlerosBadgeModelController
-        (bytes32 itemID, address mintCallee, uint256 deposit,) = klerosBadgeModelController.klerosBadge(badgeId);
+        (bytes32 itemID, address mintCallee, uint256 deposit, ) = klerosBadgeModelController.klerosBadge(badgeId);
         assertEq(itemID, keccak256(abi.encodePacked(evidenceUri)));
         assertEq(mintCallee, goku);
         assertEq(deposit, mintValue - badgeModel.mintCreatorFee);
@@ -87,7 +88,7 @@ contract TheBadgeTestCore is Config {
         // claim badge
         uint256 prevBalance = goku.balance;
         // Changes the sender to TheBadge to be able to pass the modify onlyTheBadge
-        vm.prank( address(klerosBadgeModelController.theBadge()));
+        vm.prank(address(klerosBadgeModelController.theBadge()));
         klerosBadgeModelController.claim(badgeId, "0x");
         assertEq(goku.balance, prevBalance + deposit);
         assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 1);
