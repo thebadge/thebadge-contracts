@@ -130,12 +130,12 @@ contract TheBadgeStore is TheBadgeRoles {
 
     error TheBadge__registerCreator_wrongValue();
     error TheBadge__registerCreator_alreadyRegistered();
-    error TheBadge__setBadgeModelController_emptyName();
-    error TheBadge__setBadgeModelController_notFound();
-    error TheBadge__setBadgeModelController_alreadySet();
+    error TheBadge__addBadgeModelController_emptyName();
+    error TheBadge__addBadgeModelController_notFound();
+    error TheBadge__addBadgeModelController_alreadySet();
     error TheBadge__setControllerStatus_notFound();
-    error TheBadge__createBadgeModel_invalidController();
-    error TheBadge__createBadgeModel_controllerIsPaused();
+    error TheBadge__controller_invalidController();
+    error TheBadge__controller_controllerIsPaused();
     error TheBadge__createBadgeModel_wrongValue();
     error TheBadge__updateBadgeModel_notBadgeModelOwner();
     error TheBadge__updateBadgeModel_badgeModelNotFound();

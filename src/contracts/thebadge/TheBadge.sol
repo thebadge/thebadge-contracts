@@ -335,6 +335,10 @@ contract TheBadge is
         return (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
     }
 
+    /**
+     * @notice Given a badgeId, returns the id of its model if exists
+     * @param badgeId the id of the badge
+     */
     function getBadgeModelIdFromBadgeId(uint256 badgeId) internal view returns (uint256) {
         Badge storage _badge = badges[badgeId];
 

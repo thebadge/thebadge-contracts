@@ -29,15 +29,15 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
 
         if (bytes(controllerName).length == 0) {
-            revert TheBadge__setBadgeModelController_emptyName();
+            revert TheBadge__addBadgeModelController_emptyName();
         }
 
         if (controllerAddress == address(0)) {
-            revert TheBadge__setBadgeModelController_notFound();
+            revert TheBadge__addBadgeModelController_notFound();
         }
 
         if (_badgeModelController.controller != address(0)) {
-            revert TheBadge__setBadgeModelController_alreadySet();
+            revert TheBadge__addBadgeModelController_alreadySet();
         }
 
         badgeModelControllers[controllerName] = BadgeModelController(controllerAddress, false, true);
@@ -119,17 +119,9 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
             revert TheBadge__createBadgeModel_wrongValue();
         }
 
-        // verify valid controller
-        BadgeModelController storage _badgeModelController = badgeModelControllers[args.controllerName];
-        if (_badgeModelController.controller == address(0)) {
-            revert TheBadge__createBadgeModel_invalidController();
-        }
-        if (_badgeModelController.paused) {
-            revert TheBadge__createBadgeModel_controllerIsPaused();
-        }
-        if (_badgeModelController.initialized == false) {
-            revert TheBadge__createBadgeModel_controllerIsPaused();
-        }
+        // Get valid controller
+        BadgeModelController storage _badgeModelController = getControllerFromBadgeControllerName(args.controllerName);
+
         // move fees to collector
         if (msg.value > 0) {
             payable(feeCollector).transfer(msg.value);
@@ -231,5 +223,25 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
         }
 
         return false;
+    }
+
+    /**
+     * @notice Given a controller name, returns the controller if exists
+     * @param controllerName the id badgeModelController
+     */
+    function getControllerFromBadgeControllerName(string controllerName) internal view returns (BadgeModelController) {
+        // verify valid controller
+        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        if (_badgeModelController.controller == address(0)) {
+            revert TheBadge__controller_invalidController();
+        }
+        if (_badgeModelController.initialized == false) {
+            revert TheBadge__controller_invalidController();
+        }
+        if (_badgeModelController.paused) {
+            revert TheBadge__controller_controllerIsPaused();
+        }
+
+        return _badgeModelController;
     }
 }
