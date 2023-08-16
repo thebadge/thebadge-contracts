@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import hre, { run, upgrades } from "hardhat";
+import hre, { upgrades } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 dotenv.config();

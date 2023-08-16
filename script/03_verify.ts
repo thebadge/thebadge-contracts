@@ -1,6 +1,5 @@
 import * as dotenv from "dotenv";
-import hre, { run, upgrades } from "hardhat";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { run } from "hardhat";
 
 dotenv.config();
 
@@ -12,7 +11,7 @@ if (!GOERLI_THE_BADGE_CONTRACT_ADDRESS || !GOERLI_KLEROS_BADGE_MODEL_CONTROLLER_
 const theBadgeDeployedAddress = GOERLI_THE_BADGE_CONTRACT_ADDRESS;
 const klerosBadgeModelControllerDeployedAddress = GOERLI_KLEROS_BADGE_MODEL_CONTROLLER_CONTRACT_ADDRESS;
 
-async function main(hre: HardhatRuntimeEnvironment) {
+async function main() {
   console.log("Verifying TheBadge contract on Etherscan...");
   await run(`verify:verify`, {
     address: theBadgeDeployedAddress,
@@ -28,7 +27,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-main(hre).catch((error) => {
+main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

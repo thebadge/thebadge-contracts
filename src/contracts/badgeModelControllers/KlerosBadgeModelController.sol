@@ -4,11 +4,14 @@ pragma solidity 0.8.17;
 import { ILightGeneralizedTCR } from "../../interfaces/ILightGeneralizedTCR.sol";
 import { ILightGTCRFactory } from "../../interfaces/ILightGTCRFactory.sol";
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "../../interfaces/IBadgeModelController.sol";
-import "./KleroBadgeModelControllerStore.sol";
-import "../thebadge/TheBadgeRoles.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
+import { KlerosBadgeModelControllerStore } from "./KleroBadgeModelControllerStore.sol";
+import { CappedMath } from "../../utils/CappedMath.sol";
+import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
+import { TheBadge } from "../thebadge/TheBadge.sol";
 
 contract KlerosBadgeModelController is
     Initializable,
@@ -141,7 +144,9 @@ contract KlerosBadgeModelController is
         // Then we return the deposit from within our contract to the callee address
         // TODO: review if this is safe enough
         (bool badgeDepositSent, ) = payable(_klerosBadge.callee).call{ value: balanceToDeposit }("");
-        require(badgeDepositSent, "Failed to return the deposit");
+        if (badgeDepositSent == false) {
+            revert KlerosBadgeModelController__badge__depositReturnFailed();
+        }
         emit DepositReturned(_klerosBadge.callee, balanceToDeposit, badgeId);
     }
 
@@ -346,7 +351,9 @@ contract KlerosBadgeModelController is
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
         (uint256 badgeModelId, , , ) = theBadge.badges(badgeId);
         KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
-        require(_klerosBadgeModel.tcrList != address(0), "Valid klerosBadgeModelId required for TCR!");
+        if (_klerosBadgeModel.tcrList == address(0)) {
+            revert KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
+        }
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
         return lightGeneralizedTCR;
     }
@@ -375,6 +382,7 @@ contract KlerosBadgeModelController is
      * =========================
      */
     /// Required by the OZ UUPS module
+    // solhint-disable-next-line
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**

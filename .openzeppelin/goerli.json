@@ -4768,7 +4768,7 @@
             "label": "creators",
             "offset": 0,
             "slot": "407",
-            "type": "t_mapping(t_address,t_struct(Creator)7561_storage)",
+            "type": "t_mapping(t_address,t_struct(Creator)7596_storage)",
             "contract": "TheBadgeStore",
             "src": "src/contracts/thebadge/TheBadgeStore.sol:86"
           },
@@ -4776,7 +4776,7 @@
             "label": "badgeModelControllers",
             "offset": 0,
             "slot": "408",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(BadgeModelController)7568_storage)",
+            "type": "t_mapping(t_string_memory_ptr,t_struct(BadgeModelController)7603_storage)",
             "contract": "TheBadgeStore",
             "src": "src/contracts/thebadge/TheBadgeStore.sol:87"
           },
@@ -4784,7 +4784,7 @@
             "label": "badgeModels",
             "offset": 0,
             "slot": "409",
-            "type": "t_mapping(t_uint256,t_struct(BadgeModel)7594_storage)",
+            "type": "t_mapping(t_uint256,t_struct(BadgeModel)7629_storage)",
             "contract": "TheBadgeStore",
             "src": "src/contracts/thebadge/TheBadgeStore.sol:88"
           },
@@ -4792,7 +4792,7 @@
             "label": "badges",
             "offset": 0,
             "slot": "410",
-            "type": "t_mapping(t_uint256,t_struct(Badge)7603_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Badge)7638_storage)",
             "contract": "TheBadgeStore",
             "src": "src/contracts/thebadge/TheBadgeStore.sol:89"
           },
@@ -4850,7 +4850,7 @@
             "label": "mapping(address => mapping(address => bool))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(Creator)7561_storage)": {
+          "t_mapping(t_address,t_struct(Creator)7596_storage)": {
             "label": "mapping(address => struct TheBadgeStore.Creator)",
             "numberOfBytes": "32"
           },
@@ -4862,7 +4862,7 @@
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_string_memory_ptr,t_struct(BadgeModelController)7568_storage)": {
+          "t_mapping(t_string_memory_ptr,t_struct(BadgeModelController)7603_storage)": {
             "label": "mapping(string => struct TheBadgeStore.BadgeModelController)",
             "numberOfBytes": "32"
           },
@@ -4878,11 +4878,11 @@
             "label": "mapping(uint256 => string)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Badge)7603_storage)": {
+          "t_mapping(t_uint256,t_struct(Badge)7638_storage)": {
             "label": "mapping(uint256 => struct TheBadgeStore.Badge)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(BadgeModel)7594_storage)": {
+          "t_mapping(t_uint256,t_struct(BadgeModel)7629_storage)": {
             "label": "mapping(uint256 => struct TheBadgeStore.BadgeModel)",
             "numberOfBytes": "32"
           },
@@ -4894,7 +4894,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(Badge)7603_storage": {
+          "t_struct(Badge)7638_storage": {
             "label": "struct TheBadgeStore.Badge",
             "members": [
               {
@@ -4924,7 +4924,7 @@
             ],
             "numberOfBytes": "128"
           },
-          "t_struct(BadgeModel)7594_storage": {
+          "t_struct(BadgeModel)7629_storage": {
             "label": "struct TheBadgeStore.BadgeModel",
             "members": [
               {
@@ -4978,7 +4978,7 @@
             ],
             "numberOfBytes": "256"
           },
-          "t_struct(BadgeModelController)7568_storage": {
+          "t_struct(BadgeModelController)7603_storage": {
             "label": "struct TheBadgeStore.BadgeModelController",
             "members": [
               {
@@ -5014,7 +5014,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(Creator)7561_storage": {
+          "t_struct(Creator)7596_storage": {
             "label": "struct TheBadgeStore.Creator",
             "members": [
               {
@@ -5094,7 +5094,7 @@
             "label": "theBadge",
             "offset": 2,
             "slot": "0",
-            "type": "t_contract(TheBadge)6925",
+            "type": "t_contract(TheBadge)6949",
             "contract": "KlerosBadgeModelControllerStore",
             "src": "src/contracts/badgeModelControllers/KleroBadgeModelControllerStore.sol:9"
           },
@@ -5118,7 +5118,7 @@
             "label": "klerosBadgeModel",
             "offset": 0,
             "slot": "3",
-            "type": "t_mapping(t_uint256,t_struct(KlerosBadgeModel)4723_storage)",
+            "type": "t_mapping(t_uint256,t_struct(KlerosBadgeModel)4724_storage)",
             "contract": "KlerosBadgeModelControllerStore",
             "src": "src/contracts/badgeModelControllers/KleroBadgeModelControllerStore.sol:79"
           },
@@ -5126,7 +5126,7 @@
             "label": "klerosBadge",
             "offset": 0,
             "slot": "4",
-            "type": "t_mapping(t_uint256,t_struct(KlerosBadge)4732_storage)",
+            "type": "t_mapping(t_uint256,t_struct(KlerosBadge)4733_storage)",
             "contract": "KlerosBadgeModelControllerStore",
             "src": "src/contracts/badgeModelControllers/KleroBadgeModelControllerStore.sol:80"
           },
@@ -5204,7 +5204,7 @@
             "label": "contract IArbitrator",
             "numberOfBytes": "20"
           },
-          "t_contract(TheBadge)6925": {
+          "t_contract(TheBadge)6949": {
             "label": "contract TheBadge",
             "numberOfBytes": "20"
           },
@@ -5216,15 +5216,15 @@
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(KlerosBadge)4732_storage)": {
+          "t_mapping(t_uint256,t_struct(KlerosBadge)4733_storage)": {
             "label": "mapping(uint256 => struct KlerosBadgeModelControllerStore.KlerosBadge)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(KlerosBadgeModel)4723_storage)": {
+          "t_mapping(t_uint256,t_struct(KlerosBadgeModel)4724_storage)": {
             "label": "mapping(uint256 => struct KlerosBadgeModelControllerStore.KlerosBadgeModel)",
             "numberOfBytes": "32"
           },
-          "t_struct(KlerosBadge)4732_storage": {
+          "t_struct(KlerosBadge)4733_storage": {
             "label": "struct KlerosBadgeModelControllerStore.KlerosBadge",
             "members": [
               {
@@ -5254,7 +5254,7 @@
             ],
             "numberOfBytes": "128"
           },
-          "t_struct(KlerosBadgeModel)4723_storage": {
+          "t_struct(KlerosBadgeModel)4724_storage": {
             "label": "struct KlerosBadgeModelControllerStore.KlerosBadgeModel",
             "members": [
               {

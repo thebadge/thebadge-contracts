@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-
-import "./TheBadgeRoles.sol";
-import "./TheBadgeStore.sol";
-import "./TheBadgeModels.sol";
-import "../../interfaces/ITheBadge.sol";
+import { ERC1155Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import { ERC1155URIStorageUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import { TheBadgeRoles } from "./TheBadgeRoles.sol";
+import { TheBadgeModels } from "./TheBadgeModels.sol";
+import { ITheBadge } from "../../interfaces/ITheBadge.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 
 /// @custom:security-contact hello@thebadge.com
 contract TheBadge is
@@ -86,11 +86,15 @@ contract TheBadge is
             uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeFee;
 
             (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
-            require(protocolFeeSent, "Failed to pay protocol fees");
+            if (protocolFeeSent == false) {
+                revert TheBadge__mint_protocolFeesPaymentFailed();
+            }
             emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee, _badgeModelId);
 
             (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
-            require(creatorFeeSent, "Failed to pay creator fees");
+            if (creatorFeeSent == false) {
+                revert TheBadge__mint_creatorFeesPaymentFailed();
+            }
             emit PaymentMade(_badgeModel.creator, creatorPayment, PaymentType.CreatorFee, _badgeModelId);
         }
 
@@ -259,6 +263,7 @@ contract TheBadge is
         );
 
         uint256 balance = 0;
+        // solhint-disable-next-line
         for (uint i = 0; i < badgeModelsByAccount[badgeModelId][account].length; i++) {
             uint256 badgeId = badgeModelsByAccount[badgeModelId][account][i];
             if (isExpired(badgeId) == false && controller.isAssetActive(badgeId)) {
@@ -324,7 +329,9 @@ contract TheBadge is
      * @param mintProtocolFeeInBps fee that TheBadge protocol charges from the creator revenue
      */
     function calculateFee(uint256 mintCreatorFee, uint256 mintProtocolFeeInBps) internal pure returns (uint256) {
-        require((mintCreatorFee * mintProtocolFeeInBps) >= 10_000);
+        if ((mintCreatorFee * mintProtocolFeeInBps) < 10_000) {
+            revert TheBadge__calculateFee_protocolFeesInvalidValues();
+        }
         return (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
     }
 
@@ -386,6 +393,7 @@ contract TheBadge is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
+    // solhint-disable-next-line
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     function supportsInterface(
