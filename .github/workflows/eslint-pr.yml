@@ -31,12 +31,3 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16.15.1
-      - name: Install modules
-        run: yarn
-      - name: Run Rollup build
-        run: yarn build
