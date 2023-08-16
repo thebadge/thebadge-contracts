@@ -15,10 +15,6 @@ jobs:
     name: Foundry project
     runs-on: ubuntu-latest
     steps:
-      #      - uses: actions/checkout@v3
-      #        with:
-      #          submodules: recursive
-
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
@@ -32,5 +28,5 @@ jobs:
 
       - name: Run Forge tests
         run: |
-          forge test -vvv
+          forge test -vvv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 7487305
         id: test
