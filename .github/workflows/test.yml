@@ -5,7 +5,7 @@
 #    types: [ opened, reopened, ready_for_review, synchronize ]
 #    branches:
 #      - main
-#      - staging
+#      - develop
 #
 #env:
 #  FOUNDRY_PROFILE: ci
