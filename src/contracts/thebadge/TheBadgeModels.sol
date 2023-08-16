@@ -65,6 +65,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
         creator.metadata = _metadata;
         creator.initialized = true;
         creator.suspended = false;
+        creator.verified = false;
 
         emit CreatorRegistered(_msgSender(), creator.metadata);
     }

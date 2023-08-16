@@ -33,8 +33,9 @@ contract TheBadgeStore is TheBadgeRoles {
      */
     struct Creator {
         string metadata;
-        bool suspended; // If true, the creator is not allowed to do any actions and their badges are not minteable anymore.
+        bool suspended; // If true, the creator is not allowed to do any actions and their badges are not mintable anymore.
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
+        bool verified; //  If true, the creator has been verified otherwise is false (default value)
     }
 
     /**
