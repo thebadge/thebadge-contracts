@@ -3,8 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export default task("create-collection", "Create The Badge collection").setAction(
   async (hre: HardhatRuntimeEnvironment) => {
-    const { deployments, getNamedAccounts, ethers } = hre;
-    const { deployer } = await getNamedAccounts();
+    const { ethers } = hre;
 
     const TheBadge = await ethers.getContractFactory("TheBadge");
     const collection = await TheBadge.deploy();

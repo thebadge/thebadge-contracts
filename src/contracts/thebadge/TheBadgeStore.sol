@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "./TheBadgeRoles.sol";
-import "../../interfaces/IBadgeModelController.sol";
+import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import { TheBadgeRoles } from "./TheBadgeRoles.sol";
+import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 
 // TODO: Maybe we can use abstract classes to type the store
 contract TheBadgeStore is TheBadgeRoles {

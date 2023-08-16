@@ -6,10 +6,12 @@ pragma solidity ^0.8.17;
  * =========================
  */
 
-import "../../interfaces/IBadgeModelController.sol";
-import "./TheBadgeRoles.sol";
-import "./TheBadgeStore.sol";
-import "../../interfaces/ITheBadgeModels.sol";
+import "../../interfaces/IBadgeModelController.sol" as BadgeModelController;
+import { TheBadgeRoles } from "./TheBadgeRoles.sol";
+import { TheBadgeStore } from "./TheBadgeStore.sol";
+import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
+import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 
 contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
     // Allows to use current() and increment() for badgeModelIds or badgeIds
