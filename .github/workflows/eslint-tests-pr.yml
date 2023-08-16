@@ -1,11 +1,11 @@
 # Workflow name
-name: 'EsLint & Build Checks - PR'
+name: "EsLint & Build Checks - PR"
 
 # Event for the workflow
 # Triggers the workflow on push or pull request events but only for the development branch
 on:
   pull_request:
-    types: [ opened, reopened, ready_for_review, synchronize ]
+    types: [opened, reopened, ready_for_review, synchronize]
     branches:
       - main
       - develop
