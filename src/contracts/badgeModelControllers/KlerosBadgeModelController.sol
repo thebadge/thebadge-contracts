@@ -144,7 +144,9 @@ contract KlerosBadgeModelController is
         // Then we return the deposit from within our contract to the callee address
         // TODO: review if this is safe enough
         (bool badgeDepositSent, ) = payable(_klerosBadge.callee).call{ value: balanceToDeposit }("");
-        require(badgeDepositSent, "Failed to return the deposit");
+        if (badgeDepositSent == false) {
+            revert KlerosBadgeModelController__badge__depositReturnFailed();
+        }
         emit DepositReturned(_klerosBadge.callee, balanceToDeposit, badgeId);
     }
 
@@ -349,7 +351,9 @@ contract KlerosBadgeModelController is
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
         (uint256 badgeModelId, , , ) = theBadge.badges(badgeId);
         KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModel[badgeModelId];
-        require(_klerosBadgeModel.tcrList != address(0), "Valid klerosBadgeModelId required for TCR!");
+        if (_klerosBadgeModel.tcrList == address(0)) {
+            revert KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
+        }
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
         return lightGeneralizedTCR;
     }
@@ -378,6 +382,7 @@ contract KlerosBadgeModelController is
      * =========================
      */
     /// Required by the OZ UUPS module
+    // solhint-disable-next-line
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**

@@ -110,6 +110,9 @@ contract KlerosBadgeModelControllerStore {
 
     error KlerosBadgeModelController__badge__notInChallengeableStatus();
     error KlerosBadgeModelController__badge__klerosBadgeNotFound();
+    error KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
+
+    error KlerosBadgeModelController__badge__depositReturnFailed();
 
     /**
      * =========================

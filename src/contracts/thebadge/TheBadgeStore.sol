@@ -152,6 +152,11 @@ contract TheBadgeStore is TheBadgeRoles {
 
     error TheBadge__method_not_supported();
 
+    error TheBadge__mint_protocolFeesPaymentFailed();
+    error TheBadge__mint_creatorFeesPaymentFailed();
+
+    error TheBadge__calculateFee_protocolFeesInvalidValues();
+
     /**
      * =========================
      * Modifiers

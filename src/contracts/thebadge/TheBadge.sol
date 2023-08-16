@@ -86,11 +86,15 @@ contract TheBadge is
             uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeFee;
 
             (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
-            require(protocolFeeSent, "Failed to pay protocol fees");
+            if (protocolFeeSent == false) {
+                revert TheBadge__mint_protocolFeesPaymentFailed();
+            }
             emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee, _badgeModelId);
 
             (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
-            require(creatorFeeSent, "Failed to pay creator fees");
+            if (creatorFeeSent == false) {
+                revert TheBadge__mint_creatorFeesPaymentFailed();
+            }
             emit PaymentMade(_badgeModel.creator, creatorPayment, PaymentType.CreatorFee, _badgeModelId);
         }
 
@@ -259,6 +263,7 @@ contract TheBadge is
         );
 
         uint256 balance = 0;
+        // solhint-disable-next-line
         for (uint i = 0; i < badgeModelsByAccount[badgeModelId][account].length; i++) {
             uint256 badgeId = badgeModelsByAccount[badgeModelId][account][i];
             if (isExpired(badgeId) == false && controller.isAssetActive(badgeId)) {
@@ -324,7 +329,9 @@ contract TheBadge is
      * @param mintProtocolFeeInBps fee that TheBadge protocol charges from the creator revenue
      */
     function calculateFee(uint256 mintCreatorFee, uint256 mintProtocolFeeInBps) internal pure returns (uint256) {
-        require((mintCreatorFee * mintProtocolFeeInBps) >= 10_000);
+        if ((mintCreatorFee * mintProtocolFeeInBps) < 10_000) {
+            revert TheBadge__calculateFee_protocolFeesInvalidValues();
+        }
         return (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
     }
 
@@ -386,6 +393,7 @@ contract TheBadge is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
+    // solhint-disable-next-line
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     function supportsInterface(
