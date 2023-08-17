@@ -3,11 +3,15 @@ pragma solidity 0.8.17;
 
 interface ITheBadgeUsers {
     // Write methods
-    function registerBadgeModelCreator(string memory _metadata) external payable;
+    function registerUser(string memory _metadata, bool _isCompany) external payable;
 
-    function updateBadgeModelCreator(address _creator, string memory _metadata) external;
+    function updateUser(address _creator, string memory _metadata) external;
 
-    function suspendBadgeModelCreator(address _creator, bool suspended) external;
+    function suspendUser(address _creator, bool suspended) external;
 
-    function removeBadgeModelCreator() external; // Method not implemented
+    function removeUser() external; // Method not implemented
+
+    function submitUserVerification(string memory controllerName, string memory evidenceUri) external payable;
+
+    function executeUserVerification(address _user, string memory controllerName, bool verify) external; // TODO Only called by ROLE_VERIFICATOR
 }
