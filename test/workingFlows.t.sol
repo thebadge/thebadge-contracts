@@ -8,9 +8,9 @@ import { Config, TheBadge, TheBadgeStore, KlerosBadgeModelController, KlerosBadg
 
 contract TheBadgeTestCore is Config {
     function test_createKlerosBadgeModel_shouldWork() public {
-        // register creator
+        // register User
         vm.prank(vegeta);
-        theBadge.registerBadgeModelCreator("ipfs://creatorMetadata.json");
+        theBadge.registerUser("ipfs://creatorMetadata.json", false);
 
         // Create badge model
         vm.prank(vegeta);
@@ -43,9 +43,9 @@ contract TheBadgeTestCore is Config {
     }
 
     function test_mintKlerosBadge_shouldWork() public {
-        // register creator
+        // register user
         vm.prank(vegeta);
-        theBadge.registerBadgeModelCreator("ipfs://creatorMetadata.json");
+        theBadge.registerUser("ipfs://creatorMetadata.json", false);
 
         // Create badge model
         vm.prank(vegeta);
