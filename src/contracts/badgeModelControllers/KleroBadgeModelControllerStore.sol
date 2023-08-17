@@ -109,6 +109,7 @@ contract KlerosBadgeModelControllerStore {
     event MintKlerosBadge(uint256 indexed badgeId, string evidence);
     event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
     event DepositReturned(address indexed recipient, uint256 amount, uint256 indexed badgeId);
+    event Initialize(address indexed admin, address indexed tcrFactory);
     event ProtocolSettingsUpdated();
 
     /**

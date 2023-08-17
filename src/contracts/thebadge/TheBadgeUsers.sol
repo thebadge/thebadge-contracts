@@ -98,7 +98,13 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
             if (verifyCreatorProtocolFeeSent == false) {
                 revert TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
             }
-            emit PaymentMade(feeCollector, msg.value, PaymentType.UserVerificationFee, controllerName, _msgSender());
+            emit UserVerificationPaymentMade(
+                feeCollector,
+                msg.value,
+                PaymentType.UserVerificationFee,
+                controllerName,
+                _msgSender()
+            );
         }
 
         IBadgeModelController(_badgeModelController.controller).submitUserVerification(

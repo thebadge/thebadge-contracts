@@ -119,8 +119,7 @@ contract TheBadgeStore is TheBadgeRoles {
         uint256 indexed badgeModelId
     );
 
-    // TODO
-    event PaymentMade(
+    event UserVerificationPaymentMade(
         address indexed recipient,
         uint256 amount,
         PaymentType indexed paymentType,

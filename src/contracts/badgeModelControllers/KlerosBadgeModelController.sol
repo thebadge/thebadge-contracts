@@ -36,6 +36,7 @@ contract KlerosBadgeModelController is
         tcrFactory = _tcrFactory;
 
         verifyUserProtocolFee = uint256(0);
+        emit Initialize(admin, _tcrFactory);
     }
 
     /*
