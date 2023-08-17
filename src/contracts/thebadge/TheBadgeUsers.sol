@@ -118,14 +118,24 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
      * @param controllerName id of the controller to execute the verification
      * @param verify true if the user should be verified, false otherwise
      */
-    // TODO Only called by ROLE_VERIFICATOR
     function executeUserVerification(
         address _user,
         string memory controllerName,
         bool verify
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) existingBadgeModelController(controllerName) onlyRegisteredUser(_user) {
+    ) public onlyRole(VERIFIER_ROLE) existingBadgeModelController(controllerName) onlyRegisteredUser(_user) {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
         IBadgeModelController(_badgeModelController.controller).executeUserVerification(_user, verify);
         emit UserVerificationExecuted(_user, controllerName, verify);
+    }
+
+    /**
+     * @notice Returns the fee to verify an user on the given controller
+     * @param controllerName id of the controller to execute the verification
+     */
+    function getVerificationFee(
+        string memory controllerName
+    ) public view existingBadgeModelController(controllerName) returns (uint256) {
+        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        return IBadgeModelController(_badgeModelController.controller).getVerifyUserProtocolFee();
     }
 }

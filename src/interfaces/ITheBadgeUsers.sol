@@ -13,5 +13,7 @@ interface ITheBadgeUsers {
 
     function submitUserVerification(string memory controllerName, string memory evidenceUri) external payable;
 
-    function executeUserVerification(address _user, string memory controllerName, bool verify) external; // TODO Only called by ROLE_VERIFICATOR
+    function executeUserVerification(address _user, string memory controllerName, bool verify) external;
+
+    function getVerificationFee(string memory controllerName) external view returns (uint256);
 }
