@@ -11,6 +11,13 @@ contract KlerosBadgeModelControllerStore {
     address public tcrFactory;
 
     using CappedMath for uint256;
+    uint256 internal verifyUserProtocolFee;
+
+    enum VerificationStatus {
+        VerificationSubmitted, // The user submitted a request to verify himself
+        Verified, // The verification was granted to the user
+        VerificationRejected // The verification was rejected after qhe submission
+    }
 
     /**
      * Struct to use as args to create a Kleros badge type strategy.
@@ -70,14 +77,23 @@ contract KlerosBadgeModelControllerStore {
         bool initialized;
     }
 
+    struct KlerosUser {
+        address user;
+        string userMetadata;
+        string verificationEvidence;
+        VerificationStatus verificationStatus;
+        bool initialized;
+    }
+
     /**
      * =========================
      * Store
      * =========================
      */
 
-    mapping(uint256 => KlerosBadgeModel) public klerosBadgeModel;
-    mapping(uint256 => KlerosBadge) public klerosBadge;
+    mapping(uint256 => KlerosBadgeModel) public klerosBadgeModels;
+    mapping(uint256 => KlerosBadge) public klerosBadges;
+    mapping(address => KlerosUser) public klerosUsers;
 
     /**
      * =========================
@@ -93,6 +109,7 @@ contract KlerosBadgeModelControllerStore {
     event MintKlerosBadge(uint256 indexed badgeId, string evidence);
     event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
     event DepositReturned(address indexed recipient, uint256 amount, uint256 indexed badgeId);
+    event ProtocolSettingsUpdated();
 
     /**
      * =========================
@@ -111,8 +128,13 @@ contract KlerosBadgeModelControllerStore {
     error KlerosBadgeModelController__badge__notInChallengeableStatus();
     error KlerosBadgeModelController__badge__klerosBadgeNotFound();
     error KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
+    error KlerosBadgeModelController__user__userVerificationAlreadyStarted();
+    error KlerosBadgeModelController__user__userVerificationNotStarted();
+    error KlerosBadgeModelController__user__userNotFound();
 
     error KlerosBadgeModelController__badge__depositReturnFailed();
+
+    error TheBadge__method_not_supported();
 
     /**
      * =========================
@@ -123,6 +145,17 @@ contract KlerosBadgeModelControllerStore {
     modifier onlyTheBadge() {
         if (address(theBadge) != msg.sender) {
             revert KlerosBadgeModelController__onlyTheBadge_senderNotTheBadge();
+        }
+        _;
+    }
+
+    modifier onlyUserOnVerification(address _user) {
+        KlerosUser storage _klerosUser = klerosUsers[_user];
+        if (!_klerosUser.initialized) {
+            revert KlerosBadgeModelController__user__userNotFound();
+        }
+        if (_klerosUser.verificationStatus != VerificationStatus.VerificationSubmitted) {
+            revert KlerosBadgeModelController__user__userVerificationNotStarted();
         }
         _;
     }
