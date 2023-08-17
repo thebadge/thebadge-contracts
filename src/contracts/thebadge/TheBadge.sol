@@ -44,6 +44,7 @@ contract TheBadge is
         _grantRole(PAUSER_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, minter);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(VERIFIER_ROLE, admin);
 
         feeCollector = _feeCollector;
         registerUserProtocolFee = uint256(0);
