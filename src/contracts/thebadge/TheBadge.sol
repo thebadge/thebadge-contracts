@@ -12,6 +12,7 @@ import { TheBadgeModels } from "./TheBadgeModels.sol";
 import { ITheBadge } from "../../interfaces/ITheBadge.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { TheBadgeUsers } from "./TheBadgeUsers.sol";
 
 /// @custom:security-contact hello@thebadge.com
 contract TheBadge is
@@ -22,6 +23,7 @@ contract TheBadge is
     UUPSUpgradeable,
     TheBadgeRoles,
     TheBadgeModels,
+    TheBadgeUsers,
     ITheBadge
 {
     // Allows to use current() and increment() for badgeModelIds or badgeIds
@@ -44,7 +46,7 @@ contract TheBadge is
         _grantRole(UPGRADER_ROLE, msg.sender);
 
         feeCollector = _feeCollector;
-        registerCreatorProtocolFee = uint256(0);
+        registerUserProtocolFee = uint256(0);
         createBadgeModelProtocolFee = uint256(0);
         mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
         emit Initialize(admin, minter);
@@ -95,7 +97,7 @@ contract TheBadge is
             if (creatorFeeSent == false) {
                 revert TheBadge__mint_creatorFeesPaymentFailed();
             }
-            emit PaymentMade(_badgeModel.creator, creatorPayment, PaymentType.CreatorFee, _badgeModelId);
+            emit PaymentMade(_badgeModel.creator, creatorPayment, PaymentType.CreatorMintFee, _badgeModelId);
         }
 
         // save asset info
@@ -207,7 +209,7 @@ contract TheBadge is
      * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
      */
     function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        registerCreatorProtocolFee = _registerCreatorValue;
+        registerUserProtocolFee = _registerCreatorValue;
         emit ProtocolSettingsUpdated();
     }
 
