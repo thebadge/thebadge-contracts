@@ -7,10 +7,7 @@ pragma solidity ^0.8.17;
  */
 
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
-import { TheBadgeRoles } from "./TheBadgeRoles.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
-import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
-import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { ITheBadgeUsers } from "../../interfaces/ITheBadgeUsers.sol";
 
 contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
