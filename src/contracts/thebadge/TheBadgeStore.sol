@@ -112,19 +112,14 @@ contract TheBadgeStore is TheBadgeRoles {
     event RemovedUser(address indexed creator, bool deleted);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     event BadgeModelUpdated(uint256 indexed badgeModelId);
+
     event PaymentMade(
         address indexed recipient,
+        address payer,
         uint256 amount,
         PaymentType indexed paymentType,
-        uint256 indexed badgeModelId
-    );
-
-    event UserVerificationPaymentMade(
-        address indexed recipient,
-        uint256 amount,
-        PaymentType indexed paymentType,
-        string controllerName,
-        address creatorAddress
+        uint256 indexed badgeModelId,
+        string controllerName
     );
 
     event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelId, uint256 newAmountInBps);

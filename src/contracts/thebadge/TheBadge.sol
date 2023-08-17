@@ -92,13 +92,20 @@ contract TheBadge is
             if (protocolFeeSent == false) {
                 revert TheBadge__mint_protocolFeesPaymentFailed();
             }
-            emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee, _badgeModelId);
+            emit PaymentMade(feeCollector, _msgSender(), theBadgeFee, PaymentType.ProtocolFee, _badgeModelId, "0x");
 
             (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
             if (creatorFeeSent == false) {
                 revert TheBadge__mint_creatorFeesPaymentFailed();
             }
-            emit PaymentMade(_badgeModel.creator, creatorPayment, PaymentType.CreatorMintFee, _badgeModelId);
+            emit PaymentMade(
+                _badgeModel.creator,
+                feeCollector,
+                creatorPayment,
+                PaymentType.CreatorMintFee,
+                _badgeModelId,
+                "0x"
+            );
         }
 
         // save asset info

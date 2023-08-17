@@ -22,6 +22,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
 
         if (msg.value > 0) {
             payable(feeCollector).transfer(msg.value);
+            emit PaymentMade(feeCollector, _msgSender(), msg.value, PaymentType.UserRegistrationFee, 0, "0x");
         }
 
         User storage user = registeredUsers[_msgSender()];
@@ -98,13 +99,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
             if (verifyCreatorProtocolFeeSent == false) {
                 revert TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
             }
-            emit UserVerificationPaymentMade(
-                feeCollector,
-                msg.value,
-                PaymentType.UserVerificationFee,
-                controllerName,
-                _msgSender()
-            );
+            emit PaymentMade(feeCollector, _msgSender(), msg.value, PaymentType.UserVerificationFee, 0, controllerName);
         }
 
         IBadgeModelController(_badgeModelController.controller).submitUserVerification(
