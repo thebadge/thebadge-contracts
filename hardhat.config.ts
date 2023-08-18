@@ -42,6 +42,13 @@ const config: HardhatUserConfig = {
       chainId: 5,
       gasPrice: 5000000000,
     },
+    sepolia: {
+      url: process.env.SEPOLIA_URL || "",
+      accounts: accounts,
+      timeout: 100000000,
+      chainId: 11155111,
+     // gasPrice: 5000000000,
+    },
     // gnosis: {
     //   url: process.env.GNOSIS_URL || "",
     //   accounts: accounts,
@@ -52,6 +59,7 @@ const config: HardhatUserConfig = {
     // Obtain one at https://etherscan.io/
     apiKey: {
       goerli: process.env.ETHERSCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
       gnosis: process.env.ETHERSCAN_API_KEY || "",
     },
   },

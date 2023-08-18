@@ -15,8 +15,10 @@
     "prettier:check": "prettier --check --config ./.prettierrc.yaml \"**/*.{js,json,md,sol,ts,yaml,yml}\"",
     "deploy:goerli": "hardhat run --network goerli ./script/01_deploy.ts",
     "upgrade:goerli": "hardhat run --network goerli ./script/02_upgrade.ts",
-    "deploy:gnosis": "hardhat run --network gnosis ./script/00_deploy.ts",
-    "verify:goerli": "hardhat run --network goerli ./script/03_verify.ts"
+    "verify:goerli": "hardhat run --network goerli ./script/03_verify.ts",
+    "deploy:sepolia": "hardhat run --network sepolia ./script/01_deploy.ts",
+    "upgrade:sepolia": "hardhat run --network sepolia ./script/02_upgrade.ts",
+    "verify:sepolia": "hardhat run --network sepolia ./script/03_verify.ts"
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",
