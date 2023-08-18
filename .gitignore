@@ -19,3 +19,4 @@ artifacts/
 # hardhat-tenderly plugin
 deployments
 EOF
+.idea
