@@ -68,10 +68,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
         emit SuspendedUser(_user, suspended);
     }
 
-    function removeUser() public view onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO remove the view modifier and implement
-        revert TheBadge__method_not_supported();
-    }
+
 
     /**
      * @notice Creates a request to Verify an user in an specific badgeModelController
@@ -125,14 +122,18 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
         emit UserVerificationExecuted(_user, controllerName, verify);
     }
 
-    /**
-     * @notice Returns the fee to verify an user on the given controller
-     * @param controllerName id of the controller to execute the verification
-     */
     function getVerificationFee(
         string memory controllerName
     ) public view existingBadgeModelController(controllerName) returns (uint256) {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
         return IBadgeModelController(_badgeModelController.controller).getVerifyUserProtocolFee();
+    }
+
+    function isUserVerified(
+        address _user,
+        string memory controllerName
+    ) public view existingBadgeModelController(controllerName) returns (bool) {
+        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        return IBadgeModelController(_badgeModelController.controller).isUserVerified(_user);
     }
 }

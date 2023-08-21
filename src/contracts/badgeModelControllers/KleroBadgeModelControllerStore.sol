@@ -152,7 +152,7 @@ contract KlerosBadgeModelControllerStore {
 
     modifier onlyUserOnVerification(address _user) {
         KlerosUser storage _klerosUser = klerosUsers[_user];
-        if (!_klerosUser.initialized) {
+        if (_klerosUser.initialized == false) {
             revert KlerosBadgeModelController__user__userNotFound();
         }
         if (_klerosUser.verificationStatus != VerificationStatus.VerificationSubmitted) {

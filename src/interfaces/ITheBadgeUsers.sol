@@ -9,11 +9,11 @@ interface ITheBadgeUsers {
 
     function suspendUser(address _creator, bool suspended) external;
 
-    function removeUser() external; // Method not implemented
-
     function submitUserVerification(string memory controllerName, string memory evidenceUri) external payable;
 
     function executeUserVerification(address _user, string memory controllerName, bool verify) external;
 
     function getVerificationFee(string memory controllerName) external view returns (uint256);
+
+    function isUserVerified(address _user, string memory controllerName) external view returns (bool);
 }

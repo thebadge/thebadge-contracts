@@ -41,4 +41,6 @@ interface IBadgeModelController {
     function getRemovalDepositValue(uint256 badgeId) external view returns (uint256);
 
     function getVerifyUserProtocolFee() external view returns (uint256);
+
+    function isUserVerified(address _user) external view returns (bool);
 }
