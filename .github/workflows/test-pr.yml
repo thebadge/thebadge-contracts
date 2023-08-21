@@ -1,34 +1,32 @@
-name: test
+name: "Tests - PR"
 
-on: workflow_dispatch
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+    branches:
+      - main
+      - develop
 
 env:
   FOUNDRY_PROFILE: ci
 
 jobs:
   check:
-    strategy:
-      fail-fast: true
-
     name: Foundry project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Run Forge tests
+        run: |
+          forge test -vv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 7487305
+        id: test
 
       - name: Run Forge build
         run: |
           forge --version
           forge build --sizes
         id: build
-
-      - name: Run Forge tests
-        run: |
-          forge test -vvv
-        id: test
