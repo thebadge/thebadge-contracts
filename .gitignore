@@ -12,8 +12,6 @@ node_modules/
 
 # Dotenv file
 .env
-
-cache/
 artifacts/
 
 # hardhat-tenderly plugin
