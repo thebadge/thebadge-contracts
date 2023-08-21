@@ -16,18 +16,17 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
      * @param _metadata IPFS url with the metadata of the user
      */
     function registerUser(string memory _metadata, bool _isCompany) public payable {
-        if (msg.value != registerUserProtocolFee) {
-            revert TheBadge__registerUser_wrongValue();
-        }
-
-        if (msg.value > 0) {
-            payable(feeCollector).transfer(msg.value);
-            emit PaymentMade(feeCollector, _msgSender(), msg.value, PaymentType.UserRegistrationFee, 0, "0x");
-        }
-
         User storage user = registeredUsers[_msgSender()];
         if (bytes(user.metadata).length != 0) {
             revert TheBadge__registerUser_alreadyRegistered();
+        }
+
+        if (msg.value != registerUserProtocolFee) {
+            revert TheBadge__registerUser_wrongValue();
+        }
+        if (msg.value > 0) {
+            payable(feeCollector).transfer(msg.value);
+            emit PaymentMade(feeCollector, _msgSender(), msg.value, PaymentType.UserRegistrationFee, 0, "0x");
         }
 
         user.metadata = _metadata;
