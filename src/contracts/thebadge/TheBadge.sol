@@ -12,6 +12,7 @@ import { TheBadgeModels } from "./TheBadgeModels.sol";
 import { ITheBadge } from "../../interfaces/ITheBadge.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { TheBadgeUsers } from "./TheBadgeUsers.sol";
 
 /// @custom:security-contact hello@thebadge.com
 contract TheBadge is
@@ -22,6 +23,7 @@ contract TheBadge is
     UUPSUpgradeable,
     TheBadgeRoles,
     TheBadgeModels,
+    TheBadgeUsers,
     ITheBadge
 {
     // Allows to use current() and increment() for badgeModelIds or badgeIds
@@ -42,9 +44,10 @@ contract TheBadge is
         _grantRole(PAUSER_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, minter);
         _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(VERIFIER_ROLE, admin);
 
         feeCollector = _feeCollector;
-        registerCreatorProtocolFee = uint256(0);
+        registerUserProtocolFee = uint256(0);
         createBadgeModelProtocolFee = uint256(0);
         mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
         emit Initialize(admin, minter);
@@ -89,13 +92,20 @@ contract TheBadge is
             if (protocolFeeSent == false) {
                 revert TheBadge__mint_protocolFeesPaymentFailed();
             }
-            emit PaymentMade(feeCollector, theBadgeFee, PaymentType.ProtocolFee, _badgeModelId);
+            emit PaymentMade(feeCollector, _msgSender(), theBadgeFee, PaymentType.ProtocolFee, _badgeModelId, "0x");
 
             (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
             if (creatorFeeSent == false) {
                 revert TheBadge__mint_creatorFeesPaymentFailed();
             }
-            emit PaymentMade(_badgeModel.creator, creatorPayment, PaymentType.CreatorFee, _badgeModelId);
+            emit PaymentMade(
+                _badgeModel.creator,
+                feeCollector,
+                creatorPayment,
+                PaymentType.CreatorMintFee,
+                _badgeModelId,
+                "0x"
+            );
         }
 
         // save asset info
@@ -207,7 +217,7 @@ contract TheBadge is
      * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
      */
     function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        registerCreatorProtocolFee = _registerCreatorValue;
+        registerUserProtocolFee = _registerCreatorValue;
         emit ProtocolSettingsUpdated();
     }
 
@@ -335,6 +345,10 @@ contract TheBadge is
         return (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
     }
 
+    /**
+     * @notice Given a badgeId, returns the id of its model if exists
+     * @param badgeId the id of the badge
+     */
     function getBadgeModelIdFromBadgeId(uint256 badgeId) internal view returns (uint256) {
         Badge storage _badge = badges[badgeId];
 

@@ -29,79 +29,19 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
 
         if (bytes(controllerName).length == 0) {
-            revert TheBadge__setBadgeModelController_emptyName();
+            revert TheBadge__addBadgeModelController_emptyName();
         }
 
         if (controllerAddress == address(0)) {
-            revert TheBadge__setBadgeModelController_notFound();
+            revert TheBadge__addBadgeModelController_notFound();
         }
 
         if (_badgeModelController.controller != address(0)) {
-            revert TheBadge__setBadgeModelController_alreadySet();
+            revert TheBadge__addBadgeModelController_alreadySet();
         }
 
         badgeModelControllers[controllerName] = BadgeModelController(controllerAddress, false, true);
         emit BadgeModelControllerAdded(controllerName, controllerAddress);
-    }
-
-    /**
-     * @notice Register a new badge model creator
-     * @param _metadata IPFS url
-     */
-    function registerBadgeModelCreator(string memory _metadata) public payable {
-        if (msg.value != registerCreatorProtocolFee) {
-            revert TheBadge__registerCreator_wrongValue();
-        }
-
-        if (msg.value > 0) {
-            payable(feeCollector).transfer(msg.value);
-        }
-
-        Creator storage creator = creators[_msgSender()];
-        if (bytes(creator.metadata).length != 0) {
-            revert TheBadge__registerCreator_alreadyRegistered();
-        }
-
-        creator.metadata = _metadata;
-        creator.initialized = true;
-        creator.suspended = false;
-
-        emit CreatorRegistered(_msgSender(), creator.metadata);
-    }
-
-    /**
-     * @notice Given a creator and new metadata, updates the metadata of the badge model creator
-     * @param _creator creator address
-     * @param _metadata IPFS url
-     */
-    function updateBadgeModelCreator(address _creator, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        Creator storage creator = creators[_creator];
-
-        if (bytes(creator.metadata).length == 0) {
-            revert TheBadge__updateCreator_notFound();
-        }
-
-        if (bytes(_metadata).length > 0) {
-            creator.metadata = _metadata;
-        }
-
-        emit UpdatedCreatorMetadata(_creator, _metadata);
-    }
-
-    function suspendBadgeModelCreator(address _creator, bool suspended) public onlyRole(PAUSER_ROLE) {
-        Creator storage creator = creators[_creator];
-
-        if (bytes(creator.metadata).length == 0) {
-            revert TheBadge__updateCreator_notFound();
-        }
-
-        creator.suspended = suspended;
-        emit SuspendedCreator(_creator, suspended);
-    }
-
-    function removeBadgeModelCreator() public view onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO remove the view modifier and implement
-        revert TheBadge__method_not_supported();
     }
 
     /*
@@ -112,23 +52,12 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
     function createBadgeModel(
         CreateBadgeModel memory args,
         bytes memory data
-    ) public payable onlyRegisteredBadgeModelCreator {
+    ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(args.controllerName) {
         // check values
         if (msg.value < createBadgeModelProtocolFee) {
             revert TheBadge__createBadgeModel_wrongValue();
         }
 
-        // verify valid controller
-        BadgeModelController storage _badgeModelController = badgeModelControllers[args.controllerName];
-        if (_badgeModelController.controller == address(0)) {
-            revert TheBadge__createBadgeModel_invalidController();
-        }
-        if (_badgeModelController.paused) {
-            revert TheBadge__createBadgeModel_controllerIsPaused();
-        }
-        if (_badgeModelController.initialized == false) {
-            revert TheBadge__createBadgeModel_controllerIsPaused();
-        }
         // move fees to collector
         if (msg.value > 0) {
             payable(feeCollector).transfer(msg.value);
@@ -145,8 +74,15 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
             "v1.0.0"
         );
 
+        User storage user = registeredUsers[_msgSender()];
+        if (user.isCreator == false) {
+            user.isCreator = true;
+            emit CreatorRegistered(_msgSender());
+        }
+
         emit BadgeModelCreated(badgeModelIdsCounter.current(), args.metadata);
         // TODO: According to the type of controller, modify the data.admin value
+        BadgeModelController storage _badgeModelController = badgeModelControllers[args.controllerName];
         IBadgeModelController(_badgeModelController.controller).createBadgeModel(badgeModelIdsCounter.current(), data);
         badgeModelIdsCounter.increment();
     }
@@ -224,7 +160,7 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
             revert TheBadge__badgeModel_badgeModelNotFound();
         }
 
-        Creator storage creator = creators[_badgeModel.creator];
+        User storage creator = registeredUsers[_badgeModel.creator];
         if (creator.suspended == true) {
             return true;
         }

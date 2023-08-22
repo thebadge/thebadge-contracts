@@ -7,14 +7,6 @@ interface ITheBadgeModels {
     // Write methods
     function addBadgeModelController(string memory controllerName, address controllerAddress) external;
 
-    function registerBadgeModelCreator(string memory _metadata) external payable;
-
-    function updateBadgeModelCreator(address _creator, string memory _metadata) external;
-
-    function suspendBadgeModelCreator(address _creator, bool suspended) external;
-
-    function removeBadgeModelCreator() external; // Method not implemented
-
     function createBadgeModel(TheBadgeStore.CreateBadgeModel memory args, bytes memory data) external payable;
 
     function updateBadgeModel(uint256 badgeModelId, uint256 mintCreatorFee, bool paused) external;

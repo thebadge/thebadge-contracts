@@ -1,18 +1,19 @@
 import hre, { run, upgrades } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import * as dotenv from "dotenv";
+import { Chains, contracts, isSupportedNetwork } from "./contracts";
 
 dotenv.config();
-// Todo refactor to something more fancy
-const { GOERLI_THE_BADGE_CONTRACT_ADDRESS, GOERLI_KLEROS_BADGE_MODEL_CONTROLLER_CONTRACT_ADDRESS } = process.env;
-if (!GOERLI_THE_BADGE_CONTRACT_ADDRESS || !GOERLI_KLEROS_BADGE_MODEL_CONTROLLER_CONTRACT_ADDRESS) {
-  throw new Error(`Contract addresses not set!`);
-}
-const theBadgeDeployedAddress = GOERLI_THE_BADGE_CONTRACT_ADDRESS;
-const klerosBadgeModelControllerDeployedAddress = GOERLI_KLEROS_BADGE_MODEL_CONTROLLER_CONTRACT_ADDRESS;
 
 async function main(hre: HardhatRuntimeEnvironment) {
-  const { ethers } = hre;
+  const { ethers, network } = hre;
+
+  const chainId = network.config.chainId;
+  if (!chainId || !isSupportedNetwork(chainId)) {
+    throw new Error(`Network: ${chainId} is not defined or is not supported`);
+  }
+  const theBadgeDeployedAddress = contracts.TheBadge.address[chainId as Chains];
+  const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
 
   const TheBadge = await ethers.getContractFactory("TheBadge");
   const KlerosController = await ethers.getContractFactory("KlerosBadgeModelController");

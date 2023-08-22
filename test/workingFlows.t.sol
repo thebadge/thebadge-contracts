@@ -8,9 +8,9 @@ import { Config, TheBadge, TheBadgeStore, KlerosBadgeModelController, KlerosBadg
 
 contract TheBadgeTestCore is Config {
     function test_createKlerosBadgeModel_shouldWork() public {
-        // register creator
+        // register User
         vm.prank(vegeta);
-        theBadge.registerBadgeModelCreator("ipfs://creatorMetadata.json");
+        theBadge.registerUser("ipfs://creatorMetadata.json", false);
 
         // Create badge model
         vm.prank(vegeta);
@@ -29,7 +29,7 @@ contract TheBadgeTestCore is Config {
 
         ) = theBadge.badgeModels(0);
 
-        address tcrList = klerosBadgeModelController.klerosBadgeModel(0);
+        address tcrList = klerosBadgeModelController.klerosBadgeModels(0);
 
         assertEq(vegeta, creator);
         assertEq(controllerName, badgeModel.controllerName);
@@ -43,9 +43,9 @@ contract TheBadgeTestCore is Config {
     }
 
     function test_mintKlerosBadge_shouldWork() public {
-        // register creator
+        // register user
         vm.prank(vegeta);
-        theBadge.registerBadgeModelCreator("ipfs://creatorMetadata.json");
+        theBadge.registerUser("ipfs://creatorMetadata.json", false);
 
         // Create badge model
         vm.prank(vegeta);
@@ -75,14 +75,14 @@ contract TheBadgeTestCore is Config {
         // at this moment, the badge is in review period, so balance has to be still 0.
         assertEq(theBadge.balanceOfBadgeModel(goku, badgeModelId), 0);
         // check status on KlerosBadgeModelController
-        (bytes32 itemID, address mintCallee, uint256 deposit, ) = klerosBadgeModelController.klerosBadge(badgeId);
+        (bytes32 itemID, address mintCallee, uint256 deposit, ) = klerosBadgeModelController.klerosBadges(badgeId);
         assertEq(itemID, keccak256(abi.encodePacked(evidenceUri)));
         assertEq(mintCallee, goku);
         assertEq(deposit, mintValue - badgeModel.mintCreatorFee);
         assertEq(theBadge.balanceOf(goku, badgeId), 0); // balanceOf is 0 until challenge period ends and claimKlerosBadge is called
 
         // move timestamp 1 unit after the challenge period has due.
-        address tcrList = klerosBadgeModelController.klerosBadgeModel(badgeModelId);
+        address tcrList = klerosBadgeModelController.klerosBadgeModels(badgeModelId);
         uint256 challengePeriodDuration = ILightGeneralizedTCR(tcrList).challengePeriodDuration();
         vm.warp(block.timestamp + challengePeriodDuration + 1);
         // claim badge

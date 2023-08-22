@@ -20,6 +20,13 @@ interface IBadgeModelController {
 
     function submitEvidence(uint256 badgeId, bytes calldata data) external;
 
+    // Write methods
+    function submitUserVerification(address _user, string memory userMetadata, string memory evidenceUri) external;
+
+    function executeUserVerification(address _user, bool verify) external;
+
+    function updateVerifyUserProtocolFee(uint256 _verifyUserProtocolFee) external;
+
     // Read
     function mintValue(uint256 badgeModelId) external view returns (uint256);
 
@@ -32,4 +39,8 @@ interface IBadgeModelController {
     function getChallengeDepositValue(uint256 badgeId) external view returns (uint256);
 
     function getRemovalDepositValue(uint256 badgeId) external view returns (uint256);
+
+    function getVerifyUserProtocolFee() external view returns (uint256);
+
+    function isUserVerified(address _user) external view returns (bool);
 }

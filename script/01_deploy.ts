@@ -1,31 +1,25 @@
 import * as dotenv from "dotenv";
 import hre, { upgrades } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { Chains, contracts, isSupportedNetwork } from "./contracts";
 
 dotenv.config();
 
-// Todo refactor to something more fancy
-const { GOERLI_LIGHT_GTCR_FACTORY_CONTRACT_ADDRESS, GOERLI_KLEROS_ARBITROR_CONTRACT_ADDRESS } = process.env;
-if (!GOERLI_LIGHT_GTCR_FACTORY_CONTRACT_ADDRESS || !GOERLI_KLEROS_ARBITROR_CONTRACT_ADDRESS) {
-  throw new Error(`Contract addresses not set!`);
-}
-
-const lightGTCRFactory = GOERLI_LIGHT_GTCR_FACTORY_CONTRACT_ADDRESS;
-const klerosArbitror = GOERLI_KLEROS_ARBITROR_CONTRACT_ADDRESS;
-
 async function main(hre: HardhatRuntimeEnvironment) {
-  const { ethers } = hre;
+  const { ethers, network } = hre;
   const [deployer] = await ethers.getSigners();
+
+  const chainId = network.config.chainId;
+  if (!chainId || !isSupportedNetwork(chainId)) {
+    throw new Error(`Network: ${chainId} is not defined or is not supported`);
+  }
+  const lightGTCRFactory = contracts.LightGTCRFactory.address[chainId as Chains];
+  const klerosArbitror = contracts.KlerosArbitror.address[chainId as Chains];
 
   // https://docs.openzeppelin.com/contracts/4.x/api/proxy#transparent_proxy
   // https://docs.openzeppelin.com/learn/upgrading-smart-contracts#upgrading-a-contract-via-plugins
-
   const TheBadge = await ethers.getContractFactory("TheBadge");
   const KlerosBadgeModelController = await ethers.getContractFactory("KlerosBadgeModelController");
-
-  // GBC:
-  // const lightGTCRFactory = "0x08e58Bc26CFB0d346bABD253A1799866F269805a";
-  // const klerosArbitror = "0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002";
 
   console.log("Deploying TheBadge...");
   const theBadge = await upgrades.deployProxy(TheBadge, [deployer.address, deployer.address, deployer.address]);

@@ -16,7 +16,7 @@ contract TheBadgeStore is TheBadgeRoles {
     // For example, if the badge is going to have a cost (it can be free) it has to be bigger than this variable.
     // badgeModel1 = mint cost is 4 because minBadgeMintValue is 4.
     // uint256 public minBadgeMintValue;
-    uint256 public registerCreatorProtocolFee;
+    uint256 public registerUserProtocolFee;
     uint256 public createBadgeModelProtocolFee;
     uint256 public mintBadgeProtocolDefaultFeeInBps;
     address public feeCollector;
@@ -28,23 +28,29 @@ contract TheBadgeStore is TheBadgeRoles {
      */
 
     /**
-     * @param metadata information related with the creator.
-     * @param isVerified if it was verified by TheBadge.
+     * @param metadata information related with the user.
+     * @param isCompany true if the user is a company, otherwise is false (default value)
+     * @param isCreator true if the user has created at least one badge model
+     * @param suspended If true, the user is not allowed to do any actions and if it's a creator, their badges are not mintable anymore.
+     * @param initialized When the struct is created its true, if the struct was never initialized, its false, used in validations
      */
-    struct Creator {
+    struct User {
         string metadata;
-        bool suspended; // If true, the creator is not allowed to do any actions and their badges are not minteable anymore.
-        bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
+        bool isCompany;
+        bool isCreator;
+        bool suspended;
+        bool initialized;
     }
 
     /**
      * @param controller the smart contract that controls a badge model.
      * @param paused if the controller is paused, no operations can be done
+     * @param initialized  When the struct is created its true, if the struct was never initialized, its false, used in validations
      */
     struct BadgeModelController {
         address controller;
         bool paused;
-        bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
+        bool initialized;
     }
 
     /**
@@ -80,10 +86,12 @@ contract TheBadgeStore is TheBadgeRoles {
 
     enum PaymentType {
         ProtocolFee,
-        CreatorFee
+        CreatorMintFee,
+        UserRegistrationFee,
+        UserVerificationFee
     }
 
-    mapping(address => Creator) public creators;
+    mapping(address => User) public registeredUsers;
     mapping(string => BadgeModelController) public badgeModelControllers;
     mapping(uint256 => BadgeModel) public badgeModels;
     mapping(uint256 => Badge) public badges;
@@ -95,18 +103,25 @@ contract TheBadgeStore is TheBadgeRoles {
      * =========================
      */
     event Initialize(address indexed admin, address indexed minter);
-    event CreatorRegistered(address indexed creator, string metadata);
-    event UpdatedCreatorMetadata(address indexed creator, string metadata);
-    event SuspendedCreator(address indexed creator, bool suspended);
-    event RemovedCreator(address indexed creator, bool deleted);
+    event UserRegistered(address indexed creator, string metadata);
+    event CreatorRegistered(address indexed creator);
+    event UserVerificationRequested(address indexed user, string metadata, string controllerName);
+    event UserVerificationExecuted(address indexed user, string controllerName, bool verify);
+    event UpdatedUserMetadata(address indexed creator, string metadata);
+    event SuspendedUser(address indexed creator, bool suspended);
+    event RemovedUser(address indexed creator, bool deleted);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     event BadgeModelUpdated(uint256 indexed badgeModelId);
+
     event PaymentMade(
         address indexed recipient,
+        address payer,
         uint256 amount,
         PaymentType indexed paymentType,
-        uint256 indexed badgeModelId
+        uint256 indexed badgeModelId,
+        string controllerName
     );
+
     event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelId, uint256 newAmountInBps);
     event ProtocolSettingsUpdated();
     event BadgeRequested(
@@ -124,22 +139,26 @@ contract TheBadgeStore is TheBadgeRoles {
      * =========================
      */
 
+    error TheBadge__onlyUser_userNotFound();
     error TheBadge__onlyCreator_senderIsNotACreator();
     error TheBadge__onlyCreator_creatorIsSuspended();
 
-    error TheBadge__registerCreator_wrongValue();
-    error TheBadge__registerCreator_alreadyRegistered();
-    error TheBadge__setBadgeModelController_emptyName();
-    error TheBadge__setBadgeModelController_notFound();
-    error TheBadge__setBadgeModelController_alreadySet();
+    error TheBadge__registerUser_wrongValue();
+    error TheBadge__registerUser_alreadyRegistered();
+    error TheBadge__addBadgeModelController_emptyName();
+    error TheBadge__addBadgeModelController_notFound();
+    error TheBadge__addBadgeModelController_alreadySet();
     error TheBadge__setControllerStatus_notFound();
-    error TheBadge__createBadgeModel_invalidController();
-    error TheBadge__createBadgeModel_controllerIsPaused();
+    error TheBadge__controller_invalidController();
+    error TheBadge__controller_controllerIsPaused();
     error TheBadge__createBadgeModel_wrongValue();
     error TheBadge__updateBadgeModel_notBadgeModelOwner();
     error TheBadge__updateBadgeModel_badgeModelNotFound();
     error TheBadge__badgeModel_badgeModelNotFound();
-    error TheBadge__updateCreator_notFound();
+    error TheBadge__updateUser_notFound();
+
+    error TheBadge__verifyUser_wrongValue();
+    error TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
 
     error TheBadge__SBT();
     error TheBadge__requestBadge_badgeModelNotFound();
@@ -162,22 +181,36 @@ contract TheBadgeStore is TheBadgeRoles {
      * Modifiers
      * =========================
      */
+    modifier onlyRegisteredUser(address _user) {
+        User storage user = registeredUsers[_user];
+        if (bytes(user.metadata).length == 0) {
+            revert TheBadge__onlyUser_userNotFound();
+        }
+        _;
+    }
+
     modifier onlyRegisteredBadgeModelCreator() {
-        Creator storage creator = creators[_msgSender()];
+        User storage creator = registeredUsers[_msgSender()];
         if (bytes(creator.metadata).length == 0) {
+            revert TheBadge__onlyCreator_senderIsNotACreator();
+        }
+        if (creator.isCreator == false) {
             revert TheBadge__onlyCreator_senderIsNotACreator();
         }
         _;
     }
 
     modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId) {
-        Creator storage creator = creators[_msgSender()];
+        User storage user = registeredUsers[_msgSender()];
         BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 
-        if (bytes(creator.metadata).length == 0) {
+        if (bytes(user.metadata).length == 0) {
             revert TheBadge__onlyCreator_senderIsNotACreator();
         }
-        if (creator.suspended == true) {
+        if (user.isCreator == false) {
+            revert TheBadge__onlyCreator_senderIsNotACreator();
+        }
+        if (user.suspended == true) {
             revert TheBadge__onlyCreator_creatorIsSuspended();
         }
         if (_badgeModel.creator == address(0)) {
@@ -193,7 +226,7 @@ contract TheBadgeStore is TheBadgeRoles {
         BadgeModel storage _badgeModel = badgeModels[badgeModelId];
         BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
-        Creator storage creator = creators[_badgeModel.creator];
+        User storage creator = registeredUsers[_badgeModel.creator];
 
         if (_badgeModel.creator == address(0)) {
             revert TheBadge__requestBadge_badgeModelNotFound();
@@ -214,10 +247,16 @@ contract TheBadgeStore is TheBadgeRoles {
         _;
     }
 
-    modifier onlyExistingBadge(uint256 badgeId) {
-        Creator storage creator = creators[_msgSender()];
-        if (bytes(creator.metadata).length == 0) {
-            revert TheBadge__onlyCreator_senderIsNotACreator();
+    modifier existingBadgeModelController(string memory controllerName) {
+        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        if (_badgeModelController.controller == address(0)) {
+            revert TheBadge__controller_invalidController();
+        }
+        if (_badgeModelController.initialized == false) {
+            revert TheBadge__controller_invalidController();
+        }
+        if (_badgeModelController.paused) {
+            revert TheBadge__controller_controllerIsPaused();
         }
         _;
     }
