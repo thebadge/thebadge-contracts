@@ -68,8 +68,6 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
         emit SuspendedUser(_user, suspended);
     }
 
-
-
     /**
      * @notice Creates a request to Verify an user in an specific badgeModelController
      * @param evidenceUri IPFS uri with the evidence required for the verification
