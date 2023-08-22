@@ -1,4 +1,4 @@
-import hre, { run, upgrades } from "hardhat";
+import hre, { upgrades } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import * as dotenv from "dotenv";
 import { Chains, contracts, isSupportedNetwork } from "./contracts";
