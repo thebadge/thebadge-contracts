@@ -1,4 +1,4 @@
-import hre, { run, upgrades } from "hardhat";
+import hre, { upgrades } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import * as dotenv from "dotenv";
 import { Chains, contracts, isSupportedNetwork } from "./contracts";
@@ -33,18 +33,6 @@ async function main(hre: HardhatRuntimeEnvironment) {
   console.log("TheBadge:", theBadge.address);
   console.log("klerosBadgeModelController:", klerosBadgeModelController.address);
   console.log("///////// UPGRADE finished /////////");
-
-  console.log("Verifying TheBadge contract on Etherscan...");
-  await run(`verify:verify`, {
-    address: theBadge.address,
-    constructorArguments: [],
-  });
-
-  console.log("Verifying KlerosBadgeModelController contract on Etherscan...");
-  await run(`verify:verify`, {
-    address: klerosBadgeModelController.address,
-    constructorArguments: [],
-  });
 }
 
 // We recommend this pattern to be able to use async/await everywhere
