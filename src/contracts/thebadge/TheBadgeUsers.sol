@@ -16,18 +16,17 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
      * @param _metadata IPFS url with the metadata of the user
      */
     function registerUser(string memory _metadata, bool _isCompany) public payable {
-        if (msg.value != registerUserProtocolFee) {
-            revert TheBadge__registerUser_wrongValue();
-        }
-
-        if (msg.value > 0) {
-            payable(feeCollector).transfer(msg.value);
-            emit PaymentMade(feeCollector, _msgSender(), msg.value, PaymentType.UserRegistrationFee, 0, "0x");
-        }
-
         User storage user = registeredUsers[_msgSender()];
         if (bytes(user.metadata).length != 0) {
             revert TheBadge__registerUser_alreadyRegistered();
+        }
+
+        if (msg.value != registerUserProtocolFee) {
+            revert TheBadge__registerUser_wrongValue();
+        }
+        if (msg.value > 0) {
+            payable(feeCollector).transfer(msg.value);
+            emit PaymentMade(feeCollector, _msgSender(), msg.value, PaymentType.UserRegistrationFee, 0, "0x");
         }
 
         user.metadata = _metadata;
@@ -67,11 +66,6 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
 
         user.suspended = suspended;
         emit SuspendedUser(_user, suspended);
-    }
-
-    function removeUser() public view onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO remove the view modifier and implement
-        revert TheBadge__method_not_supported();
     }
 
     /**
@@ -126,14 +120,18 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
         emit UserVerificationExecuted(_user, controllerName, verify);
     }
 
-    /**
-     * @notice Returns the fee to verify an user on the given controller
-     * @param controllerName id of the controller to execute the verification
-     */
     function getVerificationFee(
         string memory controllerName
     ) public view existingBadgeModelController(controllerName) returns (uint256) {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
         return IBadgeModelController(_badgeModelController.controller).getVerifyUserProtocolFee();
+    }
+
+    function isUserVerified(
+        address _user,
+        string memory controllerName
+    ) public view existingBadgeModelController(controllerName) returns (bool) {
+        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        return IBadgeModelController(_badgeModelController.controller).isUserVerified(_user);
     }
 }

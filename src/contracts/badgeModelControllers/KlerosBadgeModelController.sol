@@ -398,6 +398,21 @@ contract KlerosBadgeModelController is
     }
 
     /**
+     * @notice returns true if the given userAddress exists and has been verified, otherwise returns false.
+     * @param _user the userAddress
+     */
+    function isUserVerified(address _user) public view returns (bool) {
+        KlerosUser storage _klerosUser = klerosUsers[_user];
+        if (_klerosUser.initialized == false) {
+            return false;
+        }
+        if (_klerosUser.verificationStatus == VerificationStatus.Verified) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @notice Internal function that returns the TCR contract instance for a given klerosBadgeModel
      * @param badgeId the klerosBadgeId
      */
