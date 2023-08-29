@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 
-import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol";
+import { ILightGeneralizedTCR } from "../src/interfaces/facets/ILightGeneralizedTCR.sol";
 import { Config, TheBadge, TheBadgeStore, KlerosBadgeModelController, KlerosBadgeModelControllerStore } from "./utils/Config.sol";
 
 contract TheBadgeTestCore is Config {

@@ -6,9 +6,9 @@ pragma solidity ^0.8.17;
  * =========================
  */
 
-import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { IBadgeModelController } from "../../../interfaces/facets/IBadgeModelController.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
-import { ITheBadgeUsers } from "../../interfaces/ITheBadgeUsers.sol";
+import { ITheBadgeUsers } from "../../../interfaces/facets/ITheBadgeUsers.sol";
 
 contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
     /**

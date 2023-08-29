@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.17;
 
-import { ILightGeneralizedTCR } from "../../interfaces/ILightGeneralizedTCR.sol";
-import { ILightGTCRFactory } from "../../interfaces/ILightGTCRFactory.sol";
+import { ILightGeneralizedTCR } from "../../../interfaces/facets/ILightGeneralizedTCR.sol";
+import { ILightGTCRFactory } from "../../../interfaces/facets/ILightGTCRFactory.sol";
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { IBadgeModelController } from "../../../interfaces/facets/IBadgeModelController.sol";
 import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 import { KlerosBadgeModelControllerStore } from "./KleroBadgeModelControllerStore.sol";
-import { CappedMath } from "../../utils/CappedMath.sol";
-import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
+import { CappedMath } from "../../../utils/CappedMath.sol";
+import { IArbitrator } from "../../../../lib/erc-792/contracts/IArbitrator.sol";
 import { TheBadge } from "../thebadge/TheBadge.sol";
 
 contract KlerosBadgeModelController is

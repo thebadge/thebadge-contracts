@@ -9,9 +9,9 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
 import { TheBadgeModels } from "./TheBadgeModels.sol";
-import { ITheBadge } from "../../interfaces/ITheBadge.sol";
+import { ITheBadge } from "../../../interfaces/facets/ITheBadge.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { IBadgeModelController } from "../../../interfaces/facets/IBadgeModelController.sol";
 import { TheBadgeUsers } from "./TheBadgeUsers.sol";
 
 /// @custom:security-contact hello@thebadge.com

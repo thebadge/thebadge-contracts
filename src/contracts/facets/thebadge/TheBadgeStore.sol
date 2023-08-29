@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
-import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { IBadgeModelController } from "../../../interfaces/facets/IBadgeModelController.sol";
 
 // TODO: Maybe we can use abstract classes to type the store
 contract TheBadgeStore is TheBadgeRoles {

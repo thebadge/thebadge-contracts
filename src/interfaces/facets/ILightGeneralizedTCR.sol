@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.17;
 
-import { IArbitrator } from "../../lib/erc-792/contracts/IArbitrator.sol";
+import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 
 /**
  *  @title LightGeneralizedTCR

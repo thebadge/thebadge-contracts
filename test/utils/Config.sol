@@ -6,10 +6,10 @@ import "forge-std/Test.sol";
 import "../../lib/openzeppelin-contracts-upgradeable/contracts/utils/StringsUpgradeable.sol";
 import "../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 
-import { TheBadge } from "../../src/contracts/thebadge/TheBadge.sol";
-import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
-import { KlerosBadgeModelController } from "../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
-import { KlerosBadgeModelControllerStore } from "../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
+import { TheBadge } from "../../src/contracts/facets/thebadge/TheBadge.sol";
+import { TheBadgeStore } from "../../src/contracts/facets/thebadge/TheBadgeStore.sol";
+import { KlerosBadgeModelController } from "../../src/contracts/facets/badgeModelControllers/KlerosBadgeModelController.sol";
+import { KlerosBadgeModelControllerStore } from "../../src/contracts/facets/badgeModelControllers/KlerosBadgeModelController.sol";
 
 contract Config is Test {
     address public admin = vm.addr(1);
