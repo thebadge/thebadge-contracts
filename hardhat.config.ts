@@ -1,13 +1,13 @@
 import * as dotenv from "dotenv";
 
-import * as tdly from "@tenderly/hardhat-tenderly";
+import * as tenderly from "@tenderly/hardhat-tenderly";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
 
 dotenv.config();
-tdly.setup();
+tenderly.setup({ automaticVerifications: false });
 
 let accounts: any[] = [];
 if (process.env.WALLET_PRIVATE_KEY !== undefined) {
@@ -62,6 +62,11 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY || "",
       gnosis: process.env.ETHERSCAN_API_KEY || "",
     },
+  },
+  tenderly: {
+    project: process.env.TENDERLY_PROJECT || "",
+    username: process.env.TENDERLY_USERNAME || "",
+    privateVerification: false,
   },
 };
 
