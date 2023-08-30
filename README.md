@@ -77,10 +77,10 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 3) foundryup --branch master
 ```
 
+#### Install submodule dependencies:
+
 ```
-3) git submodule init para inicializar los submódulos
-4 - git submodule update para actualizar los submódulos y descargar sus contenidos
-5- yarn install para el repo principal, y luego yarn install para cada submodulo.
+forge install --no-commit
 ```
 
 For troubleshooting check the [fountry installation](https://book.getfoundry.sh/getting-started/installation) official guide.
