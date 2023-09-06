@@ -4,9 +4,11 @@ pragma solidity ^0.8.17;
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 // TODO: Maybe we can use abstract classes to type the store
-contract TheBadgeStore is TheBadgeRoles {
+contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter internal badgeModelIdsCounter;
@@ -95,20 +97,24 @@ contract TheBadgeStore is TheBadgeRoles {
     mapping(string => BadgeModelController) public badgeModelControllers;
     mapping(uint256 => BadgeModel) public badgeModels;
     mapping(uint256 => Badge) public badges;
-    mapping(uint256 => mapping(address => uint256[])) public badgeModelsByAccount;
+    mapping(uint256 => mapping(address => uint256[])) public userMintedBadgesByBadgeModel;
 
     /**
      * =========================
      * Events
      * =========================
      */
-    event Initialize(address indexed admin, address indexed minter);
+    event Initialize(address indexed admin);
     event UserRegistered(address indexed creator, string metadata);
     event CreatorRegistered(address indexed creator);
     event UserVerificationRequested(address indexed user, string metadata, string controllerName);
     event UserVerificationExecuted(address indexed user, string controllerName, bool verify);
+
     event UpdatedUserMetadata(address indexed creator, string metadata);
     event SuspendedUser(address indexed creator, bool suspended);
+
+    event UpdatedUser(address indexed userAddress, string metadata, bool suspended, bool isCreator, bool deleted);
+
     event RemovedUser(address indexed creator, bool deleted);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     event BadgeModelUpdated(uint256 indexed badgeModelId);
@@ -259,6 +265,150 @@ contract TheBadgeStore is TheBadgeRoles {
             revert TheBadge__controller_controllerIsPaused();
         }
         _;
+    }
+
+    function initialize(address admin, address _feeCollector) public initializer {
+        __Ownable_init();
+        feeCollector = _feeCollector;
+        registerUserProtocolFee = uint256(0);
+        createBadgeModelProtocolFee = uint256(0);
+        mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        emit Initialize(admin);
+    }
+
+    /**
+     * =========================
+     * Getters
+     * =========================
+     */
+    function getUser(address userAddress) external view returns (User memory) {
+        return registeredUsers[userAddress];
+    }
+
+    function getBadgeModelController(string memory controllerName) external view returns (BadgeModelController memory) {
+        return badgeModelControllers[controllerName];
+    }
+
+    function getBadgeModel(uint256 badgeModelId) external view returns (BadgeModel memory) {
+        return badgeModels[badgeModelId];
+    }
+
+    function getBadge(uint256 badgeId) external view returns (Badge memory) {
+        return badges[badgeId];
+    }
+
+    function getCurrentBadgeModelsIdCounter() external view returns (uint256) {
+        return badgeModelIdsCounter.current();
+    }
+
+    function getCurrentBadgeIdCounter() external view returns (uint256) {
+        return badgeIdsCounter.current();
+    }
+
+    function getUserMintedBadgesByBadgeModel(
+        uint256 badgeModelId,
+        address userAddress
+    ) external view returns (uint256[] memory) {
+        return userMintedBadgesByBadgeModel[badgeModelId][userAddress];
+    }
+
+    /**
+     * =========================
+     * Setters
+     * =========================
+     */
+    // TODO refactor to store updater role
+    function createUser(address userAddress, User memory newUser) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        User storage user = registeredUsers[userAddress];
+        if (bytes(user.metadata).length != 0) {
+            revert TheBadge__registerUser_alreadyRegistered();
+        }
+        registeredUsers[userAddress] = newUser;
+
+        emit UpdatedUser(userAddress, user.metadata, user.suspended, user.isCreator, false);
+    }
+
+    // todo refactor with modifier to check that the user actually exists
+    function updateUser(address userAddress, User memory updatedUser) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        User storage _user = registeredUsers[userAddress];
+        if (bytes(_user.metadata).length == 0) {
+            revert TheBadge__updateUser_notFound();
+        }
+        registeredUsers[userAddress] = updatedUser;
+
+        emit UpdatedUser(userAddress, updatedUser.metadata, updatedUser.suspended, updatedUser.isCreator, false);
+    }
+
+    // TODO refactor to store updater role & validate that
+    function addBadgeModelController(
+        string memory controllerName,
+        BadgeModelController memory badgeModelController
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        if (_badgeModelController.controller != address(0)) {
+            revert TheBadge__addBadgeModelController_alreadySet();
+        }
+        badgeModelControllers[controllerName] = badgeModelController;
+
+        emit BadgeModelControllerAdded(controllerName, badgeModelController.controller);
+    }
+
+    // TODO refactor to store updater role & validate that
+    function addBadgeModel(BadgeModel memory badgeModel, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        badgeModels[badgeModelIdsCounter.current()] = badgeModel;
+
+        emit BadgeModelCreated(badgeModelIdsCounter.current(), metadata);
+        badgeModelIdsCounter.increment();
+    }
+
+    function updateBadgeModel(
+        uint256 badgeModelId,
+        BadgeModel memory badgeModel
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        BadgeModel memory _badgeModel = badgeModels[badgeModelId];
+
+        if (_badgeModel.creator == address(0)) {
+            revert TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        _badgeModel = badgeModel;
+        emit BadgeModelUpdated(badgeModelId);
+    }
+
+    function addBadge(uint256 badgeId, Badge memory badge) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        uint256 _badgeModelId = badge.badgeModelId;
+        address _account = badge.account;
+        badges[badgeId] = badge;
+        userMintedBadgesByBadgeModel[_badgeModelId][_account].push(badgeId);
+        badgeIdsCounter.increment();
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _mintBadgeDefaultFee
+     * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
+     */
+    function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
+        emit ProtocolSettingsUpdated();
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _createBadgeModelValue
+     * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
+     */
+    function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        createBadgeModelProtocolFee = _createBadgeModelValue;
+        emit TheBadgeStore.ProtocolSettingsUpdated();
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _registerCreatorValue
+     * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
+     */
+    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        registerUserProtocolFee = _registerCreatorValue;
+        emit TheBadgeStore.ProtocolSettingsUpdated();
     }
 
     // tslint:disable-next-line:no-empty
