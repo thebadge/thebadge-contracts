@@ -31,7 +31,9 @@ contract TheBadgeUsersFacet is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable
     }
 
     modifier existingBadgeModelController(string memory controllerName) {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(controllerName);
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
         if (_badgeModelController.controller == address(0)) {
             revert LibTheBadgeUsers.TheBadge__controller_invalidController();
         }
@@ -44,9 +46,10 @@ contract TheBadgeUsersFacet is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable
         _;
     }
 
-    function initialize(TheBadgeStore badgeStore) public initializer {
+    function initialize(address admin, address badgeStore) public initializer {
         __Ownable_init();
-        _badgeStore = badgeStore;
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _badgeStore = TheBadgeStore(payable(badgeStore));
     }
 
     /**
@@ -123,7 +126,9 @@ contract TheBadgeUsersFacet is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable
         string memory controllerName,
         string memory evidenceUri
     ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(controllerName) {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(controllerName);
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
         TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
         string memory _controllerName = controllerName;
         address feeCollector = _badgeStore.feeCollector();
@@ -171,7 +176,9 @@ contract TheBadgeUsersFacet is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable
         string memory controllerName,
         bool verify
     ) public onlyRole(VERIFIER_ROLE) existingBadgeModelController(controllerName) onlyRegisteredUser(_user) {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(controllerName);
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
         IBadgeModelController(_badgeModelController.controller).executeUserVerification(_user, verify);
         emit LibTheBadgeUsers.UserVerificationExecuted(_user, controllerName, verify);
     }
@@ -179,7 +186,9 @@ contract TheBadgeUsersFacet is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable
     function getVerificationFee(
         string memory controllerName
     ) public view existingBadgeModelController(controllerName) returns (uint256) {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(controllerName);
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
         return IBadgeModelController(_badgeModelController.controller).getVerifyUserProtocolFee();
     }
 
@@ -187,7 +196,9 @@ contract TheBadgeUsersFacet is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable
         address _user,
         string memory controllerName
     ) public view existingBadgeModelController(controllerName) returns (bool) {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(controllerName);
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
         return IBadgeModelController(_badgeModelController.controller).isUserVerified(_user);
     }
 }

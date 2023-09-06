@@ -72,9 +72,10 @@ contract TheBadgeModelsFacet is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeab
         _;
     }
 
-    function initialize(TheBadgeStore badgeStore) public initializer {
+    function initialize(address admin, address badgeStore) public initializer {
         __Ownable_init();
-        _badgeStore = badgeStore;
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _badgeStore = TheBadgeStore(payable(badgeStore));
     }
 
     /**
