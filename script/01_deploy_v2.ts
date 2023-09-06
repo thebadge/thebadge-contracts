@@ -44,26 +44,26 @@ const deployMainContracts = async (
   const deployedAddresses = [];
 
   console.log("Deploying TheBadgeStore...");
-  // const TheBadgeStore = await ethers.getContractFactory("TheBadgeStore");
-  // const theBadgeStore = await upgrades.deployProxy(TheBadgeStore, [contractsAdmin, contractsAdmin]);
-  // await theBadgeStore.deployed();
-  // console.log(`TheBadgeStore deployed with address: ${theBadgeStore.address}`);
-  // deployedAddresses.push(["TheBadgeStore", theBadgeStore.address]);
-  const theBadgeStoreAddress = "0x825280D57c28A65095E9998F1eC8D4E3Db87565f";
+  const TheBadgeStore = await ethers.getContractFactory("TheBadgeStore");
+  const theBadgeStore = await upgrades.deployProxy(TheBadgeStore, [contractsAdmin, contractsAdmin]);
+  await theBadgeStore.deployed();
+  console.log(`TheBadgeStore deployed with address: ${theBadgeStore.address}`);
+  deployedAddresses.push(["TheBadgeStore", theBadgeStore.address]);
+  const theBadgeStoreAddress = theBadgeStore.address;
 
-  // console.log("Deploying TheBadgeUsers...");
-  // const TheBadgeUsers = await ethers.getContractFactory("TheBadgeUsersFacet");
-  // const theBadgeUsers = await upgrades.deployProxy(TheBadgeUsers, [contractsAdmin, theBadgeStoreAddress]);
-  // await theBadgeUsers.deployed();
-  // console.log(`TheBadgeUsers deployed with address: ${theBadgeUsers.address}`);
-  // deployedAddresses.push(["TheBadgeUsers", theBadgeUsers.address]);
-  //
-  // console.log("Deploying TheBadgeModels...");
-  // const TheBadgeModels = await ethers.getContractFactory("TheBadgeModelsFacet");
-  // const theBadgeModels = await upgrades.deployProxy(TheBadgeModels, [contractsAdmin, theBadgeStoreAddress]);
-  // await theBadgeModels.deployed();
-  // console.log(`TheBadgeModels deployed with address: ${theBadgeModels.address}`);
-  // deployedAddresses.push(["TheBadgeModels", theBadgeModels.address]);
+  console.log("Deploying TheBadgeUsers...");
+  const TheBadgeUsers = await ethers.getContractFactory("TheBadgeUsersFacet");
+  const theBadgeUsers = await upgrades.deployProxy(TheBadgeUsers, [contractsAdmin, theBadgeStoreAddress]);
+  await theBadgeUsers.deployed();
+  console.log(`TheBadgeUsers deployed with address: ${theBadgeUsers.address}`);
+  deployedAddresses.push(["TheBadgeUsers", theBadgeUsers.address]);
+
+  console.log("Deploying TheBadgeModels...");
+  const TheBadgeModels = await ethers.getContractFactory("TheBadgeModelsFacet");
+  const theBadgeModels = await upgrades.deployProxy(TheBadgeModels, [contractsAdmin, theBadgeStoreAddress]);
+  await theBadgeModels.deployed();
+  console.log(`TheBadgeModels deployed with address: ${theBadgeModels.address}`);
+  deployedAddresses.push(["TheBadgeModels", theBadgeModels.address]);
 
   console.log("Deploying TheBadge...");
   const TheBadge = await ethers.getContractFactory("TheBadgeFacet");
