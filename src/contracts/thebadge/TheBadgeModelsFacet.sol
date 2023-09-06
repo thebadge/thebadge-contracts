@@ -64,7 +64,7 @@ contract TheBadgeModelsFacet is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeab
             revert LibTheBadgeUsers.TheBadge__onlyCreator_creatorIsSuspended();
         }
         if (_badgeModel.creator == address(0)) {
-            revert LibTheBadgeModels.TheBadge__updateBadgeModel_badgeModelNotFound();
+            revert LibTheBadgeModels.TheBadge__badgeModelController_notFound();
         }
         if (_badgeModel.creator != _msgSender()) {
             revert LibTheBadgeModels.TheBadge__updateBadgeModel_notBadgeModelOwner();
@@ -96,7 +96,7 @@ contract TheBadgeModelsFacet is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeab
         }
 
         if (controllerAddress == address(0)) {
-            revert LibTheBadgeModels.TheBadge__addBadgeModelController_notFound();
+            revert LibTheBadgeModels.TheBadge__badgeModelController_notFound();
         }
 
         if (_badgeModelController.controller != address(0)) {

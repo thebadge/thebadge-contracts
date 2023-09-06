@@ -35,13 +35,13 @@ contract TheBadgeUsersFacet is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable
             controllerName
         );
         if (_badgeModelController.controller == address(0)) {
-            revert LibTheBadgeUsers.TheBadge__controller_invalidController();
+            revert LibTheBadge.TheBadge__controller_invalidController();
         }
         if (_badgeModelController.initialized == false) {
-            revert LibTheBadgeUsers.TheBadge__controller_invalidController();
+            revert LibTheBadge.TheBadge__controller_invalidController();
         }
         if (_badgeModelController.paused) {
-            revert LibTheBadgeUsers.TheBadge__controller_controllerIsPaused();
+            revert LibTheBadge.TheBadge__controller_controllerIsPaused();
         }
         _;
     }
