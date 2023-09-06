@@ -141,49 +141,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     /**
      * =========================
-     * Errors
-     * =========================
-     */
-
-    error TheBadge__onlyUser_userNotFound();
-    error TheBadge__onlyCreator_senderIsNotACreator();
-    error TheBadge__onlyCreator_creatorIsSuspended();
-
-    error TheBadge__registerUser_wrongValue();
-    error TheBadge__registerUser_alreadyRegistered();
-    error TheBadge__addBadgeModelController_emptyName();
-    error TheBadge__addBadgeModelController_notFound();
-    error TheBadge__addBadgeModelController_alreadySet();
-    error TheBadge__setControllerStatus_notFound();
-    error TheBadge__controller_invalidController();
-    error TheBadge__controller_controllerIsPaused();
-    error TheBadge__createBadgeModel_wrongValue();
-    error TheBadge__updateBadgeModel_notBadgeModelOwner();
-    error TheBadge__updateBadgeModel_badgeModelNotFound();
-    error TheBadge__badgeModel_badgeModelNotFound();
-    error TheBadge__updateUser_notFound();
-
-    error TheBadge__verifyUser_wrongValue();
-    error TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
-
-    error TheBadge__SBT();
-    error TheBadge__requestBadge_badgeModelNotFound();
-    error TheBadge__requestBadge_badgeModelIsSuspended();
-    error TheBadge__requestBadge_wrongValue();
-    error TheBadge__requestBadge_isPaused();
-    error TheBadge__requestBadge_controllerIsPaused();
-    error TheBadge__requestBadge_badgeNotFound();
-    error TheBadge__requestBadge_badgeNotClaimable();
-
-    error TheBadge__method_not_supported();
-
-    error TheBadge__mint_protocolFeesPaymentFailed();
-    error TheBadge__mint_creatorFeesPaymentFailed();
-
-    error TheBadge__calculateFee_protocolFeesInvalidValues();
-
-    /**
-     * =========================
      * Modifiers
      * =========================
      */
