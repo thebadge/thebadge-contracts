@@ -11,7 +11,8 @@ import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 import { KlerosBadgeModelControllerStore } from "./KleroBadgeModelControllerStore.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
-import { TheBadge } from "../thebadge/TheBadge.sol";
+import { TheBadgeFacet } from "../thebadge/TheBadgeFacet.sol";
+import { TheBadgeStore } from "../thebadge/TheBadgeStore.sol";
 
 contract KlerosBadgeModelController is
     Initializable,
@@ -20,22 +21,30 @@ contract KlerosBadgeModelController is
     TheBadgeRoles,
     IBadgeModelController
 {
+    TheBadgeStore private _badgeStore;
     using CappedMath for uint256;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
     constructor() initializer {}
 
-    function initialize(address admin, address _theBadge, address _arbitrator, address _tcrFactory) public initializer {
+    function initialize(
+        address admin,
+        address _theBadge,
+        address _arbitrator,
+        address _tcrFactory,
+        address badgeStore
+    ) public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(PAUSER_ROLE, msg.sender);
-        _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(PAUSER_ROLE, admin);
+        _grantRole(UPGRADER_ROLE, admin);
 
-        theBadge = TheBadge(payable(_theBadge));
+        theBadge = TheBadgeFacet(payable(_theBadge));
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
 
         verifyUserProtocolFee = uint256(0);
+        _badgeStore = TheBadgeStore(payable(badgeStore));
         emit Initialize(admin, _tcrFactory);
     }
 
@@ -417,7 +426,8 @@ contract KlerosBadgeModelController is
      * @param badgeId the klerosBadgeId
      */
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
-        (uint256 badgeModelId, , , ) = theBadge.badges(badgeId);
+        TheBadgeStore.Badge memory badge = _badgeStore.getBadge(badgeId);
+        uint256 badgeModelId = badge.badgeModelId;
         KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModels[badgeModelId];
         if (_klerosBadgeModel.tcrList == address(0)) {
             revert KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();

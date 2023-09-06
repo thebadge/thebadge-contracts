@@ -2,11 +2,11 @@
 pragma solidity 0.8.17;
 
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
-import { TheBadge } from "../thebadge/TheBadge.sol";
+import { TheBadgeFacet } from "../thebadge/TheBadgeFacet.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 
 contract KlerosBadgeModelControllerStore {
-    TheBadge public theBadge;
+    TheBadgeFacet public theBadge;
     IArbitrator public arbitrator;
     address public tcrFactory;
 
