@@ -133,23 +133,6 @@ contract TheBadgeModels is TheBadgeRoles, TheBadgeStore, ITheBadgeModels {
     }
 
     /*
-     * @notice given badgeModelId returns the cost of minting that badge (controller minting fee + mintCreatorFee)
-     * @param badgeModelId the id of the badgeModel
-     */
-    function mintValue(uint256 badgeModelId) public view returns (uint256) {
-        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
-
-        if (_badgeModel.creator == address(0)) {
-            revert TheBadge__badgeModel_badgeModelNotFound();
-        }
-
-        IBadgeModelController controller = IBadgeModelController(
-            badgeModelControllers[_badgeModel.controllerName].controller
-        );
-        return controller.mintValue(badgeModelId) + _badgeModel.mintCreatorFee;
-    }
-
-    /*
      * @notice Given a badgeModelId, returns true if the badgeModel is suspended (this means that his creator is also suspended), otherwise returns false
      * @param badgeModelId the id of the badgeModel
      */
