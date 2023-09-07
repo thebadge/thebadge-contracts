@@ -86,58 +86,11 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
-    enum PaymentType {
-        ProtocolFee,
-        CreatorMintFee,
-        UserRegistrationFee,
-        UserVerificationFee
-    }
-
     mapping(address => User) public registeredUsers;
     mapping(string => BadgeModelController) public badgeModelControllers;
     mapping(uint256 => BadgeModel) public badgeModels;
     mapping(uint256 => Badge) public badges;
     mapping(uint256 => mapping(address => uint256[])) public userMintedBadgesByBadgeModel;
-
-    /**
-     * =========================
-     * Events
-     * =========================
-     */
-    event Initialize(address indexed admin);
-    event UserRegistered(address indexed creator, string metadata);
-    event CreatorRegistered(address indexed creator);
-    event UserVerificationRequested(address indexed user, string metadata, string controllerName);
-    event UserVerificationExecuted(address indexed user, string controllerName, bool verify);
-
-    event UpdatedUserMetadata(address indexed creator, string metadata);
-    event SuspendedUser(address indexed creator, bool suspended);
-
-    event UpdatedUser(address indexed userAddress, string metadata, bool suspended, bool isCreator, bool deleted);
-
-    event RemovedUser(address indexed creator, bool deleted);
-    event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
-    event BadgeModelUpdated(uint256 indexed badgeModelId);
-
-    event PaymentMade(
-        address indexed recipient,
-        address payer,
-        uint256 amount,
-        PaymentType indexed paymentType,
-        uint256 indexed badgeModelId,
-        string controllerName
-    );
-
-    event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelId, uint256 newAmountInBps);
-    event ProtocolSettingsUpdated();
-    event BadgeRequested(
-        uint256 indexed badgeModelID,
-        uint256 indexed badgeID,
-        address indexed recipient,
-        address controller,
-        uint256 controllerBadgeId
-    );
-    event BadgeModelControllerAdded(string indexed controllerName, address indexed controllerAddress);
 
     /**
      * =========================
@@ -231,7 +184,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         createBadgeModelProtocolFee = uint256(0);
         mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        emit Initialize(admin);
+        emit LibTheBadge.Initialize(admin);
     }
 
     /**
@@ -283,7 +236,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
         registeredUsers[userAddress] = newUser;
 
-        emit UpdatedUser(userAddress, user.metadata, user.suspended, user.isCreator, false);
+        emit LibTheBadgeUsers.UpdatedUser(userAddress, user.metadata, user.suspended, user.isCreator, false);
     }
 
     // todo refactor with modifier to check that the user actually exists
@@ -294,7 +247,13 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
         registeredUsers[userAddress] = updatedUser;
 
-        emit UpdatedUser(userAddress, updatedUser.metadata, updatedUser.suspended, updatedUser.isCreator, false);
+        emit LibTheBadgeUsers.UpdatedUser(
+            userAddress,
+            updatedUser.metadata,
+            updatedUser.suspended,
+            updatedUser.isCreator,
+            false
+        );
     }
 
     // TODO refactor to store updater role & validate that
@@ -308,14 +267,14 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
         badgeModelControllers[controllerName] = badgeModelController;
 
-        emit BadgeModelControllerAdded(controllerName, badgeModelController.controller);
+        emit LibTheBadgeModels.BadgeModelControllerAdded(controllerName, badgeModelController.controller);
     }
 
     // TODO refactor to store updater role & validate that
     function addBadgeModel(BadgeModel memory badgeModel, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE) {
         badgeModels[badgeModelIdsCounter.current()] = badgeModel;
 
-        emit BadgeModelCreated(badgeModelIdsCounter.current(), metadata);
+        emit LibTheBadgeModels.BadgeModelCreated(badgeModelIdsCounter.current(), metadata);
         badgeModelIdsCounter.increment();
     }
 
@@ -330,7 +289,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
 
         _badgeModel = badgeModel;
-        emit BadgeModelUpdated(badgeModelId);
+        emit LibTheBadgeModels.BadgeModelUpdated(badgeModelId);
     }
 
     function addBadge(uint256 badgeId, Badge memory badge) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -347,7 +306,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      */
     function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
         mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
-        emit ProtocolSettingsUpdated();
+        emit LibTheBadge.ProtocolSettingsUpdated();
     }
 
     /*
