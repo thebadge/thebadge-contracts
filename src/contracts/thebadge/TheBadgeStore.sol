@@ -4,6 +4,10 @@ pragma solidity ^0.8.17;
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { LibTheBadge } from "../libraries/LibTheBadge.sol";
+import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
+import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
+import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -92,91 +96,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     mapping(uint256 => Badge) public badges;
     mapping(uint256 => mapping(address => uint256[])) public userMintedBadgesByBadgeModel;
 
-    /**
-     * =========================
-     * Modifiers
-     * =========================
-     */
-    modifier onlyRegisteredUser(address _user) {
-        User storage user = registeredUsers[_user];
-        if (bytes(user.metadata).length == 0) {
-            revert TheBadge__onlyUser_userNotFound();
-        }
-        _;
-    }
-
-    modifier onlyRegisteredBadgeModelCreator() {
-        User storage creator = registeredUsers[_msgSender()];
-        if (bytes(creator.metadata).length == 0) {
-            revert TheBadge__onlyCreator_senderIsNotACreator();
-        }
-        if (creator.isCreator == false) {
-            revert TheBadge__onlyCreator_senderIsNotACreator();
-        }
-        _;
-    }
-
-    modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId) {
-        User storage user = registeredUsers[_msgSender()];
-        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
-
-        if (bytes(user.metadata).length == 0) {
-            revert TheBadge__onlyCreator_senderIsNotACreator();
-        }
-        if (user.isCreator == false) {
-            revert TheBadge__onlyCreator_senderIsNotACreator();
-        }
-        if (user.suspended == true) {
-            revert TheBadge__onlyCreator_creatorIsSuspended();
-        }
-        if (_badgeModel.creator == address(0)) {
-            revert TheBadge__updateBadgeModel_badgeModelNotFound();
-        }
-        if (_badgeModel.creator != _msgSender()) {
-            revert TheBadge__updateBadgeModel_notBadgeModelOwner();
-        }
-        _;
-    }
-
-    modifier onlyBadgeModelMintable(uint256 badgeModelId) {
-        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
-        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
-        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
-        User storage creator = registeredUsers[_badgeModel.creator];
-
-        if (_badgeModel.creator == address(0)) {
-            revert TheBadge__requestBadge_badgeModelNotFound();
-        }
-
-        if (creator.suspended == true) {
-            revert TheBadge__requestBadge_badgeModelIsSuspended();
-        }
-
-        if (_badgeModel.paused) {
-            revert TheBadge__requestBadge_isPaused();
-        }
-
-        if (_badgeModelController.paused) {
-            revert TheBadge__requestBadge_controllerIsPaused();
-        }
-
-        _;
-    }
-
-    modifier existingBadgeModelController(string memory controllerName) {
-        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
-        if (_badgeModelController.controller == address(0)) {
-            revert TheBadge__controller_invalidController();
-        }
-        if (_badgeModelController.initialized == false) {
-            revert TheBadge__controller_invalidController();
-        }
-        if (_badgeModelController.paused) {
-            revert TheBadge__controller_controllerIsPaused();
-        }
-        _;
-    }
-
     function initialize(address admin, address _feeCollector) public initializer {
         __Ownable_init();
         feeCollector = _feeCollector;
@@ -232,7 +151,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     function createUser(address userAddress, User memory newUser) external onlyRole(DEFAULT_ADMIN_ROLE) {
         User storage user = registeredUsers[userAddress];
         if (bytes(user.metadata).length != 0) {
-            revert TheBadge__registerUser_alreadyRegistered();
+            revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
         }
         registeredUsers[userAddress] = newUser;
 
@@ -243,7 +162,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     function updateUser(address userAddress, User memory updatedUser) external onlyRole(DEFAULT_ADMIN_ROLE) {
         User storage _user = registeredUsers[userAddress];
         if (bytes(_user.metadata).length == 0) {
-            revert TheBadge__updateUser_notFound();
+            revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
         registeredUsers[userAddress] = updatedUser;
 
@@ -263,7 +182,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
         if (_badgeModelController.controller != address(0)) {
-            revert TheBadge__addBadgeModelController_alreadySet();
+            revert LibTheBadgeModels.TheBadge__addBadgeModelController_alreadySet();
         }
         badgeModelControllers[controllerName] = badgeModelController;
 
@@ -285,7 +204,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         BadgeModel memory _badgeModel = badgeModels[badgeModelId];
 
         if (_badgeModel.creator == address(0)) {
-            revert TheBadge__badgeModel_badgeModelNotFound();
+            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
         }
 
         _badgeModel = badgeModel;
@@ -315,7 +234,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      */
     function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
         createBadgeModelProtocolFee = _createBadgeModelValue;
-        emit TheBadgeStore.ProtocolSettingsUpdated();
+        emit LibTheBadge.ProtocolSettingsUpdated();
     }
 
     /*
@@ -324,7 +243,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      */
     function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
         registerUserProtocolFee = _registerCreatorValue;
-        emit TheBadgeStore.ProtocolSettingsUpdated();
+        emit LibTheBadge.ProtocolSettingsUpdated();
     }
 
     // tslint:disable-next-line:no-empty

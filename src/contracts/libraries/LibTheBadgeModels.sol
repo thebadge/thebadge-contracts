@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 
+import { TheBadgeStore } from "../thebadge/TheBadgeStore.sol";
+import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { LibTheBadge } from "../libraries/LibTheBadge.sol";
+
 library LibTheBadgeModels {
     /**
      * =========================

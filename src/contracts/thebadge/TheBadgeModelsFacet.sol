@@ -11,6 +11,7 @@ import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/C
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
+import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
 import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -39,19 +40,19 @@ contract TheBadgeModelsFacet is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeab
             controllerName
         );
         if (_badgeModelController.controller == address(0)) {
-            revert LibTheBadgeUsers.TheBadge__controller_invalidController();
+            revert LibTheBadge.TheBadge__controller_invalidController();
         }
         if (_badgeModelController.initialized == false) {
-            revert LibTheBadgeUsers.TheBadge__controller_invalidController();
+            revert LibTheBadge.TheBadge__controller_invalidController();
         }
         if (_badgeModelController.paused) {
-            revert LibTheBadgeUsers.TheBadge__controller_controllerIsPaused();
+            revert LibTheBadge.TheBadge__controller_controllerIsPaused();
         }
         _;
     }
 
-    modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
+    modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId, address _user) {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
 
         if (bytes(user.metadata).length == 0) {
@@ -64,9 +65,9 @@ contract TheBadgeModelsFacet is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeab
             revert LibTheBadgeUsers.TheBadge__onlyCreator_creatorIsSuspended();
         }
         if (_badgeModel.creator == address(0)) {
-            revert LibTheBadgeModels.TheBadge__badgeModelController_notFound();
+            revert LibTheBadgeModels.TheBadge__updateBadgeModel_badgeModelNotFound();
         }
-        if (_badgeModel.creator != _msgSender()) {
+        if (_badgeModel.creator != _user) {
             revert LibTheBadgeModels.TheBadge__updateBadgeModel_notBadgeModelOwner();
         }
         _;
@@ -96,7 +97,7 @@ contract TheBadgeModelsFacet is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeab
         }
 
         if (controllerAddress == address(0)) {
-            revert LibTheBadgeModels.TheBadge__badgeModelController_notFound();
+            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
         }
 
         if (_badgeModelController.controller != address(0)) {
@@ -169,7 +170,7 @@ contract TheBadgeModelsFacet is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeab
         uint256 badgeModelId,
         uint256 mintCreatorFee,
         bool paused
-    ) public onlyBadgeModelOwnerCreator(badgeModelId) {
+    ) public onlyBadgeModelOwnerCreator(badgeModelId, _msgSender()) {
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
 
         if (_badgeModel.creator == address(0)) {

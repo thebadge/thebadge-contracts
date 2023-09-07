@@ -8,15 +8,15 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
-import { TheBadgeModels } from "./TheBadgeModels.sol";
 import { ITheBadge } from "../../interfaces/ITheBadge.sol";
 import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
 import { ITheBadgeUsers } from "../../interfaces/ITheBadgeUsers.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
-import { TheBadgeUsers } from "./TheBadgeUsers.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
+import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
+import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 
 /// @custom:security-contact hello@thebadge.com
 contract TheBadgeFacet is
@@ -61,6 +61,28 @@ contract TheBadgeFacet is
             revert LibTheBadge.TheBadge__requestBadge_badgeModelIsSuspended();
         }
 
+        _;
+    }
+
+    modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId, address _user) {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+        TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
+
+        if (bytes(user.metadata).length == 0) {
+            revert LibTheBadgeUsers.TheBadge__onlyCreator_senderIsNotACreator();
+        }
+        if (user.isCreator == false) {
+            revert LibTheBadgeUsers.TheBadge__onlyCreator_senderIsNotACreator();
+        }
+        if (user.suspended == true) {
+            revert LibTheBadgeUsers.TheBadge__onlyCreator_creatorIsSuspended();
+        }
+        if (_badgeModel.creator == address(0)) {
+            revert LibTheBadgeModels.TheBadge__updateBadgeModel_badgeModelNotFound();
+        }
+        if (_badgeModel.creator != _user) {
+            revert LibTheBadgeModels.TheBadge__updateBadgeModel_notBadgeModelOwner();
+        }
         _;
     }
 

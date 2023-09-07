@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 
+import { TheBadgeStore } from "../thebadge/TheBadgeStore.sol";
+import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
+
 library LibTheBadgeUsers {
     /**
      * =========================
@@ -17,6 +21,7 @@ library LibTheBadgeUsers {
 
     error TheBadge__verifyUser_wrongValue();
     error TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
+
     /**
      * =========================
      * Events
@@ -30,4 +35,5 @@ library LibTheBadgeUsers {
     event UpdatedUserMetadata(address indexed creator, string metadata);
     event SuspendedUser(address indexed creator, bool suspended);
     event RemovedUser(address indexed creator, bool deleted);
+    event UpdatedUser(address indexed userAddress, string metadata, bool suspended, bool isCreator, bool deleted);
 }

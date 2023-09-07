@@ -33,11 +33,14 @@ library LibTheBadge {
     error TheBadge__mint_protocolFeesPaymentFailed();
     error TheBadge__mint_creatorFeesPaymentFailed();
     error TheBadge__calculateFee_protocolFeesInvalidValues();
+
+    event ProtocolSettingsUpdated();
     /**
      * =========================
      * Events
      * =========================
      */
+    event Initialize(address indexed admin);
     event PaymentMade(
         address indexed recipient,
         address payer,
