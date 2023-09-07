@@ -230,4 +230,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
 
         return false;
     }
+
+    // tslint:disable-next-line:no-empty
+    receive() external payable {}
 }

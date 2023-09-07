@@ -34,6 +34,11 @@ library LibTheBadge {
     error TheBadge__mint_creatorFeesPaymentFailed();
     error TheBadge__calculateFee_protocolFeesInvalidValues();
 
+    error TheBadge__theBadgeUsers_method_execution_failed();
+    error TheBadge__theBadgeModels_method_execution_failed();
+    error TheBadge__theBadge_method_execution_failed();
+    error TheBadge__proxy_method_not_supported();
+
     event ProtocolSettingsUpdated();
     /**
      * =========================

@@ -9,14 +9,10 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
 import { ITheBadge } from "../../interfaces/ITheBadge.sol";
-import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
-import { ITheBadgeUsers } from "../../interfaces/ITheBadgeUsers.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
-import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
-import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 
 /// @custom:security-contact hello@thebadge.com
 contract TheBadge is
@@ -487,4 +483,7 @@ contract TheBadge is
     ) public view override(ERC1155Upgradeable, AccessControlUpgradeable, ITheBadge) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
+
+    // tslint:disable-next-line:no-empty
+    receive() external payable {}
 }

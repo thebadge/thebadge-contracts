@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 /**
  * =========================
- * Contains all the logic related to badge models (but not badges)
+ * Contains all the logic related to TheBadge users
  * =========================
  */
 
@@ -207,4 +207,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
         );
         return IBadgeModelController(_badgeModelController.controller).isUserVerified(_user);
     }
+
+    // tslint:disable-next-line:no-empty
+    receive() external payable {}
 }
