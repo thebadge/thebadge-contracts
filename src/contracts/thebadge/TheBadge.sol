@@ -87,7 +87,8 @@ contract TheBadge is
     }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
+    // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
+    constructor() initializer {
         _disableInitializers();
     }
 

@@ -120,6 +120,12 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     mapping(uint256 => Badge) public badges;
     mapping(uint256 => mapping(address => uint256[])) public userMintedBadgesByBadgeModel;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
+    constructor() initializer {
+        _disableInitializers();
+    }
+
     function initialize(address admin, address _feeCollector) public initializer {
         __Ownable_init();
         feeCollector = _feeCollector;

@@ -73,6 +73,12 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         _;
     }
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
+    constructor() initializer {
+        _disableInitializers();
+    }
+
     function initialize(address admin, address badgeStore) public initializer {
         __Ownable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
