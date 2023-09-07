@@ -15,7 +15,7 @@ import { TheBadgeStore } from "./TheBadgeStore.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract TheBadgeUsersFacet is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
+contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
     TheBadgeStore private _badgeStore;
     /**
      * =========================

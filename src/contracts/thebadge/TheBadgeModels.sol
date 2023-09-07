@@ -17,7 +17,7 @@ import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract TheBadgeModelsFacet is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
+contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     TheBadgeStore private _badgeStore;
     // Allows to use current() and increment() for badgeModelIds or badgeIds
     using CountersUpgradeable for CountersUpgradeable.Counter;

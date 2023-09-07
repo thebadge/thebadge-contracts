@@ -11,7 +11,7 @@ import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 import { KlerosBadgeModelControllerStore } from "./KleroBadgeModelControllerStore.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
-import { TheBadgeFacet } from "../thebadge/TheBadgeFacet.sol";
+import {TheBadge} from "../thebadge/TheBadge.sol";
 import { TheBadgeStore } from "../thebadge/TheBadgeStore.sol";
 
 contract KlerosBadgeModelController is
@@ -39,7 +39,7 @@ contract KlerosBadgeModelController is
         _grantRole(PAUSER_ROLE, admin);
         _grantRole(UPGRADER_ROLE, admin);
 
-        theBadge = TheBadgeFacet(payable(_theBadge));
+        theBadge = TheBadge(payable(_theBadge));
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
 
