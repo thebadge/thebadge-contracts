@@ -29,6 +29,7 @@ contract TheBadge is
     ITheBadge
 {
     TheBadgeStore private _badgeStore;
+    string public name = "TheBadge";
     // Allows to use current() and increment() for badgeModelIds or badgeIds
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
@@ -61,28 +62,6 @@ contract TheBadge is
             revert LibTheBadge.TheBadge__requestBadge_badgeModelIsSuspended();
         }
 
-        _;
-    }
-
-    modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId, address _user) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
-        TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
-
-        if (bytes(user.metadata).length == 0) {
-            revert LibTheBadgeUsers.TheBadge__onlyCreator_senderIsNotACreator();
-        }
-        if (user.isCreator == false) {
-            revert LibTheBadgeUsers.TheBadge__onlyCreator_senderIsNotACreator();
-        }
-        if (user.suspended == true) {
-            revert LibTheBadgeUsers.TheBadge__onlyCreator_creatorIsSuspended();
-        }
-        if (_badgeModel.creator == address(0)) {
-            revert LibTheBadgeModels.TheBadge__updateBadgeModel_badgeModelNotFound();
-        }
-        if (_badgeModel.creator != _user) {
-            revert LibTheBadgeModels.TheBadge__updateBadgeModel_notBadgeModelOwner();
-        }
         _;
     }
 
