@@ -8,6 +8,7 @@ library LibTheBadgeStore {
      * =========================
      */
     error TheBadge__Store_OperationNotPermitted();
+    error TheBadge__Store_InvalidContractAddress();
 
     /**
      * =========================

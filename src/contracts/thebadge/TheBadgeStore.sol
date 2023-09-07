@@ -8,15 +8,39 @@ import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { LibTheBadgeStore } from "../libraries/LibTheBadgeStore.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 // TODO: Maybe we can use abstract classes to type the store
 contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
+    /**
+     * =========================
+     * Modifiers
+     * =========================
+     */
+
+    // Modifier to check if the caller is one of the permitted contracts
+    modifier onlyPermittedContract() {
+        bool isPermitted = false;
+        for (uint256 i = 0; i < permittedContracts.length; i++) {
+            if (permittedContracts[i] == msg.sender) {
+                isPermitted = true;
+                break;
+            }
+        }
+        if (!isPermitted) {
+            revert LibTheBadgeStore.TheBadge__Store_OperationNotPermitted();
+        }
+        _;
+    }
+
     CountersUpgradeable.Counter internal badgeModelIdsCounter;
     CountersUpgradeable.Counter internal badgeIdsCounter;
+    // List of permitted contract addresses
+    address[] public permittedContracts;
 
     // TODO: does this var makes sense? it was thought to define a min value to mint a badge.
     // For example, if the badge is going to have a cost (it can be free) it has to be bigger than this variable.
@@ -142,13 +166,17 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         return userMintedBadgesByBadgeModel[badgeModelId][userAddress];
     }
 
+    // Function to get the list of permitted contracts
+    function getPermittedContracts() public view returns (address[] memory) {
+        return permittedContracts;
+    }
+
     /**
      * =========================
      * Setters
      * =========================
      */
-    // TODO refactor to store updater role
-    function createUser(address userAddress, User memory newUser) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function createUser(address userAddress, User memory newUser) external onlyPermittedContract {
         User storage user = registeredUsers[userAddress];
         if (bytes(user.metadata).length != 0) {
             revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
@@ -159,7 +187,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     // todo refactor with modifier to check that the user actually exists
-    function updateUser(address userAddress, User memory updatedUser) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateUser(address userAddress, User memory updatedUser) external onlyPermittedContract {
         User storage _user = registeredUsers[userAddress];
         if (bytes(_user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
@@ -175,11 +203,10 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         );
     }
 
-    // TODO refactor to store updater role & validate that
     function addBadgeModelController(
         string memory controllerName,
         BadgeModelController memory badgeModelController
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyPermittedContract {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
         if (_badgeModelController.controller != address(0)) {
             revert LibTheBadgeModels.TheBadge__addBadgeModelController_alreadySet();
@@ -189,18 +216,14 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         emit LibTheBadgeModels.BadgeModelControllerAdded(controllerName, badgeModelController.controller);
     }
 
-    // TODO refactor to store updater role & validate that
-    function addBadgeModel(BadgeModel memory badgeModel, string memory metadata) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addBadgeModel(BadgeModel memory badgeModel, string memory metadata) external onlyPermittedContract {
         badgeModels[badgeModelIdsCounter.current()] = badgeModel;
 
         emit LibTheBadgeModels.BadgeModelCreated(badgeModelIdsCounter.current(), metadata);
         badgeModelIdsCounter.increment();
     }
 
-    function updateBadgeModel(
-        uint256 badgeModelId,
-        BadgeModel memory badgeModel
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateBadgeModel(uint256 badgeModelId, BadgeModel memory badgeModel) external onlyPermittedContract {
         BadgeModel memory _badgeModel = badgeModels[badgeModelId];
 
         if (_badgeModel.creator == address(0)) {
@@ -211,7 +234,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         emit LibTheBadgeModels.BadgeModelUpdated(badgeModelId);
     }
 
-    function addBadge(uint256 badgeId, Badge memory badge) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addBadge(uint256 badgeId, Badge memory badge) external onlyPermittedContract {
         uint256 _badgeModelId = badge.badgeModelId;
         address _account = badge.account;
         badges[badgeId] = badge;
@@ -223,7 +246,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * @notice Updates the value of the protocol: _mintBadgeDefaultFee
      * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
      */
-    function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyPermittedContract {
         mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
         emit LibTheBadge.ProtocolSettingsUpdated();
     }
@@ -232,7 +255,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * @notice Updates the value of the protocol: _createBadgeModelValue
      * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
      */
-    function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyPermittedContract {
         createBadgeModelProtocolFee = _createBadgeModelValue;
         emit LibTheBadge.ProtocolSettingsUpdated();
     }
@@ -241,9 +264,32 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * @notice Updates the value of the protocol: _registerCreatorValue
      * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
      */
-    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyPermittedContract {
         registerUserProtocolFee = _registerCreatorValue;
         emit LibTheBadge.ProtocolSettingsUpdated();
+    }
+
+    // Function to add a contract to the list of permitted contracts
+    function addPermittedContract(address _contractAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (_contractAddress == address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidContractAddress();
+        }
+        permittedContracts.push(_contractAddress);
+        emit LibTheBadgeStore.ContractAdded(_contractAddress);
+    }
+
+    // Function to remove a contract from the list of permitted contracts
+    function removePermittedContract(address _contractAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        for (uint256 i = 0; i < permittedContracts.length; i++) {
+            if (permittedContracts[i] == _contractAddress) {
+                // Swap with the last element and then pop
+                permittedContracts[i] = permittedContracts[permittedContracts.length - 1];
+                permittedContracts.pop();
+                emit LibTheBadgeStore.ContractRemoved(_contractAddress);
+                return;
+            }
+        }
+        revert("Contract not found in the list");
     }
 
     // tslint:disable-next-line:no-empty
