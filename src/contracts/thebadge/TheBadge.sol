@@ -98,8 +98,8 @@ contract TheBadge is
         __UUPSUpgradeable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(PAUSER_ROLE, msg.sender);
-        _grantRole(UPGRADER_ROLE, msg.sender);
+        _grantRole(PAUSER_ROLE, admin);
+        _grantRole(UPGRADER_ROLE, admin);
         _grantRole(VERIFIER_ROLE, admin);
         _badgeStore = TheBadgeStore(payable(badgeStore));
     }
