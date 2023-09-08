@@ -24,16 +24,19 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     // Modifier to check if the caller is one of the permitted contracts
     modifier onlyPermittedContract() {
+        // Check if the provided contract address exists in the permittedContracts array
         bool isPermitted = false;
         for (uint256 i = 0; i < permittedContracts.length; i++) {
-            if (permittedContracts[i] == msg.sender) {
+            if (permittedContracts[i] == _msgSender()) {
                 isPermitted = true;
                 break;
             }
         }
+
         if (!isPermitted) {
             revert LibTheBadgeStore.TheBadge__Store_OperationNotPermitted();
         }
+
         _;
     }
 
@@ -276,26 +279,58 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     // Function to add a contract to the list of permitted contracts
-    function addPermittedContract(address _contractAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addPermittedContract(
+        string memory _contractName,
+        address _contractAddress
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         if (_contractAddress == address(0)) {
             revert LibTheBadgeStore.TheBadge__Store_InvalidContractAddress();
         }
-        permittedContracts.push(_contractAddress);
-        emit LibTheBadgeStore.ContractAdded(_contractAddress);
+
+        // Check if the contract name already exists
+        if (contractAddresses[_contractName] != address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_ContractNameAlreadyExists();
+        }
+
+        // Add the contract name and address to the mapping
+        contractAddresses[_contractName] = _contractAddress;
+
+        emit LibTheBadgeStore.ContractAdded(_contractName, _contractAddress);
     }
 
     // Function to remove a contract from the list of permitted contracts
-    function removePermittedContract(address _contractAddress) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        for (uint256 i = 0; i < permittedContracts.length; i++) {
-            if (permittedContracts[i] == _contractAddress) {
-                // Swap with the last element and then pop
-                permittedContracts[i] = permittedContracts[permittedContracts.length - 1];
-                permittedContracts.pop();
-                emit LibTheBadgeStore.ContractRemoved(_contractAddress);
-                return;
-            }
+    function removePermittedContract(string memory _contractName) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        address contractAddress = contractAddresses[_contractName];
+
+        // Check if the contract name exists in the mapping
+        if (contractAddress == address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidContractName();
         }
-        revert("Contract not found in the list");
+
+        // Remove the contract name and address from the mapping
+        delete contractAddresses[_contractName];
+
+        emit LibTheBadgeStore.ContractRemoved(_contractName, contractAddress);
+    }
+
+    // Function to update a contract address based on the contract name
+    function updatePermittedContract(
+        string memory _contractName,
+        address _newContractAddress
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (_newContractAddress == address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidContractAddress();
+        }
+
+        // Check if the contract name exists in the mapping
+        if (contractAddresses[_contractName] == address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidContractName();
+        }
+
+        // Update the contract address associated with the contract name
+        contractAddresses[_contractName] = _newContractAddress;
+
+        emit LibTheBadgeStore.ContractUpdated(_contractName, _newContractAddress);
     }
 
     // tslint:disable-next-line:no-empty
