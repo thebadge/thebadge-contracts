@@ -48,7 +48,7 @@ const upgradeMainContracts = async (hre: HardhatRuntimeEnvironment): Promise<str
   deployedAddresses.push(["TheBadgeStore", theBadgeStore.address]);
 
   console.log("Upgrading TheBadgeUsers...");
-  const TheBadgeUsers = await ethers.getContractFactory("TheBadgeUsersFacet");
+  const TheBadgeUsers = await ethers.getContractFactory("TheBadgeUsers");
   const theBadgeUsersDeployment = contracts.TheBadgeUsers.address[chainId as Chains];
   const theBadgeUsers = await upgrades.upgradeProxy(theBadgeUsersDeployment, TheBadgeUsers);
   await theBadgeUsers.deployed();
@@ -56,7 +56,7 @@ const upgradeMainContracts = async (hre: HardhatRuntimeEnvironment): Promise<str
   deployedAddresses.push(["TheBadgeUsers", theBadgeUsers.address]);
 
   console.log("Upgrading TheBadgeModels...");
-  const TheBadgeModels = await ethers.getContractFactory("TheBadgeModelsFacet");
+  const TheBadgeModels = await ethers.getContractFactory("TheBadgeModels");
   const theBadgeModelsDeployment = contracts.TheBadgeModels.address[chainId as Chains];
   const theBadgeModels = await upgrades.upgradeProxy(theBadgeModelsDeployment, TheBadgeModels);
   await theBadgeModels.deployed();
@@ -64,12 +64,20 @@ const upgradeMainContracts = async (hre: HardhatRuntimeEnvironment): Promise<str
   deployedAddresses.push(["TheBadgeModels", theBadgeModels.address]);
 
   console.log("Upgrading TheBadge...");
-  const TheBadge = await ethers.getContractFactory("TheBadgeFacet");
+  const TheBadge = await ethers.getContractFactory("TheBadge");
   const theBadgeDeployment = contracts.TheBadge.address[chainId as Chains];
   const theBadge = await upgrades.upgradeProxy(theBadgeDeployment, TheBadge);
   await theBadge.deployed();
   console.log(`TheBadge Upgraded with address: ${theBadge.address}`);
   deployedAddresses.push(["TheBadge", theBadge.address]);
+
+  console.log("Upgrading TheBadgeProxy...");
+  const TheBadgeProxy = await ethers.getContractFactory("TheBadgeProxy");
+  const theBadgeProxyDeployment = contracts.TheBadgeProxy.address[chainId as Chains];
+  const theBadgeProxy = await upgrades.upgradeProxy(theBadgeProxyDeployment, TheBadgeProxy);
+  await theBadgeProxy.deployed();
+  console.log(`TheBadgeProxy Upgraded with address: ${theBadgeProxy.address}`);
+  deployedAddresses.push(["TheBadgeProxy", theBadgeProxy.address]);
 
   return deployedAddresses;
 };
