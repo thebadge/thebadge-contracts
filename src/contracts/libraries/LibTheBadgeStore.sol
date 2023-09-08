@@ -18,8 +18,11 @@ library LibTheBadgeStore {
      * =========================
      */
     // Event to log when a contract is added to the list
-    event ContractAdded(address indexed contractAddress);
+    event ContractAdded(string indexed _contractName, address indexed contractAddress);
 
     // Event to log when a contract is removed from the list
-    event ContractRemoved(address indexed contractAddress);
+    event ContractRemoved(string indexed _contractName, address indexed contractAddress);
+
+    // Event to log when a contract address is updated from the list
+    event ContractUpdated(string indexed _contractName, address indexed contractAddress);
 }
