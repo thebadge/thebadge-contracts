@@ -19,10 +19,10 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   // Deploys the four main contracts: TheBadgeStore, TheBadgeUsers, TheBadgeModels, TheBadge (in that order)
   console.log("Deploying Main contracts...");
-  const { mainContracts, theBadge, theBadgeStore } = await deployMainContracts(hre);
+  const { mainContracts, theBadgeProxy, theBadgeStore } = await deployMainContracts(hre);
 
   // Deploys all the controllers
-  const controllersAddresses = await deployControllers(hre, theBadge, theBadgeStore);
+  const controllersAddresses = await deployControllers(hre, theBadgeProxy, theBadgeStore);
 
   console.log("///////// Deployment finished /////////");
   for (const mainContractsAddresses of mainContracts) {
@@ -36,7 +36,7 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
 const deployMainContracts = async (
   hre: HardhatRuntimeEnvironment,
-): Promise<{ mainContracts: string[][]; theBadge: Contract; theBadgeStore: string }> => {
+): Promise<{ mainContracts: string[][]; theBadgeProxy: Contract; theBadgeStore: string }> => {
   const { ethers } = hre;
   const [deployer] = await ethers.getSigners();
   const contractsAdmin = deployer.address;
@@ -71,7 +71,26 @@ const deployMainContracts = async (
   console.log(`TheBadge deployed with address: ${theBadge.address}`);
   deployedAddresses.push(["TheBadge", theBadge.address]);
 
-  return { mainContracts: deployedAddresses, theBadge, theBadgeStore: theBadgeStoreAddress };
+  console.log("Deploying TheBadgeProxy...");
+  const TheBadgeProxy = await ethers.getContractFactory("TheBadgeProxy");
+  const theBadgeProxy = await upgrades.deployProxy(TheBadgeProxy, [
+    contractsAdmin,
+    theBadge.address,
+    theBadgeModels.address,
+    theBadgeUsers.address,
+  ]);
+  await theBadge.deployed();
+  console.log(`TheBadgeProxy deployed with address: ${theBadge.address}`);
+  deployedAddresses.push(["TheBadgeProxy", theBadge.address]);
+
+  console.log("Allowing TheBadge to access TheBadgeStore...");
+  await theBadgeStore.addPermittedContract("TheBadge", theBadge.address);
+  console.log("Allowing TheBadgeModels to access TheBadgeStore...");
+  await theBadgeStore.addPermittedContract("TheBadgeModels", theBadgeModels.address);
+  console.log("Allowing TheBadgeUsers to access TheBadgeStore...");
+  await theBadgeStore.addPermittedContract("TheBadgeUsers", theBadgeUsers.address);
+
+  return { mainContracts: deployedAddresses, theBadgeProxy, theBadgeStore: theBadgeStoreAddress };
 };
 
 const deployControllers = async (
