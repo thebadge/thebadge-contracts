@@ -22,18 +22,9 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * =========================
      */
 
-    // Modifier to check if the caller is one of the permitted contracts
+    // Modifier to check if the caller is one of the allowedContractAddresses contracts
     modifier onlyPermittedContract() {
-        // Check if the provided contract address exists in the permittedContracts array
-        bool isPermitted = false;
-        for (uint256 i = 0; i < permittedContracts.length; i++) {
-            if (permittedContracts[i] == _msgSender()) {
-                isPermitted = true;
-                break;
-            }
-        }
-
-        if (!isPermitted) {
+        if (allowedContractAddresses[_msgSender()] == false) {
             revert LibTheBadgeStore.TheBadge__Store_OperationNotPermitted();
         }
 
@@ -42,8 +33,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     CountersUpgradeable.Counter internal badgeModelIdsCounter;
     CountersUpgradeable.Counter internal badgeIdsCounter;
-    // List of permitted contract addresses
-    address[] public permittedContracts;
 
     // TODO: does this var makes sense? it was thought to define a min value to mint a badge.
     // For example, if the badge is going to have a cost (it can be free) it has to be bigger than this variable.
@@ -117,6 +106,9 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
+    // Mapping to store contract addresses by name
+    mapping(address => bool) public allowedContractAddresses;
+    mapping(string => address) public allowedContractAddressesByContractName;
     mapping(address => User) public registeredUsers;
     mapping(string => BadgeModelController) public badgeModelControllers;
     mapping(uint256 => BadgeModel) public badgeModels;
@@ -173,11 +165,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         address userAddress
     ) external view returns (uint256[] memory) {
         return userMintedBadgesByBadgeModel[badgeModelId][userAddress];
-    }
-
-    // Function to get the list of permitted contracts
-    function getPermittedContracts() public view returns (address[] memory) {
-        return permittedContracts;
     }
 
     /**
@@ -288,19 +275,20 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
 
         // Check if the contract name already exists
-        if (contractAddresses[_contractName] != address(0)) {
+        if (allowedContractAddressesByContractName[_contractName] != address(0)) {
             revert LibTheBadgeStore.TheBadge__Store_ContractNameAlreadyExists();
         }
 
         // Add the contract name and address to the mapping
-        contractAddresses[_contractName] = _contractAddress;
+        allowedContractAddressesByContractName[_contractName] = _contractAddress;
+        allowedContractAddresses[_contractAddress] = true;
 
         emit LibTheBadgeStore.ContractAdded(_contractName, _contractAddress);
     }
 
     // Function to remove a contract from the list of permitted contracts
     function removePermittedContract(string memory _contractName) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        address contractAddress = contractAddresses[_contractName];
+        address contractAddress = allowedContractAddressesByContractName[_contractName];
 
         // Check if the contract name exists in the mapping
         if (contractAddress == address(0)) {
@@ -308,7 +296,8 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
 
         // Remove the contract name and address from the mapping
-        delete contractAddresses[_contractName];
+        delete allowedContractAddressesByContractName[_contractName];
+        delete allowedContractAddresses[contractAddress];
 
         emit LibTheBadgeStore.ContractRemoved(_contractName, contractAddress);
     }
@@ -323,12 +312,15 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
 
         // Check if the contract name exists in the mapping
-        if (contractAddresses[_contractName] == address(0)) {
+        address oldContractAddress = allowedContractAddressesByContractName[_contractName];
+        if (oldContractAddress == address(0)) {
             revert LibTheBadgeStore.TheBadge__Store_InvalidContractName();
         }
 
         // Update the contract address associated with the contract name
-        contractAddresses[_contractName] = _newContractAddress;
+        delete allowedContractAddresses[oldContractAddress];
+        allowedContractAddressesByContractName[_contractName] = _newContractAddress;
+        allowedContractAddresses[_newContractAddress] = true;
 
         emit LibTheBadgeStore.ContractUpdated(_contractName, _newContractAddress);
     }
