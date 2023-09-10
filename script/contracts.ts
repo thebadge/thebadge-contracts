@@ -7,14 +7,35 @@ export enum Chains {
 export const contracts = {
   TheBadge: {
     address: {
-      [Chains.goerli]: "0xa86D1858D751A2f71231456fC136c4837aD76009",
-      [Chains.sepolia]: "0xec5b3e3E14D201D47fC7b7fE0F6Fc7833783A248",
+      [Chains.goerli]: "0x51729CD6225C5B5dCfe381F509d0d61249158861",
+      [Chains.sepolia]: "",
+      [Chains.gnosis]: "",
+    },
+  },
+  TheBadgeStore: {
+    address: {
+      [Chains.goerli]: "0xb1e7057bCbe6ad78569B27cC887afCC565f578fd",
+      [Chains.sepolia]: "",
+      [Chains.gnosis]: "",
+    },
+  },
+  TheBadgeUsers: {
+    address: {
+      [Chains.goerli]: "0xBc3bb63D2295e4eC65c22BdD89F7Cc287dcD93Bb",
+      [Chains.sepolia]: "",
+      [Chains.gnosis]: "",
+    },
+  },
+  TheBadgeModels: {
+    address: {
+      [Chains.goerli]: "0x3cbdE3195832c01639704536079F7328e79f0206",
+      [Chains.sepolia]: "",
       [Chains.gnosis]: "",
     },
   },
   KlerosBadgeModelController: {
     address: {
-      [Chains.goerli]: "0x05Ca615D389aE3B0f06e5B8BB04232e008Dd763d",
+      [Chains.goerli]: "0x12d7F60b66AbF21Ca93B7b1D4a22F6c2Ade8deEB",
       [Chains.sepolia]: "0x22980e9C08e79C5b63aEbeEAF9Bc3292025BbE66",
       [Chains.gnosis]: "",
     },
