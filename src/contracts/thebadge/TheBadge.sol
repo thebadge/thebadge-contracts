@@ -25,7 +25,7 @@ contract TheBadge is
     ITheBadge
 {
     TheBadgeStore private _badgeStore;
-    string public name = "TheBadge";
+    string public name;
     // Allows to use current() and increment() for badgeModelIds or badgeIds
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
@@ -78,6 +78,7 @@ contract TheBadge is
         _grantRole(UPGRADER_ROLE, admin);
         _grantRole(VERIFIER_ROLE, admin);
         _badgeStore = TheBadgeStore(payable(badgeStore));
+        name = "TheBadge";
     }
 
     /*
