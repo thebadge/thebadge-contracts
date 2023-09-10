@@ -12,13 +12,6 @@ async function main() {
     throw new Error(`Network: ${chainId} is not defined or is not supported`);
   }
 
-  console.log("Verifying TheBadgeProxy contract on Etherscan...");
-  const theBadgeProxyDeployedAddress = contracts.TheBadgeProxy.address[chainId as Chains];
-  await run(`verify:verify`, {
-    address: theBadgeProxyDeployedAddress,
-    constructorArguments: [],
-  });
-
   console.log("Verifying TheBadge contract on Etherscan...");
   const theBadgeDeployedAddress = contracts.TheBadge.address[chainId as Chains];
   await run(`verify:verify`, {
@@ -57,11 +50,6 @@ async function main() {
   // Verify on tenderly
   console.log("Verifying contracts on Tenderly...");
   const deployedContracts = [
-    {
-      name: "TheBadgeProxy",
-      address: await getImplementationAddress(ethers.provider, theBadgeProxyDeployedAddress),
-      network: chainId.toString(),
-    },
     {
       name: "TheBadge",
       address: await getImplementationAddress(ethers.provider, theBadgeDeployedAddress),
