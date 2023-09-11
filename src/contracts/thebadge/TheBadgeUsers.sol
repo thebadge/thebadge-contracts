@@ -16,7 +16,27 @@ import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/O
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
-    TheBadgeStore private _badgeStore;
+    TheBadgeStore public _badgeStore;
+
+    /**
+     * =========================
+     * Events
+     * =========================
+     */
+    event UserRegistered(address indexed user, string metadata);
+    event CreatorRegistered(address indexed user);
+    event UserVerificationRequested(address indexed user, string metadata, string controllerName);
+    event UserVerificationExecuted(address indexed user, string controllerName, bool verify);
+    event UpdatedUser(address indexed userAddress, string metadata, bool suspended, bool isCreator, bool deleted);
+    event PaymentMade(
+        address indexed recipient,
+        address payer,
+        uint256 amount,
+        LibTheBadge.PaymentType indexed paymentType,
+        uint256 indexed badgeModelId,
+        string controllerName
+    );
+
     /**
      * =========================
      * Modifiers
@@ -75,7 +95,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
         if (msg.value > 0) {
             address feeCollector = _badgeStore.feeCollector();
             payable(feeCollector).transfer(msg.value);
-            emit LibTheBadge.PaymentMade(
+            emit PaymentMade(
                 feeCollector,
                 _msgSender(),
                 msg.value,
@@ -92,15 +112,16 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
         user.initialized = true;
 
         _badgeStore.createUser(_msgSender(), user);
+        emit UserRegistered(_msgSender(), user.metadata);
     }
 
     /**
      * @notice Given an user and new metadata, updates the metadata of the user
-     * @param _user user address
+     * @param _userAddress user address
      * @param _metadata IPFS url
      */
-    function updateUser(address _user, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+    function updateUser(address _userAddress, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_userAddress);
 
         if (bytes(user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
@@ -110,18 +131,44 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
             user.metadata = _metadata;
         }
 
-        _badgeStore.updateUser(_msgSender(), user);
+        _badgeStore.updateUser(_userAddress, user);
+        emit UpdatedUser(_userAddress, user.metadata, user.suspended, user.isCreator, false);
     }
 
-    function suspendUser(address _user, bool suspended) public onlyRole(PAUSER_ROLE) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+    /**
+     * @notice Suspends or remove the suspension to the user, avoiding him to create badge models
+     * @param _userAddress user address
+     * @param suspended boolean
+     */
+    function suspendUser(address _userAddress, bool suspended) public onlyRole(PAUSER_ROLE) {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_userAddress);
 
         if (bytes(user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
 
         user.suspended = suspended;
-        _badgeStore.updateUser(_msgSender(), user);
+        _badgeStore.updateUser(_userAddress, user);
+    }
+
+    /**
+     * @notice Given an user, sets him as creator
+     * @param _userAddress user address
+     */
+    function makeUserCreator(address _userAddress) public onlyRole(USER_MANAGER_ROLE) {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_userAddress);
+
+        if (bytes(user.metadata).length == 0) {
+            revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
+        }
+
+        if (user.isCreator == true) {
+            revert LibTheBadgeUsers.TheBadge__onlyCreator_senderIsAlreadyACreator();
+        }
+
+        user.isCreator = true;
+        _badgeStore.updateUser(_userAddress, user);
+        emit UpdatedUser(_userAddress, user.metadata, user.suspended, user.isCreator, false);
     }
 
     /**
@@ -153,7 +200,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
             if (verifyCreatorProtocolFeeSent == false) {
                 revert LibTheBadgeUsers.TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
             }
-            emit LibTheBadge.PaymentMade(
+            emit PaymentMade(
                 feeCollector,
                 _msgSender(),
                 msg.value,
@@ -168,7 +215,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
             user.metadata,
             evidenceUri
         );
-        emit LibTheBadgeUsers.UserVerificationRequested(_msgSender(), evidenceUri, controllerName);
+        emit UserVerificationRequested(_msgSender(), evidenceUri, controllerName);
     }
 
     /**
@@ -186,7 +233,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
             controllerName
         );
         IBadgeModelController(_badgeModelController.controller).executeUserVerification(_user, verify);
-        emit LibTheBadgeUsers.UserVerificationExecuted(_user, controllerName, verify);
+        emit UserVerificationExecuted(_user, controllerName, verify);
     }
 
     function getVerificationFee(
