@@ -18,6 +18,20 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     /**
      * =========================
+     * Events
+     * =========================
+     */
+    // Event to log when a contract is added to the list
+    event ContractAdded(string indexed _contractName, address indexed contractAddress);
+
+    // Event to log when a contract is removed from the list
+    event ContractRemoved(string indexed _contractName, address indexed contractAddress);
+
+    // Event to log when a contract address is updated from the list
+    event ContractUpdated(string indexed _contractName, address indexed contractAddress);
+
+    /**
+     * =========================
      * Modifiers
      * =========================
      */
@@ -128,7 +142,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         createBadgeModelProtocolFee = uint256(0);
         mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        emit LibTheBadge.Initialize(admin);
+        // TODO Verify that this works if we call this outside
     }
 
     /**
@@ -178,8 +192,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
             revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
         }
         registeredUsers[userAddress] = newUser;
-
-        emit LibTheBadgeUsers.UpdatedUser(userAddress, user.metadata, user.suspended, user.isCreator, false);
     }
 
     // todo refactor with modifier to check that the user actually exists
@@ -189,14 +201,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
             revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
         registeredUsers[userAddress] = updatedUser;
-
-        emit LibTheBadgeUsers.UpdatedUser(
-            userAddress,
-            updatedUser.metadata,
-            updatedUser.suspended,
-            updatedUser.isCreator,
-            false
-        );
     }
 
     function addBadgeModelController(
@@ -208,26 +212,24 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
             revert LibTheBadgeModels.TheBadge__addBadgeModelController_alreadySet();
         }
         badgeModelControllers[controllerName] = badgeModelController;
-
-        emit LibTheBadgeModels.BadgeModelControllerAdded(controllerName, badgeModelController.controller);
     }
 
-    function addBadgeModel(BadgeModel memory badgeModel, string memory metadata) external onlyPermittedContract {
+    function addBadgeModel(BadgeModel memory badgeModel) external onlyPermittedContract {
         badgeModels[badgeModelIdsCounter.current()] = badgeModel;
 
-        emit LibTheBadgeModels.BadgeModelCreated(badgeModelIdsCounter.current(), metadata);
         badgeModelIdsCounter.increment();
     }
 
     function updateBadgeModel(uint256 badgeModelId, BadgeModel memory badgeModel) external onlyPermittedContract {
-        BadgeModel memory _badgeModel = badgeModels[badgeModelId];
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 
         if (_badgeModel.creator == address(0)) {
             revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
         }
 
-        _badgeModel = badgeModel;
-        emit LibTheBadgeModels.BadgeModelUpdated(badgeModelId);
+        _badgeModel.mintProtocolFee = badgeModel.mintProtocolFee;
+        _badgeModel.mintCreatorFee = badgeModel.mintCreatorFee;
+        _badgeModel.paused = badgeModel.paused;
     }
 
     function addBadge(uint256 badgeId, Badge memory badge) external onlyPermittedContract {
@@ -244,7 +246,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      */
     function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyPermittedContract {
         mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
-        emit LibTheBadge.ProtocolSettingsUpdated();
     }
 
     /*
@@ -253,7 +254,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      */
     function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyPermittedContract {
         createBadgeModelProtocolFee = _createBadgeModelValue;
-        emit LibTheBadge.ProtocolSettingsUpdated();
     }
 
     /*
@@ -262,7 +262,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      */
     function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyPermittedContract {
         registerUserProtocolFee = _registerCreatorValue;
-        emit LibTheBadge.ProtocolSettingsUpdated();
     }
 
     // Function to add a contract to the list of permitted contracts
@@ -283,7 +282,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         allowedContractAddressesByContractName[_contractName] = _contractAddress;
         allowedContractAddresses[_contractAddress] = true;
 
-        emit LibTheBadgeStore.ContractAdded(_contractName, _contractAddress);
+        emit ContractAdded(_contractName, _contractAddress);
     }
 
     // Function to remove a contract from the list of permitted contracts
@@ -299,7 +298,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         delete allowedContractAddressesByContractName[_contractName];
         delete allowedContractAddresses[contractAddress];
 
-        emit LibTheBadgeStore.ContractRemoved(_contractName, contractAddress);
+        emit ContractRemoved(_contractName, contractAddress);
     }
 
     // Function to update a contract address based on the contract name
@@ -322,7 +321,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         allowedContractAddressesByContractName[_contractName] = _newContractAddress;
         allowedContractAddresses[_newContractAddress] = true;
 
-        emit LibTheBadgeStore.ContractUpdated(_contractName, _newContractAddress);
+        emit ContractUpdated(_contractName, _newContractAddress);
     }
 
     // tslint:disable-next-line:no-empty
