@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
-import { Contract } from "ethers";
+import { Contract, utils } from "ethers";
+import { keccak256 } from "ethers/lib/utils";
 import hre, { upgrades } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Chains, contracts, isSupportedNetwork } from "./contracts";
@@ -19,24 +20,30 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   // Deploys the four main contracts: TheBadgeStore, TheBadgeUsers, TheBadgeModels, TheBadge (in that order)
   console.log("Deploying Main contracts...");
-  const { mainContracts, theBadge, theBadgeStore } = await deployMainContracts(hre);
+  const { mainContracts, theBadge, theBadgeUsers, theBadgeModels, theBadgeStore } = await deployMainContracts(hre);
 
   // Deploys all the controllers
-  const controllersAddresses = await deployControllers(hre, theBadge, theBadgeStore);
+  const controllersAddresses = await deployControllers(hre, { theBadge, theBadgeModels, theBadgeUsers, theBadgeStore });
 
   console.log("///////// Deployment finished /////////");
   for (const mainContractsAddresses of mainContracts) {
-    console.log(`${mainContractsAddresses[0]}-${mainContractsAddresses[1]}`);
+    console.log(`${mainContractsAddresses[0]}: ${mainContractsAddresses[1]}`);
   }
   for (const controllerAddress of controllersAddresses) {
-    console.log(`${controllerAddress[0]}-${controllerAddress[1]}`);
+    console.log(`${controllerAddress[0]}: ${controllerAddress[1]}`);
   }
   console.log("///////// Deployment finished /////////");
 }
 
 const deployMainContracts = async (
   hre: HardhatRuntimeEnvironment,
-): Promise<{ mainContracts: string[][]; theBadge: Contract; theBadgeStore: string }> => {
+): Promise<{
+  mainContracts: string[][];
+  theBadge: any;
+  theBadgeModels: any;
+  theBadgeUsers: any;
+  theBadgeStore: any;
+}> => {
   const { ethers } = hre;
   const [deployer] = await ethers.getSigners();
   const contractsAdmin = deployer.address;
@@ -59,7 +66,11 @@ const deployMainContracts = async (
 
   console.log("Deploying TheBadgeModels...");
   const TheBadgeModels = await ethers.getContractFactory("TheBadgeModels");
-  const theBadgeModels = await upgrades.deployProxy(TheBadgeModels, [contractsAdmin, theBadgeStoreAddress]);
+  const theBadgeModels = await upgrades.deployProxy(TheBadgeModels, [
+    contractsAdmin,
+    theBadgeStoreAddress,
+    theBadgeUsers.address,
+  ]);
   await theBadgeModels.deployed();
   console.log(`TheBadgeModels deployed with address: ${theBadgeModels.address}`);
   deployedAddresses.push(["TheBadgeModels", theBadgeModels.address]);
@@ -77,14 +88,32 @@ const deployMainContracts = async (
   await theBadgeStore.addPermittedContract("TheBadgeModels", theBadgeModels.address);
   console.log("Allowing TheBadgeUsers to access TheBadgeStore...");
   await theBadgeStore.addPermittedContract("TheBadgeUsers", theBadgeUsers.address);
+  console.log("Grant userManager role to TheBadgeModels on TheBadgeUsers...");
+  const managerRole = keccak256(utils.toUtf8Bytes("USER_MANAGER_ROLE"));
+  await theBadgeUsers.grantRole(managerRole, theBadgeModels.address);
 
-  return { mainContracts: deployedAddresses, theBadge, theBadgeStore: theBadgeStoreAddress };
+  return {
+    mainContracts: deployedAddresses,
+    theBadge,
+    theBadgeModels,
+    theBadgeUsers,
+    theBadgeStore,
+  };
 };
 
 const deployControllers = async (
   hre: HardhatRuntimeEnvironment,
-  theBadgeProxy: Contract,
-  theBadgeStore: string,
+  {
+    theBadge,
+    theBadgeModels,
+    theBadgeStore,
+    theBadgeUsers,
+  }: {
+    theBadge: Contract;
+    theBadgeModels: Contract;
+    theBadgeUsers: Contract;
+    theBadgeStore: Contract;
+  },
 ): Promise<string[][]> => {
   const { ethers, network } = hre;
   const [deployer] = await ethers.getSigners();
@@ -98,17 +127,19 @@ const deployControllers = async (
   const contractsAdmin = deployer.address;
   const klerosBadgeModelController = await upgrades.deployProxy(KlerosBadgeModelController, [
     contractsAdmin,
-    theBadgeProxy.address,
+    theBadge.address,
+    theBadgeModels.address,
+    theBadgeUsers.address,
     klerosArbitror,
     lightGTCRFactory,
-    theBadgeStore,
+    theBadgeStore.address,
   ]);
   await klerosBadgeModelController.deployed();
   console.log(`KlerosBadgeModelController deployed with address: ${klerosBadgeModelController.address}`);
 
   console.log("Adding KlerosBadgeModelController to TheBadge...");
-  theBadgeProxy.connect(deployer);
-  await theBadgeProxy.addBadgeModelController("kleros", klerosBadgeModelController.address);
+  theBadgeModels.connect(deployer);
+  await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address);
   return [["klerosBadgeModelController", klerosBadgeModelController.address]];
 };
 
