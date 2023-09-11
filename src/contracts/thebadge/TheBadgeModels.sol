@@ -16,11 +16,22 @@ import { TheBadgeStore } from "./TheBadgeStore.sol";
 import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { TheBadgeUsers } from "./TheBadgeUsers.sol";
 
 contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
-    TheBadgeStore private _badgeStore;
+    TheBadgeStore public _badgeStore;
+    TheBadgeUsers public _theBadgeUsers;
     // Allows to use current() and increment() for badgeModelIds or badgeIds
     using CountersUpgradeable for CountersUpgradeable.Counter;
+
+    /**
+     * =========================
+     * Events
+     * =========================
+     */
+    event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
+    event BadgeModelUpdated(uint256 indexed badgeModelId);
+    event BadgeModelControllerAdded(string indexed controllerName, address indexed controllerAddress);
 
     /**
      * =========================
@@ -79,10 +90,11 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(address admin, address badgeStore) public initializer {
+    function initialize(address admin, address badgeStore, address badgeUsers) public initializer {
         __Ownable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _badgeStore = TheBadgeStore(payable(badgeStore));
+        _theBadgeUsers = TheBadgeUsers(payable(badgeUsers));
     }
 
     /**
@@ -115,6 +127,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         _badgeModelController.paused = false;
 
         _badgeStore.addBadgeModelController(controllerName, _badgeModelController);
+        emit BadgeModelControllerAdded(controllerName, controllerAddress);
     }
 
     /*
@@ -151,13 +164,12 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         );
 
         uint256 currentBadgeModelId = _badgeStore.getCurrentBadgeModelsIdCounter();
-        _badgeStore.addBadgeModel(_newBadgeModel, args.metadata);
+        _badgeStore.addBadgeModel(_newBadgeModel);
+        emit BadgeModelCreated(currentBadgeModelId, args.metadata);
         TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
         if (user.isCreator == false) {
-            user.isCreator = true;
-            _badgeStore.updateUser(_msgSender(), user);
+            _theBadgeUsers.makeUserCreator(_msgSender());
         }
-
         // TODO: According to the type of controller, modify the data.admin value
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             args.controllerName
@@ -187,6 +199,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         _badgeModel.paused = paused;
 
         _badgeStore.updateBadgeModel(badgeModelId, _badgeModel);
+        emit BadgeModelUpdated(badgeModelId);
     }
 
     function suspendBadgeModel() public view onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -209,7 +222,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
 
         _badgeModel.mintProtocolFee = feeInBps;
         _badgeStore.updateBadgeModel(badgeModelId, _badgeModel);
-        // emit LibDiamond.BadgeModelProtocolFeeUpdated(badgeModelId, feeInBps);
+        emit BadgeModelUpdated(badgeModelId);
     }
 
     /*

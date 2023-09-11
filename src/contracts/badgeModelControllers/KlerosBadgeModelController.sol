@@ -11,8 +11,10 @@ import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 import { KlerosBadgeModelControllerStore } from "./KleroBadgeModelControllerStore.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
-import {TheBadge} from "../thebadge/TheBadge.sol";
+import { TheBadge } from "../thebadge/TheBadge.sol";
+import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
 import { TheBadgeStore } from "../thebadge/TheBadgeStore.sol";
+import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
 
 contract KlerosBadgeModelController is
     Initializable,
@@ -33,6 +35,8 @@ contract KlerosBadgeModelController is
     function initialize(
         address admin,
         address _theBadge,
+        address _theBadgeModels,
+        address _theBadgeUsers,
         address _arbitrator,
         address _tcrFactory,
         address badgeStore
@@ -40,11 +44,11 @@ contract KlerosBadgeModelController is
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);
         _grantRole(UPGRADER_ROLE, admin);
-
         theBadge = TheBadge(payable(_theBadge));
+        theBadgeModels = TheBadgeModels(payable(_theBadgeModels));
+        theBadgeUsers = TheBadgeUsers(payable(_theBadgeUsers));
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
-
         verifyUserProtocolFee = uint256(0);
         _badgeStore = TheBadgeStore(payable(badgeStore));
         emit Initialize(admin, _tcrFactory);
@@ -64,7 +68,7 @@ contract KlerosBadgeModelController is
      * @param badgeModelId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
-    function createBadgeModel(uint256 badgeModelId, bytes calldata data) public onlyTheBadge {
+    function createBadgeModel(uint256 badgeModelId, bytes calldata data) public onlyTheBadgeModels {
         KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModels[badgeModelId];
         if (_klerosBadgeModel.tcrList != address(0)) {
             revert KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
@@ -246,7 +250,7 @@ contract KlerosBadgeModelController is
         address _user,
         string memory userMetadata,
         string memory evidenceUri
-    ) public onlyTheBadge {
+    ) public onlyTheBadgeUsers {
         KlerosUser storage _klerosUser = klerosUsers[_user];
 
         if (_klerosUser.initialized) {
@@ -265,7 +269,10 @@ contract KlerosBadgeModelController is
      * @param _user address of the user
      * @param verify true if the user should be verified, otherwise false
      */
-    function executeUserVerification(address _user, bool verify) public onlyTheBadge onlyUserOnVerification(_user) {
+    function executeUserVerification(
+        address _user,
+        bool verify
+    ) public onlyTheBadgeUsers onlyUserOnVerification(_user) {
         KlerosUser storage _klerosUser = klerosUsers[_user];
         _klerosUser.verificationStatus = verify ? VerificationStatus.Verified : VerificationStatus.VerificationRejected;
     }

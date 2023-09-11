@@ -24,10 +24,33 @@ contract TheBadge is
     TheBadgeRoles,
     ITheBadge
 {
-    TheBadgeStore private _badgeStore;
+    TheBadgeStore public _badgeStore;
     string public name;
     // Allows to use current() and increment() for badgeModelIds or badgeIds
     using CountersUpgradeable for CountersUpgradeable.Counter;
+
+    /**
+     * =========================
+     * Events
+     * =========================
+     */
+    event Initialize(address indexed admin);
+    event PaymentMade(
+        address indexed recipient,
+        address payer,
+        uint256 amount,
+        LibTheBadge.PaymentType indexed paymentType,
+        uint256 indexed badgeModelId,
+        string controllerName
+    );
+    event BadgeRequested(
+        uint256 indexed badgeModelID,
+        uint256 indexed badgeID,
+        address indexed recipient,
+        address controller,
+        uint256 controllerBadgeId
+    );
+    event ProtocolSettingsUpdated();
 
     /**
      * =========================
@@ -79,6 +102,7 @@ contract TheBadge is
         _grantRole(VERIFIER_ROLE, admin);
         _badgeStore = TheBadgeStore(payable(badgeStore));
         name = "TheBadge";
+        emit Initialize(admin);
     }
 
     /*
@@ -105,37 +129,9 @@ contract TheBadge is
         }
 
         // distribute fees
-        TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
-        address feeCollector = _badgeStore.feeCollector();
+        TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
         if (_badgeModel.mintCreatorFee > 0) {
-            uint256 theBadgeFee = calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee);
-            uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeFee;
-
-            (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
-            if (protocolFeeSent == false) {
-                revert LibTheBadge.TheBadge__mint_protocolFeesPaymentFailed();
-            }
-            emit LibTheBadge.PaymentMade(
-                feeCollector,
-                _msgSender(),
-                theBadgeFee,
-                LibTheBadge.PaymentType.ProtocolFee,
-                _badgeModelId,
-                "0x"
-            );
-
-            (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
-            if (creatorFeeSent == false) {
-                revert LibTheBadge.TheBadge__mint_creatorFeesPaymentFailed();
-            }
-            emit LibTheBadge.PaymentMade(
-                _badgeModel.creator,
-                feeCollector,
-                creatorPayment,
-                LibTheBadge.PaymentType.CreatorMintFee,
-                _badgeModelId,
-                "0x"
-            );
+            payProtocolFees(_badgeModelId);
         }
 
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
@@ -163,13 +159,7 @@ contract TheBadge is
         uint256 dueDate = _badgeModel.validFor == 0 ? 0 : block.timestamp + _badgeModel.validFor;
         TheBadgeStore.Badge memory badge = TheBadgeStore.Badge(_badgeModelId, _account, dueDate, true);
         _badgeStore.addBadge(badgeId, badge);
-        emit LibTheBadge.BadgeRequested(
-            _badgeModelId,
-            badgeId,
-            _account,
-            _badgeModelController.controller,
-            controllerBadgeId
-        );
+        emit BadgeRequested(_badgeModelId, badgeId, _account, _badgeModelController.controller, controllerBadgeId);
     }
 
     /**
@@ -246,6 +236,7 @@ contract TheBadge is
      */
     function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _badgeStore.updateMintBadgeDefaultProtocolFee(_mintBadgeDefaultFee);
+        emit ProtocolSettingsUpdated();
     }
 
     /*
@@ -254,6 +245,7 @@ contract TheBadge is
      */
     function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _badgeStore.updateCreateBadgeModelProtocolFee(_createBadgeModelValue);
+        emit ProtocolSettingsUpdated();
     }
 
     /*
@@ -262,6 +254,40 @@ contract TheBadge is
      */
     function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _badgeStore.updateRegisterCreatorProtocolFee(_registerCreatorValue);
+        emit ProtocolSettingsUpdated();
+    }
+
+    function payProtocolFees(uint256 _badgeModelId) internal {
+        TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
+        address feeCollector = _badgeStore.feeCollector();
+        uint256 theBadgeFee = calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee);
+        uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeFee;
+
+        (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
+        if (protocolFeeSent == false) {
+            revert LibTheBadge.TheBadge__mint_protocolFeesPaymentFailed();
+        }
+        emit PaymentMade(
+            feeCollector,
+            _msgSender(),
+            theBadgeFee,
+            LibTheBadge.PaymentType.ProtocolFee,
+            _badgeModelId,
+            "0x"
+        );
+
+        (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
+        if (creatorFeeSent == false) {
+            revert LibTheBadge.TheBadge__mint_creatorFeesPaymentFailed();
+        }
+        emit PaymentMade(
+            _badgeModel.creator,
+            feeCollector,
+            creatorPayment,
+            LibTheBadge.PaymentType.CreatorMintFee,
+            _badgeModelId,
+            "0x"
+        );
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {
@@ -430,6 +456,10 @@ contract TheBadge is
 
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
         return controller.mintValue(badgeModelId) + _badgeModel.mintCreatorFee;
+    }
+
+    function getStoreAddress() public view returns (address) {
+        return address(_badgeStore);
     }
 
     /**

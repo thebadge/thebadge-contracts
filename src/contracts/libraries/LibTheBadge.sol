@@ -38,28 +38,4 @@ library LibTheBadge {
     error TheBadge__theBadgeModels_method_execution_failed();
     error TheBadge__theBadge_method_execution_failed();
     error TheBadge__proxy_method_not_supported();
-
-    event ProtocolSettingsUpdated();
-    /**
-     * =========================
-     * Events
-     * =========================
-     */
-    event Initialize(address indexed admin);
-    event PaymentMade(
-        address indexed recipient,
-        address payer,
-        uint256 amount,
-        PaymentType indexed paymentType,
-        uint256 indexed badgeModelId,
-        string controllerName
-    );
-
-    event BadgeRequested(
-        uint256 indexed badgeModelID,
-        uint256 indexed badgeID,
-        address indexed recipient,
-        address controller,
-        uint256 controllerBadgeId
-    );
 }
