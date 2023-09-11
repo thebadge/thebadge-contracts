@@ -3,14 +3,11 @@ pragma solidity ^0.8.17;
 
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
-import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
-import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadgeStore } from "../libraries/LibTheBadgeStore.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 // TODO: Maybe we can use abstract classes to type the store
 contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {

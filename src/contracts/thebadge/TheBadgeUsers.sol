@@ -13,7 +13,6 @@ import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
     TheBadgeStore public _badgeStore;

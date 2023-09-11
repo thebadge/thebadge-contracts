@@ -348,7 +348,7 @@ contract TheBadge is
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
         uint256 balance = 0;
-        for (uint i = 0; i < userMintedBadgesByBadgeModel.length; i++) {
+        for (uint256 i = 0; i < userMintedBadgesByBadgeModel.length; i++) {
             uint256 badgeId = userMintedBadgesByBadgeModel[i];
             if (isExpired(badgeId) == false && controller.isAssetActive(badgeId)) {
                 balance++;
