@@ -111,6 +111,10 @@ yarn hardhat --network <network> etherscan-verify
 
 - If you want to learn more give a look to our [docs](https://docs.thebadge.xyz/)
 
+## Architecture
+
+  <img alt="decorative-image-3" loading="lazy" decoding="async" data-nimg="1" style="color:transparent" src="./assets/images/SC-Architecture.png">
+
 ## Security and Liability
 
 All contracts are WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
