@@ -24,10 +24,12 @@ contract TheBadge is
     TheBadgeRoles,
     ITheBadge
 {
-    TheBadgeStore public _badgeStore;
-    string public name;
     // Allows to use current() and increment() for badgeModelIds or badgeIds
     using CountersUpgradeable for CountersUpgradeable.Counter;
+
+    TheBadgeStore public _badgeStore;
+    string public name;
+    string public symbol;
 
     /**
      * =========================
@@ -102,6 +104,7 @@ contract TheBadge is
         _grantRole(VERIFIER_ROLE, admin);
         _badgeStore = TheBadgeStore(payable(badgeStore));
         name = "TheBadge";
+        symbol = "BGD";
         emit Initialize(admin);
     }
 
@@ -458,31 +461,11 @@ contract TheBadge is
         return controller.mintValue(badgeModelId) + _badgeModel.mintCreatorFee;
     }
 
-    function getStoreAddress() public view returns (address) {
-        return address(_badgeStore);
-    }
-
     /**
      * =========================
      * Overrides
      * =========================
      */
-
-    /*
-     * @notice Given a badgeId returns the uri of the erc115 badge token
-     * @param badgeId id of a badge inside a model
-     */
-    function uri(
-        uint256 badgeId
-    )
-        public
-        view
-        virtual
-        override(ERC1155URIStorageUpgradeable, ERC1155Upgradeable, ITheBadge)
-        returns (string memory)
-    {
-        return super.uri(badgeId);
-    }
 
     /**
      * @notice ERC1155 _setApprovalForAll method, returns a soul-bonded token revert message
