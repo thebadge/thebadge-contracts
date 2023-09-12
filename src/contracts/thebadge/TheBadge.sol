@@ -467,6 +467,22 @@ contract TheBadge is
      * =========================
      */
 
+    /*
+     * @notice Given a badgeId returns the uri of the erc115 badge token
+     * @param badgeId id of a badge inside a model
+     */
+    function uri(
+        uint256 badgeId
+    )
+        public
+        view
+        virtual
+        override(ERC1155URIStorageUpgradeable, ERC1155Upgradeable, ITheBadge)
+        returns (string memory)
+    {
+        return super.uri(badgeId);
+    }
+
     /**
      * @notice ERC1155 _setApprovalForAll method, returns a soul-bonded token revert message
      */
