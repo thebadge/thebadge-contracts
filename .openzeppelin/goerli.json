@@ -6189,11 +6189,7 @@
           },
           "t_enum(VerificationStatus)4698": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -6486,11 +6482,7 @@
           },
           "t_enum(VerificationStatus)4698": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -8301,11 +8293,7 @@
           },
           "t_enum(VerificationStatus)4698": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -9546,11 +9534,7 @@
           },
           "t_enum(VerificationStatus)4830": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -10803,11 +10787,7 @@
           },
           "t_enum(VerificationStatus)4830": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -14690,11 +14670,7 @@
           },
           "t_enum(VerificationStatus)3166": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -15975,11 +15951,7 @@
           },
           "t_enum(VerificationStatus)4830": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -16558,11 +16530,7 @@
           },
           "t_enum(VerificationStatus)4840": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
