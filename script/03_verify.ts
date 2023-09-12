@@ -11,16 +11,36 @@ async function main() {
   if (!chainId || !isSupportedNetwork(chainId)) {
     throw new Error(`Network: ${chainId} is not defined or is not supported`);
   }
-  const theBadgeDeployedAddress = contracts.TheBadge.address[chainId as Chains];
-  const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
-  console.log("Verifying TheBadge contract on Etherscan...");
 
   console.log("Verifying TheBadge contract on Etherscan...");
+  const theBadgeDeployedAddress = contracts.TheBadge.address[chainId as Chains];
   await run(`verify:verify`, {
     address: theBadgeDeployedAddress,
     constructorArguments: [],
   });
 
+  console.log("Verifying TheBadgeStore contract on Etherscan...");
+  const theBadgeStore = contracts.TheBadgeStore.address[chainId as Chains];
+  await run(`verify:verify`, {
+    address: theBadgeStore,
+    constructorArguments: [],
+  });
+
+  console.log("Verifying TheBadgeUsers contract on Etherscan...");
+  const theBadgeUsers = contracts.TheBadgeUsers.address[chainId as Chains];
+  await run(`verify:verify`, {
+    address: theBadgeUsers,
+    constructorArguments: [],
+  });
+
+  console.log("Verifying TheBadgeModels contract on Etherscan...");
+  const theBadgeModels = contracts.TheBadgeModels.address[chainId as Chains];
+  await run(`verify:verify`, {
+    address: theBadgeModels,
+    constructorArguments: [],
+  });
+
+  const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
   console.log("Verifying KlerosBadgeModelController contract on Etherscan...");
   await run(`verify:verify`, {
     address: klerosBadgeModelControllerDeployedAddress,
@@ -33,6 +53,21 @@ async function main() {
     {
       name: "TheBadge",
       address: await getImplementationAddress(ethers.provider, theBadgeDeployedAddress),
+      network: chainId.toString(),
+    },
+    {
+      name: "TheBadgeStore",
+      address: await getImplementationAddress(ethers.provider, theBadgeStore),
+      network: chainId.toString(),
+    },
+    {
+      name: "TheBadgeUsers",
+      address: await getImplementationAddress(ethers.provider, theBadgeUsers),
+      network: chainId.toString(),
+    },
+    {
+      name: "TheBadgeModels",
+      address: await getImplementationAddress(ethers.provider, theBadgeModels),
       network: chainId.toString(),
     },
     {

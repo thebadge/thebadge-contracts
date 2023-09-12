@@ -35,6 +35,8 @@ interface ITheBadge is IERC1155Upgradeable {
 
     function getRemovalDepositValue(uint256 badgeId) external view returns (uint256);
 
+    function mintValue(uint256 badgeModelId) external returns (uint256);
+
     function uri(uint256 badgeId) external view returns (string memory);
 
     function supportsInterface(bytes4 interfaceId) external view returns (bool);

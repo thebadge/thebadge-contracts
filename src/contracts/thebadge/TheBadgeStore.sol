@@ -3,11 +3,44 @@ pragma solidity ^0.8.17;
 
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
-import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
+import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
+import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
+import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
+import { LibTheBadgeStore } from "../libraries/LibTheBadgeStore.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 // TODO: Maybe we can use abstract classes to type the store
-contract TheBadgeStore is TheBadgeRoles {
+contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+
+    /**
+     * =========================
+     * Events
+     * =========================
+     */
+    // Event to log when a contract is added to the list
+    event ContractAdded(string indexed _contractName, address indexed contractAddress);
+
+    // Event to log when a contract is removed from the list
+    event ContractRemoved(string indexed _contractName, address indexed contractAddress);
+
+    // Event to log when a contract address is updated from the list
+    event ContractUpdated(string indexed _contractName, address indexed contractAddress);
+
+    /**
+     * =========================
+     * Modifiers
+     * =========================
+     */
+
+    // Modifier to check if the caller is one of the allowedContractAddresses contracts
+    modifier onlyPermittedContract() {
+        if (allowedContractAddresses[_msgSender()] == false) {
+            revert LibTheBadgeStore.TheBadge__Store_OperationNotPermitted();
+        }
+
+        _;
+    }
 
     CountersUpgradeable.Counter internal badgeModelIdsCounter;
     CountersUpgradeable.Counter internal badgeIdsCounter;
@@ -84,181 +117,208 @@ contract TheBadgeStore is TheBadgeRoles {
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }
 
-    enum PaymentType {
-        ProtocolFee,
-        CreatorMintFee,
-        UserRegistrationFee,
-        UserVerificationFee
-    }
-
+    // Mapping to store contract addresses by name
+    mapping(address => bool) public allowedContractAddresses;
+    mapping(string => address) public allowedContractAddressesByContractName;
     mapping(address => User) public registeredUsers;
     mapping(string => BadgeModelController) public badgeModelControllers;
     mapping(uint256 => BadgeModel) public badgeModels;
     mapping(uint256 => Badge) public badges;
-    mapping(uint256 => mapping(address => uint256[])) public badgeModelsByAccount;
+    mapping(uint256 => mapping(address => uint256[])) public userMintedBadgesByBadgeModel;
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address admin, address _feeCollector) public initializer {
+        __Ownable_init();
+        feeCollector = _feeCollector;
+        registerUserProtocolFee = uint256(0);
+        createBadgeModelProtocolFee = uint256(0);
+        mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        // TODO Verify that this works if we call this outside
+    }
 
     /**
      * =========================
-     * Events
+     * Getters
      * =========================
      */
-    event Initialize(address indexed admin, address indexed minter);
-    event UserRegistered(address indexed creator, string metadata);
-    event CreatorRegistered(address indexed creator);
-    event UserVerificationRequested(address indexed user, string metadata, string controllerName);
-    event UserVerificationExecuted(address indexed user, string controllerName, bool verify);
-    event UpdatedUserMetadata(address indexed creator, string metadata);
-    event SuspendedUser(address indexed creator, bool suspended);
-    event RemovedUser(address indexed creator, bool deleted);
-    event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
-    event BadgeModelUpdated(uint256 indexed badgeModelId);
+    function getUser(address userAddress) external view returns (User memory) {
+        return registeredUsers[userAddress];
+    }
 
-    event PaymentMade(
-        address indexed recipient,
-        address payer,
-        uint256 amount,
-        PaymentType indexed paymentType,
-        uint256 indexed badgeModelId,
-        string controllerName
-    );
+    function getBadgeModelController(string memory controllerName) external view returns (BadgeModelController memory) {
+        return badgeModelControllers[controllerName];
+    }
 
-    event BadgeModelProtocolFeeUpdated(uint256 indexed badgeModelId, uint256 newAmountInBps);
-    event ProtocolSettingsUpdated();
-    event BadgeRequested(
-        uint256 indexed badgeModelID,
-        uint256 indexed badgeID,
-        address indexed recipient,
-        address controller,
-        uint256 controllerBadgeId
-    );
-    event BadgeModelControllerAdded(string indexed controllerName, address indexed controllerAddress);
+    function getBadgeModel(uint256 badgeModelId) external view returns (BadgeModel memory) {
+        return badgeModels[badgeModelId];
+    }
+
+    function getBadge(uint256 badgeId) external view returns (Badge memory) {
+        return badges[badgeId];
+    }
+
+    function getCurrentBadgeModelsIdCounter() external view returns (uint256) {
+        return badgeModelIdsCounter.current();
+    }
+
+    function getCurrentBadgeIdCounter() external view returns (uint256) {
+        return badgeIdsCounter.current();
+    }
+
+    function getUserMintedBadgesByBadgeModel(
+        uint256 badgeModelId,
+        address userAddress
+    ) external view returns (uint256[] memory) {
+        return userMintedBadgesByBadgeModel[badgeModelId][userAddress];
+    }
 
     /**
      * =========================
-     * Errors
+     * Setters
      * =========================
      */
-
-    error TheBadge__onlyUser_userNotFound();
-    error TheBadge__onlyCreator_senderIsNotACreator();
-    error TheBadge__onlyCreator_creatorIsSuspended();
-
-    error TheBadge__registerUser_wrongValue();
-    error TheBadge__registerUser_alreadyRegistered();
-    error TheBadge__addBadgeModelController_emptyName();
-    error TheBadge__addBadgeModelController_notFound();
-    error TheBadge__addBadgeModelController_alreadySet();
-    error TheBadge__setControllerStatus_notFound();
-    error TheBadge__controller_invalidController();
-    error TheBadge__controller_controllerIsPaused();
-    error TheBadge__createBadgeModel_wrongValue();
-    error TheBadge__updateBadgeModel_notBadgeModelOwner();
-    error TheBadge__updateBadgeModel_badgeModelNotFound();
-    error TheBadge__badgeModel_badgeModelNotFound();
-    error TheBadge__updateUser_notFound();
-
-    error TheBadge__verifyUser_wrongValue();
-    error TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
-
-    error TheBadge__SBT();
-    error TheBadge__requestBadge_badgeModelNotFound();
-    error TheBadge__requestBadge_badgeModelIsSuspended();
-    error TheBadge__requestBadge_wrongValue();
-    error TheBadge__requestBadge_isPaused();
-    error TheBadge__requestBadge_controllerIsPaused();
-    error TheBadge__requestBadge_badgeNotFound();
-    error TheBadge__requestBadge_badgeNotClaimable();
-
-    error TheBadge__method_not_supported();
-
-    error TheBadge__mint_protocolFeesPaymentFailed();
-    error TheBadge__mint_creatorFeesPaymentFailed();
-
-    error TheBadge__calculateFee_protocolFeesInvalidValues();
-
-    /**
-     * =========================
-     * Modifiers
-     * =========================
-     */
-    modifier onlyRegisteredUser(address _user) {
-        User storage user = registeredUsers[_user];
-        if (bytes(user.metadata).length == 0) {
-            revert TheBadge__onlyUser_userNotFound();
+    function createUser(address userAddress, User memory newUser) external onlyPermittedContract {
+        User storage user = registeredUsers[userAddress];
+        if (bytes(user.metadata).length != 0) {
+            revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
         }
-        _;
+        registeredUsers[userAddress] = newUser;
     }
 
-    modifier onlyRegisteredBadgeModelCreator() {
-        User storage creator = registeredUsers[_msgSender()];
-        if (bytes(creator.metadata).length == 0) {
-            revert TheBadge__onlyCreator_senderIsNotACreator();
+    // todo refactor with modifier to check that the user actually exists
+    function updateUser(address userAddress, User memory updatedUser) external onlyPermittedContract {
+        User storage _user = registeredUsers[userAddress];
+        if (bytes(_user.metadata).length == 0) {
+            revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
-        if (creator.isCreator == false) {
-            revert TheBadge__onlyCreator_senderIsNotACreator();
-        }
-        _;
+        registeredUsers[userAddress] = updatedUser;
     }
 
-    modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId) {
-        User storage user = registeredUsers[_msgSender()];
-        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
-
-        if (bytes(user.metadata).length == 0) {
-            revert TheBadge__onlyCreator_senderIsNotACreator();
-        }
-        if (user.isCreator == false) {
-            revert TheBadge__onlyCreator_senderIsNotACreator();
-        }
-        if (user.suspended == true) {
-            revert TheBadge__onlyCreator_creatorIsSuspended();
-        }
-        if (_badgeModel.creator == address(0)) {
-            revert TheBadge__updateBadgeModel_badgeModelNotFound();
-        }
-        if (_badgeModel.creator != _msgSender()) {
-            revert TheBadge__updateBadgeModel_notBadgeModelOwner();
-        }
-        _;
-    }
-
-    modifier onlyBadgeModelMintable(uint256 badgeModelId) {
-        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
-        BadgeModelController storage _badgeModelController = badgeModelControllers[_badgeModel.controllerName];
-        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
-        User storage creator = registeredUsers[_badgeModel.creator];
-
-        if (_badgeModel.creator == address(0)) {
-            revert TheBadge__requestBadge_badgeModelNotFound();
-        }
-
-        if (creator.suspended == true) {
-            revert TheBadge__requestBadge_badgeModelIsSuspended();
-        }
-
-        if (_badgeModel.paused) {
-            revert TheBadge__requestBadge_isPaused();
-        }
-
-        if (_badgeModelController.paused) {
-            revert TheBadge__requestBadge_controllerIsPaused();
-        }
-
-        _;
-    }
-
-    modifier existingBadgeModelController(string memory controllerName) {
+    function addBadgeModelController(
+        string memory controllerName,
+        BadgeModelController memory badgeModelController
+    ) external onlyPermittedContract {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
-        if (_badgeModelController.controller == address(0)) {
-            revert TheBadge__controller_invalidController();
+        if (_badgeModelController.controller != address(0)) {
+            revert LibTheBadgeModels.TheBadge__addBadgeModelController_alreadySet();
         }
-        if (_badgeModelController.initialized == false) {
-            revert TheBadge__controller_invalidController();
+        badgeModelControllers[controllerName] = badgeModelController;
+    }
+
+    function addBadgeModel(BadgeModel memory badgeModel) external onlyPermittedContract {
+        badgeModels[badgeModelIdsCounter.current()] = badgeModel;
+
+        badgeModelIdsCounter.increment();
+    }
+
+    function updateBadgeModel(uint256 badgeModelId, BadgeModel memory badgeModel) external onlyPermittedContract {
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
+
+        if (_badgeModel.creator == address(0)) {
+            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
         }
-        if (_badgeModelController.paused) {
-            revert TheBadge__controller_controllerIsPaused();
+
+        _badgeModel.mintProtocolFee = badgeModel.mintProtocolFee;
+        _badgeModel.mintCreatorFee = badgeModel.mintCreatorFee;
+        _badgeModel.paused = badgeModel.paused;
+    }
+
+    function addBadge(uint256 badgeId, Badge memory badge) external onlyPermittedContract {
+        uint256 _badgeModelId = badge.badgeModelId;
+        address _account = badge.account;
+        badges[badgeId] = badge;
+        userMintedBadgesByBadgeModel[_badgeModelId][_account].push(badgeId);
+        badgeIdsCounter.increment();
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _mintBadgeDefaultFee
+     * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
+     */
+    function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyPermittedContract {
+        mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _createBadgeModelValue
+     * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
+     */
+    function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyPermittedContract {
+        createBadgeModelProtocolFee = _createBadgeModelValue;
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _registerCreatorValue
+     * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
+     */
+    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyPermittedContract {
+        registerUserProtocolFee = _registerCreatorValue;
+    }
+
+    // Function to add a contract to the list of permitted contracts
+    function addPermittedContract(
+        string memory _contractName,
+        address _contractAddress
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (_contractAddress == address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidContractAddress();
         }
-        _;
+
+        // Check if the contract name already exists
+        if (allowedContractAddressesByContractName[_contractName] != address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_ContractNameAlreadyExists();
+        }
+
+        // Add the contract name and address to the mapping
+        allowedContractAddressesByContractName[_contractName] = _contractAddress;
+        allowedContractAddresses[_contractAddress] = true;
+
+        emit ContractAdded(_contractName, _contractAddress);
+    }
+
+    // Function to remove a contract from the list of permitted contracts
+    function removePermittedContract(string memory _contractName) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        address contractAddress = allowedContractAddressesByContractName[_contractName];
+
+        // Check if the contract name exists in the mapping
+        if (contractAddress == address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidContractName();
+        }
+
+        // Remove the contract name and address from the mapping
+        delete allowedContractAddressesByContractName[_contractName];
+        delete allowedContractAddresses[contractAddress];
+
+        emit ContractRemoved(_contractName, contractAddress);
+    }
+
+    // Function to update a contract address based on the contract name
+    function updatePermittedContract(
+        string memory _contractName,
+        address _newContractAddress
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (_newContractAddress == address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidContractAddress();
+        }
+
+        // Check if the contract name exists in the mapping
+        address oldContractAddress = allowedContractAddressesByContractName[_contractName];
+        if (oldContractAddress == address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidContractName();
+        }
+
+        // Update the contract address associated with the contract name
+        delete allowedContractAddresses[oldContractAddress];
+        allowedContractAddressesByContractName[_contractName] = _newContractAddress;
+        allowedContractAddresses[_newContractAddress] = true;
+
+        emit ContractUpdated(_contractName, _newContractAddress);
     }
 
     // tslint:disable-next-line:no-empty

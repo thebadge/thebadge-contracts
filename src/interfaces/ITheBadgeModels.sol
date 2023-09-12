@@ -15,8 +15,5 @@ interface ITheBadgeModels {
 
     function updateBadgeModelProtocolFee(uint256 badgeModelId, uint256 feeInBps) external;
 
-    // Read methods
-    function mintValue(uint256 badgeModelId) external returns (uint256);
-
     function isBadgeModelSuspended(uint256 badgeModelId) external returns (bool);
 }

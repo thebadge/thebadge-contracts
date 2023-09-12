@@ -2,11 +2,15 @@
 pragma solidity 0.8.17;
 
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
-import { TheBadge } from "../thebadge/TheBadge.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
+import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
+import { TheBadge } from "../thebadge/TheBadge.sol";
+import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
 
 contract KlerosBadgeModelControllerStore {
     TheBadge public theBadge;
+    TheBadgeModels public theBadgeModels;
+    TheBadgeUsers public theBadgeUsers;
     IArbitrator public arbitrator;
     address public tcrFactory;
 
@@ -119,6 +123,8 @@ contract KlerosBadgeModelControllerStore {
      */
     error KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
     error KlerosBadgeModelController__onlyTheBadge_senderNotTheBadge();
+    error KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeModels();
+    error KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeUsers();
     error KlerosBadgeModelController__mintBadge_alreadyMinted();
     error KlerosBadgeModelController__mintBadge_wrongBadgeModel();
     error KlerosBadgeModelController__mintBadge_isPaused();
@@ -146,6 +152,20 @@ contract KlerosBadgeModelControllerStore {
     modifier onlyTheBadge() {
         if (address(theBadge) != msg.sender) {
             revert KlerosBadgeModelController__onlyTheBadge_senderNotTheBadge();
+        }
+        _;
+    }
+
+    modifier onlyTheBadgeModels() {
+        if (address(theBadgeModels) != msg.sender) {
+            revert KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeModels();
+        }
+        _;
+    }
+
+    modifier onlyTheBadgeUsers() {
+        if (address(theBadgeUsers) != msg.sender) {
+            revert KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeUsers();
         }
         _;
     }

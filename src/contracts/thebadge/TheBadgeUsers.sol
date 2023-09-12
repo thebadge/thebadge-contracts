@@ -2,31 +2,106 @@
 pragma solidity ^0.8.17;
 /**
  * =========================
- * Contains all the logic related to badge models (but not badges)
+ * Contains all the logic related to TheBadge users
  * =========================
  */
 
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
-import { TheBadgeStore } from "./TheBadgeStore.sol";
 import { ITheBadgeUsers } from "../../interfaces/ITheBadgeUsers.sol";
+import { TheBadgeRoles } from "./TheBadgeRoles.sol";
+import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
+import { LibTheBadge } from "../libraries/LibTheBadge.sol";
+import { TheBadgeStore } from "./TheBadgeStore.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
+contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
+    TheBadgeStore public _badgeStore;
+
+    /**
+     * =========================
+     * Events
+     * =========================
+     */
+    event UserRegistered(address indexed user, string metadata);
+    event CreatorRegistered(address indexed user);
+    event UserVerificationRequested(address indexed user, string metadata, string controllerName);
+    event UserVerificationExecuted(address indexed user, string controllerName, bool verify);
+    event UpdatedUser(address indexed userAddress, string metadata, bool suspended, bool isCreator, bool deleted);
+    event PaymentMade(
+        address indexed recipient,
+        address payer,
+        uint256 amount,
+        LibTheBadge.PaymentType indexed paymentType,
+        uint256 indexed badgeModelId,
+        string controllerName
+    );
+
+    /**
+     * =========================
+     * Modifiers
+     * =========================
+     */
+    modifier onlyRegisteredUser(address _user) {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+        if (bytes(user.metadata).length == 0) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
+        }
+        _;
+    }
+
+    modifier existingBadgeModelController(string memory controllerName) {
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
+        if (_badgeModelController.controller == address(0)) {
+            revert LibTheBadge.TheBadge__controller_invalidController();
+        }
+        if (_badgeModelController.initialized == false) {
+            revert LibTheBadge.TheBadge__controller_invalidController();
+        }
+        if (_badgeModelController.paused) {
+            revert LibTheBadge.TheBadge__controller_controllerIsPaused();
+        }
+        _;
+    }
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address admin, address badgeStore) public initializer {
+        __Ownable_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _badgeStore = TheBadgeStore(payable(badgeStore));
+    }
+
     /**
      * @notice Register a new user
      * @param _metadata IPFS url with the metadata of the user
      */
     function registerUser(string memory _metadata, bool _isCompany) public payable {
-        User storage user = registeredUsers[_msgSender()];
+        TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
         if (bytes(user.metadata).length != 0) {
-            revert TheBadge__registerUser_alreadyRegistered();
+            revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
         }
 
+        uint256 registerUserProtocolFee = _badgeStore.registerUserProtocolFee();
         if (msg.value != registerUserProtocolFee) {
-            revert TheBadge__registerUser_wrongValue();
+            revert LibTheBadgeUsers.TheBadge__registerUser_wrongValue();
         }
         if (msg.value > 0) {
+            address feeCollector = _badgeStore.feeCollector();
             payable(feeCollector).transfer(msg.value);
-            emit PaymentMade(feeCollector, _msgSender(), msg.value, PaymentType.UserRegistrationFee, 0, "0x");
+            emit PaymentMade(
+                feeCollector,
+                _msgSender(),
+                msg.value,
+                LibTheBadge.PaymentType.UserRegistrationFee,
+                0,
+                "0x"
+            );
         }
 
         user.metadata = _metadata;
@@ -35,37 +110,64 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
         user.suspended = false;
         user.initialized = true;
 
+        _badgeStore.createUser(_msgSender(), user);
         emit UserRegistered(_msgSender(), user.metadata);
     }
 
     /**
      * @notice Given an user and new metadata, updates the metadata of the user
-     * @param _user user address
+     * @param _userAddress user address
      * @param _metadata IPFS url
      */
-    function updateUser(address _user, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        User storage user = registeredUsers[_user];
+    function updateUser(address _userAddress, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_userAddress);
 
         if (bytes(user.metadata).length == 0) {
-            revert TheBadge__updateUser_notFound();
+            revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
 
         if (bytes(_metadata).length > 0) {
             user.metadata = _metadata;
         }
 
-        emit UpdatedUserMetadata(_user, _metadata);
+        _badgeStore.updateUser(_userAddress, user);
+        emit UpdatedUser(_userAddress, user.metadata, user.suspended, user.isCreator, false);
     }
 
-    function suspendUser(address _user, bool suspended) public onlyRole(PAUSER_ROLE) {
-        User storage user = registeredUsers[_user];
+    /**
+     * @notice Suspends or remove the suspension to the user, avoiding him to create badge models
+     * @param _userAddress user address
+     * @param suspended boolean
+     */
+    function suspendUser(address _userAddress, bool suspended) public onlyRole(PAUSER_ROLE) {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_userAddress);
 
         if (bytes(user.metadata).length == 0) {
-            revert TheBadge__updateUser_notFound();
+            revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
 
         user.suspended = suspended;
-        emit SuspendedUser(_user, suspended);
+        _badgeStore.updateUser(_userAddress, user);
+    }
+
+    /**
+     * @notice Given an user, sets him as creator
+     * @param _userAddress user address
+     */
+    function makeUserCreator(address _userAddress) public onlyRole(USER_MANAGER_ROLE) {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_userAddress);
+
+        if (bytes(user.metadata).length == 0) {
+            revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
+        }
+
+        if (user.isCreator == true) {
+            revert LibTheBadgeUsers.TheBadge__onlyCreator_senderIsAlreadyACreator();
+        }
+
+        user.isCreator = true;
+        _badgeStore.updateUser(_userAddress, user);
+        emit UpdatedUser(_userAddress, user.metadata, user.suspended, user.isCreator, false);
     }
 
     /**
@@ -76,24 +178,35 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
         string memory controllerName,
         string memory evidenceUri
     ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(controllerName) {
-        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
-        User storage user = registeredUsers[_msgSender()];
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
+        TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
+        string memory _controllerName = controllerName;
+        address feeCollector = _badgeStore.feeCollector();
 
         // The verification fee differs in each controller
         uint256 verifyCreatorProtocolFee = IBadgeModelController(_badgeModelController.controller)
             .getVerifyUserProtocolFee();
 
         if (msg.value != verifyCreatorProtocolFee) {
-            revert TheBadge__verifyUser_wrongValue();
+            revert LibTheBadgeUsers.TheBadge__verifyUser_wrongValue();
         }
 
         if (msg.value > 0) {
             // Transfers the verification fee to the collector
             (bool verifyCreatorProtocolFeeSent, ) = payable(feeCollector).call{ value: msg.value }("");
             if (verifyCreatorProtocolFeeSent == false) {
-                revert TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
+                revert LibTheBadgeUsers.TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
             }
-            emit PaymentMade(feeCollector, _msgSender(), msg.value, PaymentType.UserVerificationFee, 0, controllerName);
+            emit PaymentMade(
+                feeCollector,
+                _msgSender(),
+                msg.value,
+                LibTheBadge.PaymentType.UserVerificationFee,
+                0,
+                _controllerName
+            );
         }
 
         IBadgeModelController(_badgeModelController.controller).submitUserVerification(
@@ -115,7 +228,9 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
         string memory controllerName,
         bool verify
     ) public onlyRole(VERIFIER_ROLE) existingBadgeModelController(controllerName) onlyRegisteredUser(_user) {
-        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
         IBadgeModelController(_badgeModelController.controller).executeUserVerification(_user, verify);
         emit UserVerificationExecuted(_user, controllerName, verify);
     }
@@ -123,7 +238,9 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
     function getVerificationFee(
         string memory controllerName
     ) public view existingBadgeModelController(controllerName) returns (uint256) {
-        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
         return IBadgeModelController(_badgeModelController.controller).getVerifyUserProtocolFee();
     }
 
@@ -131,7 +248,12 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeStore {
         address _user,
         string memory controllerName
     ) public view existingBadgeModelController(controllerName) returns (bool) {
-        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
         return IBadgeModelController(_badgeModelController.controller).isUserVerified(_user);
     }
+
+    // tslint:disable-next-line:no-empty
+    receive() external payable {}
 }
