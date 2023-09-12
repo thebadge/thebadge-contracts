@@ -8,7 +8,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
-import { KlerosBadgeModelControllerStore } from "./KleroBadgeModelControllerStore.sol";
+import { KlerosBadgeModelControllerStore } from "./KlerosBadgeModelControllerStore.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { TheBadge } from "../thebadge/TheBadge.sol";
