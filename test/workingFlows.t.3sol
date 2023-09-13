@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "forge-std/Test.sol";
 
 import { ILightGeneralizedTCR } from "../src/interfaces/ILightGeneralizedTCR.sol";
-import { Config, TheBadge, TheBadgeStore, KlerosBadgeModelController, KlerosBadgeModelControllerStore } from "./utils/Config.sol";
+import { Config, TheBadge, TheBadgeStore, KlerosBadgeModelController, KlerosBadgeModelControllerStore } from "./utils/Config.2sol";
 
 contract TheBadgeTestCore is Config {
     function test_createKlerosBadgeModel_shouldWork() public {
@@ -14,7 +14,7 @@ contract TheBadgeTestCore is Config {
 
         // Create badge model
         vm.prank(vegeta);
-        TheBadge.CreateBadgeModel memory badgeModel = getBaseBadgeModel();
+        TheBadgeStore.CreateBadgeModel memory badgeModel = getBaseBadgeModel();
         KlerosBadgeModelController.CreateBadgeModel memory klerosBadgeModel = getKlerosBaseBadgeModel();
         theBadge.createBadgeModel(badgeModel, abi.encode(klerosBadgeModel));
 
@@ -49,7 +49,7 @@ contract TheBadgeTestCore is Config {
 
         // Create badge model
         vm.prank(vegeta);
-        TheBadge.CreateBadgeModel memory badgeModel = getBaseBadgeModel();
+        TheBadgeStore.CreateBadgeModel memory badgeModel = getBaseBadgeModel();
         KlerosBadgeModelController.CreateBadgeModel memory klerosBadgeModel = getKlerosBaseBadgeModel();
         theBadge.createBadgeModel(badgeModel, abi.encode(klerosBadgeModel));
 
