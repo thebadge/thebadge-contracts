@@ -153,7 +153,6 @@ contract TheBadgeModelsTest is Test {
 
         ) = badgeStoreInstance.badgeModels(newBadgeModelCount - 1); // Assuming the last badge model was created
 
-
         // Perform assertions
         assertEq(creator, user1, "Creator should match");
         assertEq(controllerName, badgeModel.controllerName, "Controller name should match");
