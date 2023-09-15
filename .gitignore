@@ -22,3 +22,6 @@ EOF
 /lib/*
 
 /types/*
+
+/artifacts
+/deployments
