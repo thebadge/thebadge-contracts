@@ -19,4 +19,4 @@ deployments
 EOF
 .idea/
 
-.lib/
+/lib/*
