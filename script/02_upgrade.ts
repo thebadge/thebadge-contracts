@@ -88,7 +88,26 @@ const updateControllers = async (hre: HardhatRuntimeEnvironment): Promise<string
   );
   await klerosBadgeModelController.deployed();
 
-  return [["klerosBadgeModelController", klerosBadgeModelController.address]];
+  console.log("Upgrading TpBadgeModelController...");
+  const TpBadgeModelController = await ethers.getContractFactory("TpBadgeModelController");
+  const tpBadgeModelControllerDeployment = contracts.TpBadgeModelController.address[chainId as Chains];
+  const tpBadgeModelController = await upgrades.upgradeProxy(tpBadgeModelControllerDeployment, TpBadgeModelController);
+  await tpBadgeModelController.deployed();
+
+  console.log("Upgrading TpBadgeModelControllerStore...");
+  const TpBadgeModelControllerStore = await ethers.getContractFactory("TpBadgeModelControllerStore");
+  const tpBadgeModelControllerStoreDeployment = contracts.TpBadgeModelControllerStore.address[chainId as Chains];
+  const tpBadgeModelControllerStore = await upgrades.upgradeProxy(
+    tpBadgeModelControllerStoreDeployment,
+    TpBadgeModelControllerStore,
+  );
+  await tpBadgeModelController.deployed();
+
+  return [
+    ["klerosBadgeModelController", klerosBadgeModelController.address],
+    ["TpBadgeModelController", tpBadgeModelController.address],
+    ["TpBadgeModelControllerStore", tpBadgeModelControllerStore.address],
+  ];
 };
 
 // We recommend this pattern to be able to use async/await everywhere
