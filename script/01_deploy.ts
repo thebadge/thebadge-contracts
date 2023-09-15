@@ -20,10 +20,10 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   // Deploys the four main contracts: TheBadgeStore, TheBadgeUsers, TheBadgeModels, TheBadge (in that order)
   console.log("Deploying Main contracts...");
-  const { mainContracts, theBadge, theBadgeUsers, theBadgeModels, theBadgeStore } = await deployMainContracts(hre);
+  const { mainContracts, theBadge, theBadgeUsers, theBadgeModels } = await deployMainContracts(hre);
 
   // Deploys all the controllers
-  const controllersAddresses = await deployControllers(hre, { theBadge, theBadgeModels, theBadgeUsers, theBadgeStore });
+  const controllersAddresses = await deployControllers(hre, { theBadge, theBadgeModels, theBadgeUsers });
 
   console.log("///////// Deployment finished /////////");
   for (const mainContractsAddresses of mainContracts) {
@@ -42,7 +42,6 @@ const deployMainContracts = async (
   theBadge: any;
   theBadgeModels: any;
   theBadgeUsers: any;
-  theBadgeStore: any;
 }> => {
   const { ethers } = hre;
   const [deployer] = await ethers.getSigners();
@@ -97,7 +96,6 @@ const deployMainContracts = async (
     theBadge,
     theBadgeModels,
     theBadgeUsers,
-    theBadgeStore,
   };
 };
 
@@ -106,13 +104,11 @@ const deployControllers = async (
   {
     theBadge,
     theBadgeModels,
-    theBadgeStore,
     theBadgeUsers,
   }: {
     theBadge: Contract;
     theBadgeModels: Contract;
     theBadgeUsers: Contract;
-    theBadgeStore: Contract;
   },
 ): Promise<string[][]> => {
   const { ethers, network } = hre;
@@ -132,7 +128,6 @@ const deployControllers = async (
     theBadgeUsers.address,
     klerosArbitror,
     lightGTCRFactory,
-    theBadgeStore.address,
   ]);
   await klerosBadgeModelController.deployed();
   console.log(`KlerosBadgeModelController deployed with address: ${klerosBadgeModelController.address}`);
@@ -140,7 +135,42 @@ const deployControllers = async (
   console.log("Adding KlerosBadgeModelController to TheBadge...");
   theBadgeModels.connect(deployer);
   await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address);
-  return [["klerosBadgeModelController", klerosBadgeModelController.address]];
+
+  console.log("Deploying ThirdPartyModelControllerStore...");
+  const TpBadgeModelControllerStore = await ethers.getContractFactory("TpBadgeModelControllerStore");
+  const tpBadgeModelControllerStore = await upgrades.deployProxy(TpBadgeModelControllerStore, [
+    contractsAdmin,
+    contractsAdmin,
+    klerosArbitror,
+    lightGTCRFactory,
+  ]);
+  await tpBadgeModelControllerStore.deployed();
+  console.log(`ThirdPartyModelControllerStore deployed with address: ${tpBadgeModelControllerStore.address}`);
+
+  console.log("Deploying ThirdPartyModelController...");
+  const TpBadgeModelController = await ethers.getContractFactory("TpBadgeModelController");
+  const tpBadgeModelController = await upgrades.deployProxy(TpBadgeModelController, [
+    contractsAdmin,
+    theBadge.address,
+    theBadgeModels.address,
+    theBadgeUsers.address,
+    tpBadgeModelControllerStore.address,
+  ]);
+  await tpBadgeModelController.deployed();
+  console.log(`ThirdPartyModelController deployed with address: ${tpBadgeModelController.address}`);
+
+  console.log("Allowing ThirdPartyModelController to access ThirdPartyModelControllerStore...");
+  await tpBadgeModelControllerStore.addPermittedContract("TpBadgeModelController", tpBadgeModelController.address);
+
+  console.log(`Grant claimer role to the relayer address: ${contractsAdmin} on ThirdPartyModelControllerStore...`);
+  const claimerRole = keccak256(utils.toUtf8Bytes("CLAIMER_ROLE"));
+  await tpBadgeModelControllerStore.grantRole(claimerRole, contractsAdmin);
+
+  return [
+    ["klerosBadgeModelController", klerosBadgeModelController.address],
+    ["ThirdPartyModelController", tpBadgeModelController.address],
+    ["TpBadgeModelControllerStore", tpBadgeModelControllerStore.address],
+  ];
 };
 
 // We recommend this pattern to be able to use async/await everywhere
