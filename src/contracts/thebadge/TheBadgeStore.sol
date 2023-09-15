@@ -219,6 +219,19 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         badgeModelControllersByAddress[badgeModelController.controller] = badgeModelController;
     }
 
+    function updateBadgeModelController(
+        string memory controllerName,
+        BadgeModelController memory badgeModelController
+    ) external onlyPermittedContract {
+        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        if (_badgeModelController.controller == address(0)) {
+            revert LibTheBadgeModels.TheBadge__addBadgeModelController_notFound();
+        }
+        delete badgeModelControllersByAddress[_badgeModelController.controller];
+        badgeModelControllers[controllerName] = badgeModelController;
+        badgeModelControllersByAddress[badgeModelController.controller] = badgeModelController;
+    }
+
     function addBadgeModel(BadgeModel memory badgeModel) external onlyPermittedContract {
         badgeModels[badgeModelIdsCounter.current()] = badgeModel;
 

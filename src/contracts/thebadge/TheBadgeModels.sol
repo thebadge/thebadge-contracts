@@ -31,6 +31,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     event BadgeModelUpdated(uint256 indexed badgeModelId);
     event BadgeModelControllerAdded(string indexed controllerName, address indexed controllerAddress);
+    event BadgeModelControllerUpdated(string indexed controllerName, address indexed controllerAddress);
 
     /**
      * =========================
@@ -126,6 +127,35 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         _badgeModelController.paused = false;
 
         _badgeStore.addBadgeModelController(controllerName, _badgeModelController);
+        emit BadgeModelControllerAdded(controllerName, controllerAddress);
+    }
+
+    /**
+     * @notice Updates a badge model controller on the supported list of controllers
+     * @param controllerName - name of the controller (for instance: Kleros)
+     * @param controllerAddress - new address of the controller
+     */
+    function updateBadgeModelController(
+        string memory controllerName,
+        address controllerAddress
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
+
+        if (bytes(controllerName).length == 0) {
+            revert LibTheBadgeModels.TheBadge__addBadgeModelController_emptyName();
+        }
+
+        if (controllerAddress == address(0)) {
+            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        _badgeModelController.controller = controllerAddress;
+        _badgeModelController.initialized = true;
+        _badgeModelController.paused = false;
+
+        _badgeStore.updateBadgeModelController(controllerName, _badgeModelController);
         emit BadgeModelControllerAdded(controllerName, controllerAddress);
     }
 
