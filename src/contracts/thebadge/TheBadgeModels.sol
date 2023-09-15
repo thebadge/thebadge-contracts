@@ -169,7 +169,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         if (user.isCreator == false) {
             _theBadgeUsers.makeUserCreator(_msgSender());
         }
-        // TODO: According to the type of controller, modify the data.admin value
+
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             args.controllerName
         );

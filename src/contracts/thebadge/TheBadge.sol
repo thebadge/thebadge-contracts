@@ -52,6 +52,7 @@ contract TheBadge is
         address controller,
         uint256 controllerBadgeId
     );
+    event BadgeTransferred(uint256 indexed badgeId, address indexed origin, address indexed destination);
     event ProtocolSettingsUpdated();
 
     /**
@@ -111,7 +112,7 @@ contract TheBadge is
     /*
      * @notice Receives a badgeModel, and user account, the token data ipfsURI and the controller's data and mints the badge for the user
      * @param badgeModelId id of theBadgeModel
-     * @param account user address
+     * @param account the recipient address of the badge, if empty and it's allowed, its stored on the controller's address until its claimed
      * @param tokenURI url of the data of the token stored in IPFS
      * @param data metaEvidence for the controller
      */
@@ -124,6 +125,7 @@ contract TheBadge is
         // Re-declaring variables reduces the stack tree and avoid compilation errors
         uint256 _badgeModelId = badgeModelId;
         address _account = account;
+        address _mintingAccount = _account;
         bytes memory _data = data;
         string memory _tokenURI = tokenURI;
 
@@ -131,7 +133,7 @@ contract TheBadge is
             revert LibTheBadge.TheBadge__requestBadge_wrongValue();
         }
 
-        // distribute fees
+        // Distribute fees
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
         if (_badgeModel.mintCreatorFee > 0) {
             payProtocolFees(_badgeModelId);
@@ -142,33 +144,50 @@ contract TheBadge is
         );
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
+        // If no recipient has been defined, we ask the controller if it's allowed to temporally store
+        // the asset within his address until the user claims the ownership
+        if (_account == address(0)) {
+            if (!controller.isMintableToController(_badgeModelId, _account)) {
+                revert LibTheBadge.TheBadge__requestBadge_badgeNotMintable();
+            }
+            _mintingAccount = _badgeModelController.controller;
+        }
+
         // save asset info
         uint256 badgeId = _badgeStore.getCurrentBadgeIdCounter();
-        _setURI(badgeId, _tokenURI);
-        // Account: badge recipient; badgeId: the id of the badge; value: amount of badges to create (always 1), data: data of the badge (always null)
-        // This creates a new badge with id: badgeId
-        // For details check: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/token/ERC1155/ERC1155Upgradeable.sol#L303C72-L303C76
-        _mint(_account, badgeId, 1, "0x");
 
         // Mints the badge on the controller
         uint256 controllerBadgeId = controller.mint{ value: (msg.value - _badgeModel.mintCreatorFee) }(
             _msgSender(),
             _badgeModelId,
             badgeId,
-            _data
+            _data,
+            _mintingAccount
         );
+
+        // Mints the badge on the ERC1155 collection
+        _setURI(badgeId, _tokenURI);
+        // Account: badge recipient; badgeId: the id of the badge; value: amount of badges to create (always 1), data: data of the badge (always null)
+        // For details check: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/token/ERC1155/ERC1155Upgradeable.sol#L303C72-L303C76
+        _mint(_mintingAccount, badgeId, 1, "0x");
 
         // Stores the badge
         uint256 dueDate = _badgeModel.validFor == 0 ? 0 : block.timestamp + _badgeModel.validFor;
-        TheBadgeStore.Badge memory badge = TheBadgeStore.Badge(_badgeModelId, _account, dueDate, true);
+        TheBadgeStore.Badge memory badge = TheBadgeStore.Badge(_badgeModelId, _mintingAccount, dueDate, true);
         _badgeStore.addBadge(badgeId, badge);
-        emit BadgeRequested(_badgeModelId, badgeId, _account, _badgeModelController.controller, controllerBadgeId);
+        emit BadgeRequested(
+            _badgeModelId,
+            badgeId,
+            _mintingAccount,
+            _badgeModelController.controller,
+            controllerBadgeId
+        );
     }
 
     /**
-     * @notice Given a badge and data related to the claimer, claims the given badge to the claimr
+     * @notice Given a badgeId and data related to the recipient, claims the given badge to the recipient address
      * @param badgeId the id of the badge
-     * @param data containing information related to the claimer
+     * @param data containing information related to the recipient address
      */
     function claim(uint256 badgeId, bytes calldata data) public {
         uint256 badgeModelId = getBadgeModelIdFromBadgeId(badgeId);
@@ -176,13 +195,20 @@ contract TheBadge is
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             _badgeModel.controllerName
         );
+        TheBadgeStore.Badge memory badge = _badgeStore.getBadge(badgeId);
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        if (controller.isClaimable(badgeId) == false) {
+        if (badge.initialized == false) {
             revert LibTheBadge.TheBadge__requestBadge_badgeNotClaimable();
         }
 
-        controller.claim(badgeId, data);
+        if (controller.isClaimable(badgeId, data, _msgSender()) == false) {
+            revert LibTheBadge.TheBadge__requestBadge_badgeNotClaimable();
+        }
+
+        address claimAddress = controller.claim(badgeId, data);
+        _badgeStore.transferBadge(badgeId, address(_badgeModelController.controller), claimAddress);
+        emit BadgeTransferred(badgeId, address(_badgeModelController.controller), claimAddress);
     }
 
     /**
@@ -498,7 +524,12 @@ contract TheBadge is
         uint256[] memory amounts,
         bytes memory data
     ) internal override whenNotPaused {
-        if (from != address(0)) {
+        // Check if the from address is one of the badgeModelControllers
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelControllerByAddress(
+            from
+        );
+
+        if (_badgeModelController.initialized == false || from != address(0)) {
             revert LibTheBadge.TheBadge__SBT();
         }
 
