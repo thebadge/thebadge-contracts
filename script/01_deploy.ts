@@ -166,6 +166,10 @@ const deployControllers = async (
   const claimerRole = keccak256(utils.toUtf8Bytes("CLAIMER_ROLE"));
   await tpBadgeModelControllerStore.grantRole(claimerRole, contractsAdmin);
 
+  console.log("Adding ThirdPartyModelController to TheBadge...");
+  theBadgeModels.connect(deployer);
+  await theBadgeModels.addBadgeModelController("thirdParty", tpBadgeModelController.address);
+
   return [
     ["klerosBadgeModelController", klerosBadgeModelController.address],
     ["ThirdPartyModelController", tpBadgeModelController.address],
