@@ -320,17 +320,17 @@ contract TpBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeRoles
     }
 
     /**
-     * @notice not implemented / not used here
+     * @notice should not be used
      */
     function getChallengeDepositValue(uint256 /*badgeId*/) external pure returns (uint256) {
-        revert LibTpBadgeModelController.ThirdPartyModelController__method_not_supported();
+        return LibTpBadgeModelController.CHALLENGE_COST;
     }
 
     /**
-     * @notice not implemented / not used here
+     * @notice should not be used
      */
     function getRemovalDepositValue(uint256 /*badgeId*/) external pure returns (uint256) {
-        revert LibTpBadgeModelController.ThirdPartyModelController__method_not_supported();
+        return LibTpBadgeModelController.CHALLENGE_COST;
     }
 
     /**

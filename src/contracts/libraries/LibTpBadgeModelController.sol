@@ -7,7 +7,7 @@ library LibTpBadgeModelController {
     uint256 public constant CHALLENGE_TIME_SECONDS = 60; // 1 min
     uint256 public constant COURT_ID = 0;
     uint256 public constant NUMBER_OF_JURORS = 1;
-    uint256 private constant CHALLENGE_COST = 10000000000000000000000; // 10k ETH
+    uint256 public constant CHALLENGE_COST = 10000000000000000000000; // 10k ETH
     uint256 public constant THIRD_PARTY_BASE_DEPOSIT = CHALLENGE_COST;
     uint256 public constant THIRD_PARTY_STAKE_MULTIPLIER = 100;
 
