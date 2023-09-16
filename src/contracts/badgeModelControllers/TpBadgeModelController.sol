@@ -6,6 +6,9 @@ import { ILightGTCRFactory } from "../../interfaces/ILightGTCRFactory.sol";
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { ERC1155HolderUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
+import { ERC1155ReceiverUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155ReceiverUpgradeable.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadge } from "../thebadge/TheBadge.sol";
 import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
@@ -16,7 +19,13 @@ import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { TpBadgeModelControllerStore } from "./TpBadgeModelControllerStore.sol";
 import { LibTpBadgeModelController } from "../libraries/LibTpBadgeModelController.sol";
 
-contract TpBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeRoles, IBadgeModelController {
+contract TpBadgeModelController is
+    Initializable,
+    UUPSUpgradeable,
+    TheBadgeRoles,
+    IBadgeModelController,
+    ERC1155HolderUpgradeable
+{
     TpBadgeModelControllerStore public tpBadgeModelControllerStore;
     TheBadge public theBadge;
     TheBadgeModels public theBadgeModels;
@@ -373,6 +382,12 @@ contract TpBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeRoles
     /// Required by the OZ UUPS module
     // solhint-disable-next-line
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(AccessControlUpgradeable, ERC1155ReceiverUpgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
 
     /**
      * @notice we need a receive function to receive deposits devolution from kleros

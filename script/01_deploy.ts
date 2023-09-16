@@ -164,7 +164,7 @@ const deployControllers = async (
 
   console.log(`Grant claimer role to the relayer address: ${contractsAdmin} on ThirdPartyModelControllerStore...`);
   const claimerRole = keccak256(utils.toUtf8Bytes("CLAIMER_ROLE"));
-  await tpBadgeModelControllerStore.grantRole(claimerRole, contractsAdmin);
+  await tpBadgeModelController.grantRole(claimerRole, contractsAdmin);
 
   console.log("Adding ThirdPartyModelController to TheBadge...");
   theBadgeModels.connect(deployer);
