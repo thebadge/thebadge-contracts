@@ -529,7 +529,7 @@ contract TheBadge is
             from
         );
 
-        if (_badgeModelController.initialized == false || from != address(0)) {
+        if (from != address(0) && _badgeModelController.initialized == false) {
             revert LibTheBadge.TheBadge__SBT();
         }
 

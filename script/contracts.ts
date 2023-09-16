@@ -7,49 +7,49 @@ export enum Chains {
 export const contracts = {
   TheBadge: {
     address: {
-      [Chains.goerli]: "0x92E22069c8e12EFe6d9A14EB1bf8301D56Bc168f",
+      [Chains.goerli]: "0x2f2f14FB89129a6E9D4d01E3D29a408Af4A868Bb",
       [Chains.sepolia]: "0x83701fe7a462bD714A9006a9FF604367C24613E3",
       [Chains.gnosis]: "",
     },
   },
   TheBadgeStore: {
     address: {
-      [Chains.goerli]: "0xA13203Eec70a245E1Cb3AD3f3f636e41dD12c0cD",
+      [Chains.goerli]: "0xdD313a032A0F833158F9c89e67950444cC4e1C01",
       [Chains.sepolia]: "0x79Ffb85704b223B39d924233A14c849F5A3dC2e2",
       [Chains.gnosis]: "",
     },
   },
   TheBadgeUsers: {
     address: {
-      [Chains.goerli]: "0x4F12622326B25E2AF7043C1caC250988E28Fc737",
+      [Chains.goerli]: "0x9d9284C4c34A280DCae6aA8946c4133140ABA62A",
       [Chains.sepolia]: "0x5E7c648EE852241f145e1d480932C091979883D1",
       [Chains.gnosis]: "",
     },
   },
   TheBadgeModels: {
     address: {
-      [Chains.goerli]: "0x848f6D6a7A53BAC4b9543CC10FBCA99F39c47468",
+      [Chains.goerli]: "0x25AB0275Fff77dC085257d8FD817ca14Aa42E5a3",
       [Chains.sepolia]: "0x5df8183d0B77Bea3B72391eB0c4c873d2fdDC6f2",
       [Chains.gnosis]: "",
     },
   },
   KlerosBadgeModelController: {
     address: {
-      [Chains.goerli]: "0xfA3e24678C42a0E7cd6967DDE9b4c077c45C4Cb4",
+      [Chains.goerli]: "0x9a2d2777af64478B370A3beF58612F147fFC9b12",
       [Chains.sepolia]: "0x93549ecf683cc80C4aE73e2dbf11cb0FA51bc303",
       [Chains.gnosis]: "",
     },
   },
   TpBadgeModelController: {
     address: {
-      [Chains.goerli]: "0xD3914675F46278C10c699b30804220252467F7d9",
+      [Chains.goerli]: "0x8b4b38716B0C64DA8763E5630Ad0ea3Db5961178",
       [Chains.sepolia]: "",
       [Chains.gnosis]: "",
     },
   },
   TpBadgeModelControllerStore: {
     address: {
-      [Chains.goerli]: "0xAd480d38cce9B15245E38838FDf20FB5c0592486",
+      [Chains.goerli]: "0x758b938e9726Ea59aaEEe386bbac1e73317bE6BF",
       [Chains.sepolia]: "",
       [Chains.gnosis]: "",
     },
