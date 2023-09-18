@@ -122,6 +122,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     mapping(string => address) public allowedContractAddressesByContractName;
     mapping(address => User) public registeredUsers;
     mapping(string => BadgeModelController) public badgeModelControllers;
+    mapping(address => BadgeModelController) public badgeModelControllersByAddress;
     mapping(uint256 => BadgeModel) public badgeModels;
     mapping(uint256 => Badge) public badges;
     mapping(uint256 => mapping(address => uint256[])) public userMintedBadgesByBadgeModel;
@@ -153,6 +154,12 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     function getBadgeModelController(string memory controllerName) external view returns (BadgeModelController memory) {
         return badgeModelControllers[controllerName];
+    }
+
+    function getBadgeModelControllerByAddress(
+        address controllerAddress
+    ) external view returns (BadgeModelController memory) {
+        return badgeModelControllersByAddress[controllerAddress];
     }
 
     function getBadgeModel(uint256 badgeModelId) external view returns (BadgeModel memory) {
@@ -209,6 +216,20 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
             revert LibTheBadgeModels.TheBadge__addBadgeModelController_alreadySet();
         }
         badgeModelControllers[controllerName] = badgeModelController;
+        badgeModelControllersByAddress[badgeModelController.controller] = badgeModelController;
+    }
+
+    function updateBadgeModelController(
+        string memory controllerName,
+        BadgeModelController memory badgeModelController
+    ) external onlyPermittedContract {
+        BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
+        if (_badgeModelController.controller == address(0)) {
+            revert LibTheBadgeModels.TheBadge__addBadgeModelController_notFound();
+        }
+        delete badgeModelControllersByAddress[_badgeModelController.controller];
+        badgeModelControllers[controllerName] = badgeModelController;
+        badgeModelControllersByAddress[badgeModelController.controller] = badgeModelController;
     }
 
     function addBadgeModel(BadgeModel memory badgeModel) external onlyPermittedContract {
@@ -235,6 +256,23 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         badges[badgeId] = badge;
         userMintedBadgesByBadgeModel[_badgeModelId][_account].push(badgeId);
         badgeIdsCounter.increment();
+    }
+
+    function transferBadge(uint256 badgeId, address origin, address destination) external onlyPermittedContract {
+        Badge storage badge = badges[badgeId];
+        if (origin == address(0) || destination == address(0)) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidUserAddress();
+        }
+        if (badge.initialized == false) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidBadgeID();
+        }
+        if (badge.account != origin) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidUserAddress();
+        }
+
+        badge.account = destination;
+        delete userMintedBadgesByBadgeModel[badge.badgeModelId][origin][badgeId];
+        userMintedBadgesByBadgeModel[badge.badgeModelId][destination].push(badgeId);
     }
 
     /*

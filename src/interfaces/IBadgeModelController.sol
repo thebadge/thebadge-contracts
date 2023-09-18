@@ -9,10 +9,11 @@ interface IBadgeModelController {
         address callee,
         uint256 badgeModelId,
         uint256 badgeId,
-        bytes calldata data
+        bytes calldata data,
+        address destinationAddress
     ) external payable returns (uint256);
 
-    function claim(uint256 badgeId, bytes calldata data) external;
+    function claim(uint256 badgeId, bytes calldata data) external returns (address);
 
     function challenge(uint256 badgeId, bytes calldata data) external payable;
 
@@ -30,9 +31,9 @@ interface IBadgeModelController {
     // Read
     function mintValue(uint256 badgeModelId) external view returns (uint256);
 
-    function isMintable(uint256 badgeId, address account) external view returns (bool);
+    function isMintableToController(uint256 badgeModelId, address account) external view returns (bool);
 
-    function isClaimable(uint256 badgeId) external view returns (bool);
+    function isClaimable(uint256 badgeId, bytes calldata data, address caller) external view returns (bool);
 
     function isAssetActive(uint256 badgeId) external view returns (bool);
 

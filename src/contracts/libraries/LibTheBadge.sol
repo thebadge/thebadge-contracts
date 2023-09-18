@@ -25,6 +25,7 @@ library LibTheBadge {
     error TheBadge__requestBadge_badgeModelNotFound();
     error TheBadge__requestBadge_badgeModelIsSuspended();
     error TheBadge__requestBadge_wrongValue();
+    error TheBadge__requestBadge_badgeNotMintable();
     error TheBadge__requestBadge_isPaused();
     error TheBadge__requestBadge_controllerIsPaused();
     error TheBadge__requestBadge_badgeNotFound();
