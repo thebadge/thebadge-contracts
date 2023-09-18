@@ -9,6 +9,7 @@ library LibTheBadgeModels {
      */
     error TheBadge__addBadgeModelController_emptyName();
     error TheBadge__addBadgeModelController_alreadySet();
+    error TheBadge__addBadgeModelController_notFound();
     error TheBadge__updateBadgeModel_badgeModelNotFound();
     error TheBadge__createBadgeModel_wrongValue();
     error TheBadge__updateBadgeModel_notBadgeModelOwner();

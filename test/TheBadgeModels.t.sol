@@ -64,8 +64,7 @@ contract TheBadgeModelsTest is Test {
             address(badgeModelsInstance),
             address(badgeUsersInstance),
             _arbitrator,
-            _tcrFactory,
-            address(badgeStoreInstance)
+            _tcrFactory
         );
         console.log(
             "klerosBadgeModelControllerInstance initialized with address: ",

@@ -81,11 +81,23 @@ interface ILightGeneralizedTCR {
     function addItem(string calldata _item) external payable;
 
     /**
+     * @dev Directly add an item to the list bypassing request-challenge. Can only be used by the relay contract.
+     * @param _item The URI to the item data.
+     */
+    function addItemDirectly(string calldata _item) external;
+
+    /**
      * @dev Submit a request to remove an item from the list. Accepts enough ETH to cover the deposit, reimburses the rest.
      * @param _itemID The ID of the item to remove.
      * @param _evidence A link to an evidence using its URI. Ignored if not provided.
      */
     function removeItem(bytes32 _itemID, string calldata _evidence) external payable;
+
+    /**
+     * @dev Directly remove an item from the list bypassing request-challenge. Can only be used by the relay contract.
+     * @param _itemID The ID of the item to remove.
+     */
+    function removeItemDirectly(bytes32 _itemID) external;
 
     /**
      * @dev Challenges the request of the item. Accepts enough ETH to cover the deposit, reimburses the rest.

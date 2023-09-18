@@ -76,8 +76,10 @@ contract KlerosBadgeModelControllerStore {
      */
     struct KlerosBadge {
         bytes32 itemID;
+        uint256 badgeModelId;
         address callee;
         uint256 deposit;
+        address destinationAddress;
         bool initialized;
     }
 

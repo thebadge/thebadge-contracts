@@ -11,4 +11,6 @@ library LibTheBadgeStore {
     error TheBadge__Store_InvalidContractAddress();
     error TheBadge__Store_ContractNameAlreadyExists();
     error TheBadge__Store_InvalidContractName();
+    error TheBadge__Store_InvalidUserAddress();
+    error TheBadge__Store_InvalidBadgeID();
 }

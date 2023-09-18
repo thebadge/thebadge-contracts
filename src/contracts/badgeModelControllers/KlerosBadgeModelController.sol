@@ -13,7 +13,6 @@ import { CappedMath } from "../../utils/CappedMath.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { TheBadge } from "../thebadge/TheBadge.sol";
 import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
-import { TheBadgeStore } from "../thebadge/TheBadgeStore.sol";
 import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
 
 contract KlerosBadgeModelController is
@@ -23,7 +22,6 @@ contract KlerosBadgeModelController is
     TheBadgeRoles,
     IBadgeModelController
 {
-    TheBadgeStore private _badgeStore;
     using CappedMath for uint256;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -38,8 +36,7 @@ contract KlerosBadgeModelController is
         address _theBadgeModels,
         address _theBadgeUsers,
         address _arbitrator,
-        address _tcrFactory,
-        address badgeStore
+        address _tcrFactory
     ) public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);
@@ -50,13 +47,12 @@ contract KlerosBadgeModelController is
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
         verifyUserProtocolFee = uint256(0);
-        _badgeStore = TheBadgeStore(payable(badgeStore));
         emit Initialize(admin, _tcrFactory);
     }
 
     /*
      * @notice Updates the value of the protocol: _mintBadgeDefaultFee
-     * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
+     * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each user verification (in bps)
      */
     function updateVerifyUserProtocolFee(uint256 _verifyUserProtocolFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
         verifyUserProtocolFee = _verifyUserProtocolFee;
@@ -88,7 +84,7 @@ contract KlerosBadgeModelController is
             args.baseDeposits, // The base deposits for requests/challenges (4 values: submit, remove, challenge and removal request)
             args.challengePeriodDuration, // The time in seconds parties have to challenge a request.
             args.stakeMultipliers, // Multipliers of the arbitration cost in basis points (see LightGeneralizedTCR MULTIPLIER_DIVISOR)
-            args.admin // The address of the relay contract to add/remove items directly. // TODO: set TCR admin to an address that we control, so we can call "removeItem", only for Third-party badges
+            args.admin // The address of the relay contract to add/remove items directly. // TODO: Review what we are sending on the dApp, this should be 0x
         );
 
         // Get the address for the kleros badge model created
@@ -114,12 +110,14 @@ contract KlerosBadgeModelController is
      * @param badgeModelId the badgeModelId
      * @param badgeId the klerosBadgeId
      * @param data the klerosBadgeId
+     * @param destinationAddress the address owner of the new badge
      */
     function mint(
         address callee,
         uint256 badgeModelId,
         uint256 badgeId,
-        bytes calldata data
+        bytes calldata data,
+        address destinationAddress
     ) public payable onlyTheBadge returns (uint256) {
         // check value
         uint256 mintCost = mintValue(badgeModelId);
@@ -131,7 +129,6 @@ contract KlerosBadgeModelController is
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
         MintParams memory args = abi.decode(data, (MintParams));
 
-        // TODO: it would be good to emit and mintKlerosBadge which the badgeId
         // and the klerosItemID (which can be calculated here, before adding the item in TCR)
         // but could it cause some issues if the item it's not added on the next line?
         // Note: it would be good, as it will simplify a lot the logic on the subgraph, not needing to listen to internal TCR events
@@ -142,7 +139,7 @@ contract KlerosBadgeModelController is
         // Its needed on the subgraph to check the disputes status for that item
         bytes32 klerosItemID = keccak256(abi.encodePacked(args.evidence));
         // save deposit amount for callee as it has to be returned if it was not challenged.
-        klerosBadges[badgeId] = KlerosBadge(klerosItemID, callee, msg.value, true);
+        klerosBadges[badgeId] = KlerosBadge(klerosItemID, badgeModelId, callee, msg.value, destinationAddress, true);
 
         emit MintKlerosBadge(badgeId, args.evidence);
         return uint256(klerosItemID);
@@ -152,9 +149,10 @@ contract KlerosBadgeModelController is
      * @notice After the review period ends, the items on the tcr list should be claimed using this function
      * returns the badge's mint callee deposit and set the internal value to 0 again
      * the internal value is not the deposit, is just a counter to know how much money belongs to the deposit
+     * this method can be called by anyone
      * @param badgeId the klerosBadgeId
      */
-    function claim(uint256 badgeId, bytes calldata /*data*/) public onlyTheBadge {
+    function claim(uint256 badgeId, bytes calldata /*data*/) public onlyTheBadge returns (address) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
 
@@ -175,6 +173,7 @@ contract KlerosBadgeModelController is
             revert KlerosBadgeModelController__badge__depositReturnFailed();
         }
         emit DepositReturned(_klerosBadge.callee, balanceToDeposit, badgeId);
+        return _klerosBadge.destinationAddress;
     }
 
     /**
@@ -293,18 +292,17 @@ contract KlerosBadgeModelController is
     }
 
     /**
-     * @notice Badge can be minted if it was never requested for the address or if it has a due date before now
+     * @notice Returns true if the controller supports to be the temporal owner of the minted badge until the user claims it
      */
-    function isMintable(uint256, address) public pure returns (bool) {
-        // TODO: implementation missing?
-        return true;
+    function isMintableToController(uint256 /*badgeModelId*/, address /*account*/) public pure returns (bool) {
+        return false;
     }
 
     /**
      * @notice Returns true if the badge is ready to be claimed (its status is RegistrationRequested and the challenge period ended), otherwise returns false
      * @param badgeId the klerosBadgeId
      */
-    function isClaimable(uint256 badgeId) public view returns (bool) {
+    function isClaimable(uint256 badgeId, bytes calldata /*data*/, address /*caller*/) public view returns (bool) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         KlerosBadge storage _klerosBadge = klerosBadges[badgeId];
 
@@ -435,9 +433,8 @@ contract KlerosBadgeModelController is
      * @param badgeId the klerosBadgeId
      */
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
-        TheBadgeStore.Badge memory badge = _badgeStore.getBadge(badgeId);
-        uint256 badgeModelId = badge.badgeModelId;
-        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModels[badgeModelId];
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
+        KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModels[_klerosBadge.badgeModelId];
         if (_klerosBadgeModel.tcrList == address(0)) {
             revert KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
         }
