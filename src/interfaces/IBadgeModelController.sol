@@ -13,7 +13,7 @@ interface IBadgeModelController {
         address destinationAddress
     ) external payable returns (uint256);
 
-    function claim(uint256 badgeId, bytes calldata data) external returns (address);
+    function claim(uint256 badgeId, bytes calldata data, address caller) external returns (address);
 
     function challenge(uint256 badgeId, bytes calldata data) external payable;
 
@@ -33,7 +33,7 @@ interface IBadgeModelController {
 
     function isMintableToController(uint256 badgeModelId, address account) external view returns (bool);
 
-    function isClaimable(uint256 badgeId, bytes calldata data, address caller) external view returns (bool);
+    function isClaimable(uint256 badgeId) external view returns (bool);
 
     function isAssetActive(uint256 badgeId) external view returns (bool);
 

@@ -112,6 +112,7 @@ contract TpBadgeModelController is
      * @notice Allows to create off-chain third-party strategies for registered entities
      * @param badgeModelId from TheBadge contract
      */
+    // TODO: Should also receive a list of allowed minting addresses and grant the minter role
     function createBadgeModel(uint256 badgeModelId, bytes calldata /*data*/) public onlyTheBadgeModels {
         TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _badgeModel = tpBadgeModelControllerStore.getBadgeModel(
             badgeModelId
@@ -160,6 +161,8 @@ contract TpBadgeModelController is
      * @param badgeId the badgeId
      * @param data extra data related to the badge, usually 0x
      */
+    // TODO Only verified callee and verified user
+    // TODO: Add a new modifier that not only checks that the call came from TheBadge, but also from an authorized user
     function mint(
         address /*callee*/,
         uint256 badgeModelId,
@@ -200,11 +203,26 @@ contract TpBadgeModelController is
      * @param badgeId the id of the badge
      * @param data contains the recipient address
      */
-    function claim(uint256 badgeId, bytes calldata data) public onlyTheBadge returns (address) {
+    function claim(uint256 badgeId, bytes calldata data, address caller) public onlyTheBadge returns (address) {
         TpBadgeModelControllerStore.ClaimParams memory args = abi.decode(
             data,
             (TpBadgeModelControllerStore.ClaimParams)
         );
+
+        if (args.recipientAddress == address(0)) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__claimBadge_invalidRecipient();
+        }
+
+        uint256 ownBalance = theBadge.balanceOf(address(this), badgeId);
+        if (ownBalance == 0) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__claimBadge_invalidBadgeOrAlreadyClaimed();
+        }
+
+        // This is the role assigned to the relayer
+        if (!hasRole(CLAIMER_ROLE, caller)) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__claimBadge_userNotAllowed();
+        }
+
         theBadge.safeTransferFrom(address(this), args.recipientAddress, badgeId, 1, "0x");
         emit ThirdPartyBadgeClaimed(address(this), args.recipientAddress, badgeId);
         return args.recipientAddress;
@@ -288,18 +306,7 @@ contract TpBadgeModelController is
      * @notice Returns true if the badge is ready to be claimed to the destination address, otherwise returns false
      * @param badgeId the badgeId
      */
-    function isClaimable(uint256 badgeId, bytes calldata data, address caller) external view returns (bool) {
-        TpBadgeModelControllerStore.ClaimParams memory args = abi.decode(
-            data,
-            (TpBadgeModelControllerStore.ClaimParams)
-        );
-        if (args.recipientAddress == address(0)) {
-            return false;
-        }
-        // This is the role assigned to the relayer
-        if (!hasRole(CLAIMER_ROLE, caller)) {
-            return false;
-        }
+    function isClaimable(uint256 badgeId) external view returns (bool) {
         uint256 ownBalance = theBadge.balanceOf(address(this), badgeId);
         if (ownBalance > 0) {
             return true;
