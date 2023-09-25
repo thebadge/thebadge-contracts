@@ -25,6 +25,7 @@ contract KlerosBadgeModelControllerStore {
 
     /**
      * Struct to use as args to create a Kleros badge type strategy.
+     *  @param owner address of the creator of the model
      *  @param governor An address with permission to updates parameters of the list. Use Kleros governor for full decentralization.
      *  @param admin The address with permission to add/remove items directly.
      *  @param courtId The ID of the kleros's court.
@@ -63,9 +64,11 @@ contract KlerosBadgeModelControllerStore {
     }
 
     /**
+     * @param owner address of the creator of the model
      * @param tcrList The TCR List created for a particular badge type
      */
     struct KlerosBadgeModel {
+        address owner;
         address tcrList;
     }
 
@@ -139,6 +142,7 @@ contract KlerosBadgeModelControllerStore {
     error KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
     error KlerosBadgeModelController__user__userVerificationAlreadyStarted();
     error KlerosBadgeModelController__user__userVerificationNotStarted();
+    error KlerosBadgeModelController__user__userVerificationRejected();
     error KlerosBadgeModelController__user__userNotFound();
 
     error KlerosBadgeModelController__badge__depositReturnFailed();
@@ -180,6 +184,18 @@ contract KlerosBadgeModelControllerStore {
         if (_klerosUser.verificationStatus != VerificationStatus.VerificationSubmitted) {
             revert KlerosBadgeModelController__user__userVerificationNotStarted();
         }
+        _;
+    }
+
+    modifier onlyKlerosUser(address _user) {
+        KlerosUser storage _klerosUser = klerosUsers[_user];
+        if (_klerosUser.initialized == false) {
+            revert KlerosBadgeModelController__user__userNotFound();
+        }
+        if (_klerosUser.verificationStatus == VerificationStatus.VerificationRejected) {
+            revert KlerosBadgeModelController__user__userVerificationRejected();
+        }
+        // TODO Maybe also add onlyVerifiedUser?
         _;
     }
 }
