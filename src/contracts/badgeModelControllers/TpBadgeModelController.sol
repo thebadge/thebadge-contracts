@@ -26,11 +26,11 @@ contract TpBadgeModelController is
     IBadgeModelController,
     ERC1155HolderUpgradeable
 {
+    using CappedMath for uint256;
     TpBadgeModelControllerStore public tpBadgeModelControllerStore;
     TheBadge public theBadge;
     TheBadgeModels public theBadgeModels;
     TheBadgeUsers public theBadgeUsers;
-    using CappedMath for uint256;
 
     /**
      * =========================
