@@ -203,7 +203,11 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             args.controllerName
         );
-        IBadgeModelController(_badgeModelController.controller).createBadgeModel(currentBadgeModelId, data);
+        IBadgeModelController(_badgeModelController.controller).createBadgeModel(
+            _msgSender(),
+            currentBadgeModelId,
+            data
+        );
     }
 
     /*

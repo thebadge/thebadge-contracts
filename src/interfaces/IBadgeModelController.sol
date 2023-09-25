@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 interface IBadgeModelController {
     // Write
-    function createBadgeModel(uint256 badgeModelId, bytes calldata data) external;
+    function createBadgeModel(address callee, uint256 badgeModelId, bytes calldata data) external;
 
     function mint(
         address callee,

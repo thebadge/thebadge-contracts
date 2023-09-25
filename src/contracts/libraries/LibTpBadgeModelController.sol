@@ -40,6 +40,7 @@ library LibTpBadgeModelController {
 
     error ThirdPartyModelController__user__userVerificationAlreadyStarted();
     error ThirdPartyModelController__user__userVerificationNotStarted();
+    error ThirdPartyModelController__user__userVerificationRejected();
     error ThirdPartyModelController__user__userNotFound();
 
     error ThirdPartyModelController__store_InvalidContractName();
