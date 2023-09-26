@@ -262,9 +262,21 @@ contract TheBadgeModelsTest is Test {
         // Perform assertions over TCRList
         address arbitrator = address(klerosBadgeModelControllerStoreInstance.arbitrator());
         ILightGeneralizedTCR tcrListInstance = ILightGeneralizedTCR(tcrList);
-        assertEq(arbitrator, address(tcrListInstance.arbitrator()), "The tcrList should be created with the correct arbitrator");
-        assertEq(tcrGovernor, address(tcrListInstance.governor()), "The tcrList should be created with the correct governor");
-        assertEq(tcrAdmin, address(tcrListInstance.relayerContract()), "The tcrList should be created with the correct admin");
+        assertEq(
+            arbitrator,
+            address(tcrListInstance.arbitrator()),
+            "The tcrList should be created with the correct arbitrator"
+        );
+        assertEq(
+            tcrGovernor,
+            address(tcrListInstance.governor()),
+            "The tcrList should be created with the correct governor"
+        );
+        assertEq(
+            tcrAdmin,
+            address(tcrListInstance.relayerContract()),
+            "The tcrList should be created with the correct admin"
+        );
         // TODO: Assert creation event if needed
     }
 }
