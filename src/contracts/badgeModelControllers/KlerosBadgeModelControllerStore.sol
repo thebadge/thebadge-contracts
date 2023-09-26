@@ -206,6 +206,22 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     }
 
     /**
+     * @notice Get the current badge model id
+     * @return The current badgeModelId counter
+     */
+    function getCurrentBadgeModelsIdCounter() external view returns (uint256) {
+        return klerosBadgeModelIdsCounter.current();
+    }
+
+    /**
+     * @notice Get the current badge id
+     * @return The current badgeId counter
+     */
+    function getCurrentBadgeIdCounter() external view returns (uint256) {
+        return klerosBadgeIdsCounter.current();
+    }
+
+    /**
      * =========================
      * Setters
      * =========================

@@ -121,6 +121,7 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
      * @param data Encoded data required to create a Kleros TCR list
      */
     function createBadgeModel(address callee, uint256 badgeModelId, bytes calldata data) public onlyTheBadgeModels {
+        address _callee = callee;
         KlerosBadgeModelControllerStore.KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModelControllerStore
             .getKlerosBadgeModel(badgeModelId);
         if (_klerosBadgeModel.tcrList != address(0)) {
@@ -138,13 +139,14 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
 
         IArbitrator _arbitrator = klerosBadgeModelControllerStore.getArbitrator();
         address admin = address(0);
+        address governor = args.governor != address(0) ? args.governor : _callee;
         lightGTCRFactory.deploy(
             _arbitrator, // Arbitrator address
             bytes.concat(abi.encodePacked(args.courtId), abi.encodePacked(args.numberOfJurors)), // ArbitratorExtraData
             address(0), // TODO: check this. The address of the TCR that stores related TCR addresses. This parameter can be left empty.
             args.registrationMetaEvidence, // The URI of the meta evidence object for registration requests.
             args.clearingMetaEvidence, // The URI of the meta evidence object for clearing requests.
-            args.governor, // The trusted governor of this contract.
+            governor, // The trusted governor of this contract.
             args.baseDeposits, // The base deposits for requests/challenges (4 values: submit, remove, challenge and removal request)
             args.challengePeriodDuration, // The time in seconds parties have to challenge a request.
             args.stakeMultipliers, // Multipliers of the arbitration cost in basis points (see LightGeneralizedTCR MULTIPLIER_DIVISOR)
@@ -160,9 +162,9 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
 
         klerosBadgeModelControllerStore.createKlerosBadgeModel(
             badgeModelId,
-            callee,
+            _callee,
             klerosTcrListAddress,
-            args.governor,
+            governor,
             admin
         );
 
