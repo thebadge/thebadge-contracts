@@ -164,6 +164,18 @@ interface ILightGeneralizedTCR {
     function arbitrator() external view returns (IArbitrator);
 
     /**
+     * @notice Gets the tcr governor.
+     * @return The governor address.
+     */
+    function governor() external view returns (address);
+
+    /**
+     * @notice Gets the tcr admin.
+     * @return The admin address.
+     */
+    function relayerContract() external view returns (address);
+
+    /**
      * @notice Gets the arbitratorExtraData for new requests.
      * @dev Gets the latest value in arbitrationParamsChanges.
      * @return The arbitrator extra data.
