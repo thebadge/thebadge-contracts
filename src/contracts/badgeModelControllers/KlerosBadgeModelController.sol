@@ -65,11 +65,7 @@ contract KlerosBadgeModelController is
      * @param badgeModelId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
-    function createBadgeModel(
-        address callee,
-        uint256 badgeModelId,
-        bytes calldata data
-    ) public onlyTheBadgeModels onlyKlerosUser(callee) {
+    function createBadgeModel(address callee, uint256 badgeModelId, bytes calldata data) public onlyTheBadgeModels {
         KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModels[badgeModelId];
         if (_klerosBadgeModel.tcrList != address(0)) {
             revert KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();

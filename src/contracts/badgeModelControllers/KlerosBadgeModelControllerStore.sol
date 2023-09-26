@@ -186,16 +186,4 @@ contract KlerosBadgeModelControllerStore {
         }
         _;
     }
-
-    modifier onlyKlerosUser(address _user) {
-        KlerosUser storage _klerosUser = klerosUsers[_user];
-        if (_klerosUser.initialized == false) {
-            revert KlerosBadgeModelController__user__userNotFound();
-        }
-        if (_klerosUser.verificationStatus == VerificationStatus.VerificationRejected) {
-            revert KlerosBadgeModelController__user__userVerificationRejected();
-        }
-        // TODO Maybe also add onlyVerifiedUser?
-        _;
-    }
 }
