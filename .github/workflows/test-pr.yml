@@ -22,7 +22,7 @@ jobs:
 
       - name: Run Forge tests
         run: |
-          forge test -vv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 9681756
+          forge test -vvv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 9681756
         id: test
 
       - name: Run Forge build
