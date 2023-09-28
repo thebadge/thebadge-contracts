@@ -3,8 +3,6 @@ pragma solidity ^0.8.0;
 import "../../src/contracts/libraries/LibTheBadge.sol";
 import "../../src/contracts/libraries/LibTheBadgeUsers.sol";
 import { StringsUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
-import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-
 import { Config } from "./Config.sol";
 
 contract UpdateUser is Config {
