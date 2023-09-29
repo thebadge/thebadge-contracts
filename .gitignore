@@ -22,3 +22,5 @@ EOF
 .lib/
 
 lib/
+
+types/

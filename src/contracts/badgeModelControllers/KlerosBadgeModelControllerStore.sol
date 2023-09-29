@@ -1,33 +1,50 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.17;
 
+import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
-import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
-import { TheBadge } from "../thebadge/TheBadge.sol";
-import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { LibKlerosBadgeModelController } from "../libraries/LibKlerosBadgeModelController.sol";
+import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 
-contract KlerosBadgeModelControllerStore {
-    TheBadge public theBadge;
-    TheBadgeModels public theBadgeModels;
-    TheBadgeUsers public theBadgeUsers;
-    IArbitrator public arbitrator;
-    address public tcrFactory;
-
+contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     using CappedMath for uint256;
-    uint256 internal verifyUserProtocolFee;
+    using CountersUpgradeable for CountersUpgradeable.Counter;
 
-    enum VerificationStatus {
-        VerificationSubmitted, // The user submitted a request to verify himself
-        Verified, // The verification was granted to the user
-        VerificationRejected // The verification was rejected after qhe submission
+    /**
+     * =========================
+     * Events
+     * =========================
+     */
+    // Event to log when a contract is added to the list
+    event ContractAdded(string indexed _contractName, address indexed contractAddress);
+
+    // Event to log when a contract is removed from the list
+    event ContractRemoved(string indexed _contractName, address indexed contractAddress);
+
+    // Event to log when a contract address is updated from the list
+    event ContractUpdated(string indexed _contractName, address indexed contractAddress);
+
+    /**
+     * =========================
+     * Modifiers
+     * =========================
+     */
+
+    // Modifier to check if the caller is one of the allowedContractAddresses contracts
+    modifier onlyPermittedContract() {
+        if (allowedContractAddresses[_msgSender()] == false) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__store_OperationNotPermitted();
+        }
+
+        _;
     }
 
     /**
      * Struct to use as args to create a Kleros badge type strategy.
      *  @param owner address of the creator of the model
      *  @param governor An address with permission to updates parameters of the list. Use Kleros governor for full decentralization.
-     *  @param admin The address with permission to add/remove items directly.
      *  @param courtId The ID of the kleros's court.
      *  @param numberOfJurors The number of jurors required if a dispute is initiated.
      *  @param registrationMetaEvidence The URI of the meta evidence object for registration requests.
@@ -45,7 +62,6 @@ contract KlerosBadgeModelControllerStore {
      */
     struct CreateBadgeModel {
         address governor;
-        address admin;
         uint256 courtId;
         uint256 numberOfJurors;
         string registrationMetaEvidence;
@@ -69,7 +85,11 @@ contract KlerosBadgeModelControllerStore {
      */
     struct KlerosBadgeModel {
         address owner;
+        uint256 badgeModelId;
         address tcrList;
+        address governor;
+        address admin;
+        bool initialized;
     }
 
     /**
@@ -90,7 +110,7 @@ contract KlerosBadgeModelControllerStore {
         address user;
         string userMetadata;
         string verificationEvidence;
-        VerificationStatus verificationStatus;
+        LibKlerosBadgeModelController.VerificationStatus verificationStatus;
         bool initialized;
     }
 
@@ -99,91 +119,298 @@ contract KlerosBadgeModelControllerStore {
      * Store
      * =========================
      */
+    CountersUpgradeable.Counter internal klerosBadgeModelIdsCounter;
+    CountersUpgradeable.Counter internal klerosBadgeIdsCounter;
+    IArbitrator public arbitrator;
+    address public tcrFactory;
+    uint256 internal verifyUserProtocolFee;
 
+    // Mapping to store contract addresses by name
+    mapping(address => bool) public allowedContractAddresses;
+    mapping(string => address) public allowedContractAddressesByContractName;
     mapping(uint256 => KlerosBadgeModel) public klerosBadgeModels;
     mapping(uint256 => KlerosBadge) public klerosBadges;
     mapping(address => KlerosUser) public klerosUsers;
 
-    /**
-     * =========================
-     * Events
-     * =========================
-     */
-    event NewKlerosBadgeModel(
-        uint256 indexed badgeModelId,
-        address indexed tcrAddress,
-        string registrationMetaEvidence,
-        string clearingMetaEvidence
-    );
-    event MintKlerosBadge(uint256 indexed badgeId, string evidence);
-    event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
-    event DepositReturned(address indexed recipient, uint256 amount, uint256 indexed badgeId);
-    event Initialize(address indexed admin, address indexed tcrFactory);
-    event ProtocolSettingsUpdated();
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address admin, address _arbitrator, address _tcrFactory) public initializer {
+        __Ownable_init();
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        arbitrator = IArbitrator(_arbitrator);
+        tcrFactory = _tcrFactory;
+        verifyUserProtocolFee = uint256(0);
+    }
 
     /**
      * =========================
-     * Errors
+     * Getters
      * =========================
      */
-    error KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
-    error KlerosBadgeModelController__onlyTheBadge_senderNotTheBadge();
-    error KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeModels();
-    error KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeUsers();
-    error KlerosBadgeModelController__mintBadge_alreadyMinted();
-    error KlerosBadgeModelController__mintBadge_wrongBadgeModel();
-    error KlerosBadgeModelController__mintBadge_isPaused();
-    error KlerosBadgeModelController__mintBadge_wrongValue();
-    error KlerosBadgeModelController__claimBadge_insufficientBalance();
-    error KlerosBadgeModelController__createBadgeModel_TCRListAddressZero();
+    /**
+     * @notice Get the current verification protocol fee.
+     * @return The current verification protocol fee.
+     */
+    function getVerifyUserProtocolFee() external view returns (uint256) {
+        return verifyUserProtocolFee;
+    }
 
-    error KlerosBadgeModelController__badge__notInChallengeableStatus();
-    error KlerosBadgeModelController__badge__klerosBadgeNotFound();
-    error KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
-    error KlerosBadgeModelController__user__userVerificationAlreadyStarted();
-    error KlerosBadgeModelController__user__userVerificationNotStarted();
-    error KlerosBadgeModelController__user__userVerificationRejected();
-    error KlerosBadgeModelController__user__userNotFound();
+    /**
+     * @notice Get KlerosBadgeModel by badge model ID.
+     * @param badgeModelId The ID of the KlerosBadgeModel.
+     * @return KlerosBadgeModel struct representing the badge model.
+     */
+    function getKlerosBadgeModel(uint256 badgeModelId) external view returns (KlerosBadgeModel memory) {
+        return klerosBadgeModels[badgeModelId];
+    }
 
-    error KlerosBadgeModelController__badge__depositReturnFailed();
+    /**
+     * @notice Get KlerosBadge by badge ID.
+     * @param badgeId The ID of the KlerosBadge.
+     * @return KlerosBadge struct representing the badge.
+     */
+    function getKlerosBadge(uint256 badgeId) external view returns (KlerosBadge memory) {
+        return klerosBadges[badgeId];
+    }
 
-    error TheBadge__method_not_supported();
+    /**
+     * @notice Get KlerosUser by user address.
+     * @param userAddress The address of the user.
+     * @return KlerosUser struct representing the user.
+     */
+    function getKlerosUser(address userAddress) external view returns (KlerosUser memory) {
+        return klerosUsers[userAddress];
+    }
+
+    /**
+     * @notice Get the current arbitrator contract.
+     * @return The current IArbitrator contract.
+     */
+    function getArbitrator() external view returns (IArbitrator) {
+        return arbitrator;
+    }
+
+    /**
+     * @notice Get the current TCR factory address.
+     * @return The current TCR factory address.
+     */
+    function getTCRFactory() external view returns (address) {
+        return tcrFactory;
+    }
+
+    /**
+     * @notice Get the current badge model id
+     * @return The current badgeModelId counter
+     */
+    function getCurrentBadgeModelsIdCounter() external view returns (uint256) {
+        return klerosBadgeModelIdsCounter.current();
+    }
+
+    /**
+     * @notice Get the current badge id
+     * @return The current badgeId counter
+     */
+    function getCurrentBadgeIdCounter() external view returns (uint256) {
+        return klerosBadgeIdsCounter.current();
+    }
 
     /**
      * =========================
-     * Modifiers
+     * Setters
      * =========================
      */
 
-    modifier onlyTheBadge() {
-        if (address(theBadge) != msg.sender) {
-            revert KlerosBadgeModelController__onlyTheBadge_senderNotTheBadge();
+    // Function to add a contract to the list of permitted contracts
+    function addPermittedContract(
+        string memory _contractName,
+        address _contractAddress
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (_contractAddress == address(0)) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__store_InvalidContractAddress();
         }
-        _;
+
+        // Check if the contract name already exists
+        if (allowedContractAddressesByContractName[_contractName] != address(0)) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__store_ContractNameAlreadyExists();
+        }
+
+        // Add the contract name and address to the mapping
+        allowedContractAddressesByContractName[_contractName] = _contractAddress;
+        allowedContractAddresses[_contractAddress] = true;
+
+        emit ContractAdded(_contractName, _contractAddress);
     }
 
-    modifier onlyTheBadgeModels() {
-        if (address(theBadgeModels) != msg.sender) {
-            revert KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeModels();
+    // Function to remove a contract from the list of permitted contracts
+    function removePermittedContract(string memory _contractName) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        address contractAddress = allowedContractAddressesByContractName[_contractName];
+
+        // Check if the contract name exists in the mapping
+        if (contractAddress == address(0)) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__store_InvalidContractName();
         }
-        _;
+
+        // Remove the contract name and address from the mapping
+        delete allowedContractAddressesByContractName[_contractName];
+        delete allowedContractAddresses[contractAddress];
+
+        emit ContractRemoved(_contractName, contractAddress);
     }
 
-    modifier onlyTheBadgeUsers() {
-        if (address(theBadgeUsers) != msg.sender) {
-            revert KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeUsers();
+    // Function to update a contract address based on the contract name
+    function updatePermittedContract(
+        string memory _contractName,
+        address _newContractAddress
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (_newContractAddress == address(0)) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__store_InvalidContractAddress();
         }
-        _;
+
+        // Check if the contract name exists in the mapping
+        address oldContractAddress = allowedContractAddressesByContractName[_contractName];
+        if (oldContractAddress == address(0)) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__store_InvalidContractName();
+        }
+
+        // Update the contract address associated with the contract name
+        delete allowedContractAddresses[oldContractAddress];
+        allowedContractAddressesByContractName[_contractName] = _newContractAddress;
+        allowedContractAddresses[_newContractAddress] = true;
+
+        emit ContractUpdated(_contractName, _newContractAddress);
     }
 
-    modifier onlyUserOnVerification(address _user) {
-        KlerosUser storage _klerosUser = klerosUsers[_user];
-        if (_klerosUser.initialized == false) {
-            revert KlerosBadgeModelController__user__userNotFound();
+    /**
+     * @notice Create a new KlerosBadgeModel.
+     * @param _badgeModelId The ID of the KlerosBadgeModel to create.
+     * @param _owner The address of the owner of the KlerosBadgeModel.
+     * @param _tcrList The address of the TCR list associated with the KlerosBadgeModel.
+     * @param _governor The address governor of the TCR list associated.
+     * @param _admin The address _admin of the TCR list associated.
+     */
+    function createKlerosBadgeModel(
+        uint256 _badgeModelId,
+        address _owner,
+        address _tcrList,
+        address _governor,
+        address _admin
+    ) external onlyPermittedContract {
+        KlerosBadgeModel storage badgeModel = klerosBadgeModels[_badgeModelId];
+
+        if (badgeModel.initialized == true) {
+            revert LibKlerosBadgeModelController
+                .KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
         }
-        if (_klerosUser.verificationStatus != VerificationStatus.VerificationSubmitted) {
-            revert KlerosBadgeModelController__user__userVerificationNotStarted();
-        }
-        _;
+
+        KlerosBadgeModel memory newBadgeModel = KlerosBadgeModel({
+            owner: _owner,
+            badgeModelId: _badgeModelId,
+            tcrList: _tcrList,
+            governor: _governor,
+            admin: _admin,
+            initialized: true
+        });
+
+        klerosBadgeModels[_badgeModelId] = newBadgeModel;
+        klerosBadgeModelIdsCounter.increment();
     }
+
+    /**
+     * @notice Update a KlerosBadgeModel.
+     * @param badgeModelId The ID of the KlerosBadgeModel to update.
+     * @param _klerosBadgeModel the model updated
+     */
+    function updateKlerosBadgeModel(
+        uint256 badgeModelId,
+        KlerosBadgeModel memory _klerosBadgeModel
+    ) external onlyPermittedContract {
+        KlerosBadgeModel storage badgeModel = klerosBadgeModels[badgeModelId];
+
+        if (badgeModel.owner == address(0)) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__badgeModel__NotFound();
+        }
+
+        klerosBadgeModels[badgeModelId] = _klerosBadgeModel;
+    }
+
+    /**
+     * @notice Add a new KlerosBadge.
+     * @param badgeId The ID of the KlerosBadge.
+     * @param badge The KlerosBadge struct to be added.
+     */
+    function addKlerosBadge(uint256 badgeId, KlerosBadge memory badge) external onlyPermittedContract {
+        klerosBadges[badgeId] = badge;
+        klerosBadgeIdsCounter.increment();
+    }
+
+    /**
+     * @notice Clears the deposit amount for a specific KlerosBadge.
+     *
+     * This function allows the owner or a permitted contract to clear the deposit amount associated with a KlerosBadge.
+     *
+     * @dev The deposit amount for the KlerosBadge is set to 0.
+     * @param badgeId The ID of the KlerosBadge for which to clear the deposit amount.
+     */
+    function clearKlerosBadgeDepositAmount(uint256 badgeId) external onlyPermittedContract {
+        KlerosBadge storage existingBadge = klerosBadges[badgeId];
+
+        if (!existingBadge.initialized) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__klerosBadgeNotFound();
+        }
+
+        existingBadge.deposit = 0;
+    }
+
+    /**
+     * @notice Creates a KlerosUser's details.
+     * @param userAddress The address of the user to be created.
+     * @param newUser The new KlerosUser struct.
+     */
+    function registerKlerosUser(address userAddress, KlerosUser memory newUser) external onlyPermittedContract {
+        KlerosUser memory _user = klerosUsers[userAddress];
+        if (_user.initialized == true) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userVerificationAlreadyStarted();
+        }
+        klerosUsers[userAddress] = newUser;
+    }
+
+    /**
+     * @notice Update a KlerosUser's details.
+     * @param userAddress The address of the user to be updated.
+     * @param _verificationStatus the new verification status of the user
+     */
+    function updateKlerosUserVerificationStatus(
+        address userAddress,
+        LibKlerosBadgeModelController.VerificationStatus _verificationStatus
+    ) external onlyPermittedContract {
+        KlerosUser memory _user = klerosUsers[userAddress];
+        if (_user.initialized == false) {
+            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userNotFound();
+        }
+        _user.verificationStatus = _verificationStatus;
+        klerosUsers[userAddress] = _user;
+    }
+
+    /**
+     * @notice Update the verification protocol fee.
+     * @dev Only the owner can update the verification protocol fee.
+     * @param newFee The new verification protocol fee to set.
+     */
+    function setVerifyUserProtocolFee(uint256 newFee) external onlyPermittedContract {
+        verifyUserProtocolFee = newFee;
+    }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[50] private __gap;
+
+    // tslint:disable-next-line:no-empty
+    receive() external payable {}
 }

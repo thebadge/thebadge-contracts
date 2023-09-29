@@ -26,11 +26,11 @@ contract TpBadgeModelController is
     IBadgeModelController,
     ERC1155HolderUpgradeable
 {
+    using CappedMath for uint256;
     TpBadgeModelControllerStore public tpBadgeModelControllerStore;
     TheBadge public theBadge;
     TheBadgeModels public theBadgeModels;
     TheBadgeUsers public theBadgeUsers;
-    using CappedMath for uint256;
 
     /**
      * =========================
@@ -441,6 +441,13 @@ contract TpBadgeModelController is
     ) public view override(AccessControlUpgradeable, ERC1155ReceiverUpgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[50] private __gap;
 
     /**
      * @notice we need a receive function to receive deposits devolution from kleros
