@@ -61,10 +61,11 @@ contract KlerosBadgeModelController is
 
     /**
      * @notice Allows to create off-chain kleros strategies for registered entities
+     * @param callee the user that originally called the createBadgeModel() function
      * @param badgeModelId from TheBadge contract
      * @param data Encoded data required to create a Kleros TCR list
      */
-    function createBadgeModel(uint256 badgeModelId, bytes calldata data) public onlyTheBadgeModels {
+    function createBadgeModel(address callee, uint256 badgeModelId, bytes calldata data) public onlyTheBadgeModels {
         KlerosBadgeModel storage _klerosBadgeModel = klerosBadgeModels[badgeModelId];
         if (_klerosBadgeModel.tcrList != address(0)) {
             revert KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
@@ -94,7 +95,7 @@ contract KlerosBadgeModelController is
             revert KlerosBadgeModelController__createBadgeModel_TCRListAddressZero();
         }
 
-        klerosBadgeModels[badgeModelId] = KlerosBadgeModel(klerosTcrListAddress);
+        klerosBadgeModels[badgeModelId] = KlerosBadgeModel(callee, klerosTcrListAddress);
 
         emit NewKlerosBadgeModel(
             badgeModelId,
@@ -152,7 +153,7 @@ contract KlerosBadgeModelController is
      * this method can be called by anyone
      * @param badgeId the klerosBadgeId
      */
-    function claim(uint256 badgeId, bytes calldata /*data*/) public onlyTheBadge returns (address) {
+    function claim(uint256 badgeId, bytes calldata /*data*/, address /*caller*/) public onlyTheBadge returns (address) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
 
@@ -302,7 +303,7 @@ contract KlerosBadgeModelController is
      * @notice Returns true if the badge is ready to be claimed (its status is RegistrationRequested and the challenge period ended), otherwise returns false
      * @param badgeId the klerosBadgeId
      */
-    function isClaimable(uint256 badgeId, bytes calldata /*data*/, address /*caller*/) public view returns (bool) {
+    function isClaimable(uint256 badgeId) public view returns (bool) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         KlerosBadge storage _klerosBadge = klerosBadges[badgeId];
 

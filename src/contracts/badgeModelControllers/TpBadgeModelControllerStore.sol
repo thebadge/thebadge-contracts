@@ -54,34 +54,11 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      */
 
     /**
-     * Struct to use as args to create a Kleros badge type strategy.
-     *  @param governor An address with permission to updates parameters of the list. Use Kleros governor for full decentralization.
-     *  @param admin The address with permission to add/remove items directly.
-     *  @param courtId The ID of the kleros's court.
-     *  @param numberOfJurors The number of jurors required if a dispute is initiated.
-     *  @param registrationMetaEvidence The URI of the meta evidence object for registration requests.
-     *  @param clearingMetaEvidence The URI of the meta evidence object for clearing requests.
-     *  @param challengePeriodDuration The time in seconds parties have to challenge a request.
-     *  @param baseDeposits The base deposits for requests/challenges as follows:
-     *  - The base deposit to submit an item.
-     *  - The base deposit to remove an item.
-     *  - The base deposit to challenge a submission.
-     *  - The base deposit to challenge a removal request.
-     *  @param stakeMultipliers Multipliers of the arbitration cost in basis points (see GeneralizedTCR MULTIPLIER_DIVISOR) as follows:
-     *  - The multiplier applied to each party's fee stake for a round when there is no winner/loser in the previous round (e.g. when it's the first round or the arbitrator refused to arbitrate).
-     *  - The multiplier applied to the winner's fee stake for an appeal round.
-     *  - The multiplier applied to the loser's fee stake for an appeal round.
+     * @param owner address of the creator of the model (the third party address)
+     * @param administrators the list of addresses that are allowed to maintain the badgeModel apart from the owner
      */
     struct CreateBadgeModel {
-        address governor;
-        address admin;
-        uint256 courtId;
-        uint256 numberOfJurors;
-        string registrationMetaEvidence;
-        string clearingMetaEvidence;
-        uint256 challengePeriodDuration;
-        uint256[4] baseDeposits;
-        uint256[3] stakeMultipliers;
+        address[] administrators;
     }
 
     struct MintParams {
@@ -93,10 +70,18 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     }
 
     /**
+     * @param owner address of the creator of the model (the third party address)
+     * @param badgeModelId the id of the badgeModel
      * @param tcrList The TCR List created for a particular badge model
+     * @param governor An address with permission to updates parameters of the list. Use Kleros governor for full decentralization.
+     * @param admin The address with permission to add/remove items directly.
      */
     struct ThirdPartyBadgeModel {
+        address owner;
+        uint256 badgeModelId;
         address tcrList;
+        address governor;
+        address admin;
     }
 
     /**
@@ -141,6 +126,8 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     mapping(uint256 => ThirdPartyBadgeModel) public thirdPartyBadgeModels;
     mapping(uint256 => ThirdPartyBadge) public thirdPartyBadges;
     mapping(address => ThirdPartyUser) public thirdPartyUsers;
+    // Mapping to store the list of addresses that are allowed by the owner as co-administrators in each thirdPartyBadgeModel
+    mapping(uint256 => mapping(address => bool)) public thirdPartyAdministratorsByBadgeModel;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
@@ -191,6 +178,15 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
 
     function getCurrentBadgeIdCounter() external view returns (uint256) {
         return badgeIdsCounter.current();
+    }
+
+    function isBadgeModelOwner(uint256 badgeModelId, address userAddress) external view returns (bool) {
+        ThirdPartyBadgeModel memory _badgeModel = this.getBadgeModel(badgeModelId);
+        return keccak256(abi.encodePacked(_badgeModel.owner)) == keccak256(abi.encodePacked(userAddress));
+    }
+
+    function isBadgeModelAdministrator(uint256 badgeModelId, address userAddress) external view returns (bool) {
+        return thirdPartyAdministratorsByBadgeModel[badgeModelId][userAddress];
     }
 
     /**
@@ -284,6 +280,38 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      */
     function updateVerifyUserProtocolFee(uint256 _verifyUserProtocolFee) public onlyPermittedContract {
         verifyUserProtocolFee = _verifyUserProtocolFee;
+    }
+
+    /*
+     * @notice Adds a new administrator to the given badgeModel
+     * @param badgeModelId the id of the badgeModel
+     * @param administrator the address of the adminsitrator of the badgeModel
+     */
+    function addAdministratorToBadgeModel(uint256 badgeModelId, address administrator) public onlyPermittedContract {
+        thirdPartyAdministratorsByBadgeModel[badgeModelId][administrator] = true;
+    }
+
+    /*
+     * @notice Given an array of addresses to add as administrators and a badgeModelId, adds them to the given badgeModel
+     * @param badgeModelId the id of the badgeModel
+     * @param administrators the array of addresses to setup as administrators of the badgeModel
+     */
+    function addAdministratorsToBadgeModel(uint256 badgeModelId, address[] memory administrators) public {
+        for (uint256 i = 0; i < administrators.length; i++) {
+            addAdministratorToBadgeModel(badgeModelId, administrators[i]);
+        }
+    }
+
+    /*
+     * @notice Removes a new administrator to the given badgeModel
+     * @param badgeModelId the id of the badgeModel
+     * @param administrator the address of the administrator of the badgeModel
+     */
+    function removeAdministratorFromBadgeModel(
+        uint256 badgeModelId,
+        address administrator
+    ) public onlyPermittedContract {
+        thirdPartyAdministratorsByBadgeModel[badgeModelId][administrator] = false;
     }
 
     // tslint:disable-next-line:no-empty

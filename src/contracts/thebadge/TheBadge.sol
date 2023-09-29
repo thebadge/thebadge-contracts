@@ -202,11 +202,11 @@ contract TheBadge is
             revert LibTheBadge.TheBadge__requestBadge_badgeNotClaimable();
         }
 
-        if (controller.isClaimable(badgeId, data, _msgSender()) == false) {
+        if (controller.isClaimable(badgeId) == false) {
             revert LibTheBadge.TheBadge__requestBadge_badgeNotClaimable();
         }
 
-        address claimAddress = controller.claim(badgeId, data);
+        address claimAddress = controller.claim(badgeId, data, _msgSender());
         _badgeStore.transferBadge(badgeId, address(_badgeModelController.controller), claimAddress);
         emit BadgeTransferred(badgeId, address(_badgeModelController.controller), claimAddress);
     }

@@ -32,11 +32,15 @@ library LibTpBadgeModelController {
     error ThirdPartyModelController__mintBadge_wrongValue();
 
     error ThirdPartyModelController__claimBadge_notAllowed();
+    error ThirdPartyModelController__claimBadge_invalidRecipient();
+    error ThirdPartyModelController__claimBadge_invalidBadgeOrAlreadyClaimed();
+    error ThirdPartyModelController__claimBadge_userNotAllowed();
 
     error ThirdPartyModelController__badge__tcrKlerosBadgeNotFound();
 
     error ThirdPartyModelController__user__userVerificationAlreadyStarted();
     error ThirdPartyModelController__user__userVerificationNotStarted();
+    error ThirdPartyModelController__user__userVerificationRejected();
     error ThirdPartyModelController__user__userNotFound();
 
     error ThirdPartyModelController__store_InvalidContractName();

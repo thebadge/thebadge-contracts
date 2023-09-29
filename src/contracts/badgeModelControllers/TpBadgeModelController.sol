@@ -85,6 +85,29 @@ contract TpBadgeModelController is
         _;
     }
 
+    modifier onlyThirdPartyUser(address callee) {
+        TpBadgeModelControllerStore.ThirdPartyUser memory _thirdPartyUser = tpBadgeModelControllerStore.getUser(callee);
+        if (_thirdPartyUser.initialized == false) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__user__userNotFound();
+        }
+        if (_thirdPartyUser.verificationStatus == LibTpBadgeModelController.VerificationStatus.VerificationRejected) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationRejected();
+        }
+        // TODO Maybe also add onlyVerifiedUser?
+        _;
+    }
+
+    modifier onlyBadgeModelAdministrator(uint256 badgeModelId, address callee) {
+        bool isOwner = tpBadgeModelControllerStore.isBadgeModelOwner(badgeModelId, callee);
+        if (!isOwner) {
+            bool isAdministrator = tpBadgeModelControllerStore.isBadgeModelAdministrator(badgeModelId, callee);
+            if (!isAdministrator) {
+                revert LibTpBadgeModelController.ThirdPartyModelController__store_OperationNotPermitted();
+            }
+        }
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
     constructor() {
@@ -110,19 +133,36 @@ contract TpBadgeModelController is
 
     /**
      * @notice Allows to create off-chain third-party strategies for registered entities
+     * @param callee the user that originally called the createBadgeModel() function
      * @param badgeModelId from TheBadge contract
+     * @param data contains the encoded value: administrators of the badgeModel
+
      */
-    function createBadgeModel(uint256 badgeModelId, bytes calldata /*data*/) public onlyTheBadgeModels {
+    function createBadgeModel(
+        address callee,
+        uint256 badgeModelId,
+        bytes calldata data
+    ) public onlyTheBadgeModels onlyThirdPartyUser(callee) {
+        uint256 _badgeModelId = badgeModelId;
+        address _callee = callee;
+        bytes calldata _data = data;
         TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _badgeModel = tpBadgeModelControllerStore.getBadgeModel(
-            badgeModelId
+            _badgeModelId
         );
         if (_badgeModel.tcrList != address(0)) {
             revert LibTpBadgeModelController.ThirdPartyModelController__createBadgeModel_badgeModelAlreadyCreated();
         }
 
+        TpBadgeModelControllerStore.CreateBadgeModel memory args = abi.decode(
+            _data,
+            (TpBadgeModelControllerStore.CreateBadgeModel)
+        );
+
         ILightGTCRFactory lightGTCRFactory = ILightGTCRFactory(tpBadgeModelControllerStore.tcrFactory());
         uint256 thirdPartyBaseDeposit = LibTpBadgeModelController.THIRD_PARTY_BASE_DEPOSIT;
         uint256 thirdPartyStakeMultiplier = LibTpBadgeModelController.THIRD_PARTY_STAKE_MULTIPLIER;
+        address _admin = address(this);
+        address _governor = address(this);
         lightGTCRFactory.deploy(
             IArbitrator(address(tpBadgeModelControllerStore.arbitrator())), // Arbitrator address
             bytes.concat(
@@ -132,12 +172,12 @@ contract TpBadgeModelController is
             address(0), // TODO: check this. The address of the TCR that stores related TCR addresses. This parameter can be left empty.
             LibTpBadgeModelController.REGISTRATION_META_EVIDENCE, // The URI of the meta evidence object for registration requests.
             LibTpBadgeModelController.CLEARING_META_EVIDENCE, // The URI of the meta evidence object for clearing requests.
-            address(this), // The trusted governor of this contract.
+            _governor, // The governor of the TCR list, it's allowed to update the tcr parameters
             // The base deposits for requests/challenges (4 values: submit, remove, challenge and removal request)
             [thirdPartyBaseDeposit, thirdPartyBaseDeposit, thirdPartyBaseDeposit, thirdPartyBaseDeposit],
             LibTpBadgeModelController.CHALLENGE_TIME_SECONDS, // The time in seconds parties have to challenge a request.
             [thirdPartyStakeMultiplier, thirdPartyStakeMultiplier, thirdPartyStakeMultiplier], // Multipliers of the arbitration cost in basis points (see LightGeneralizedTCR MULTIPLIER_DIVISOR)
-            address(this) // The address of the relay contract to add/remove items directly.
+            _admin // The address of the relay contract that's allowed add/remove items directly.
         );
 
         // Get the address for the TCR created
@@ -148,35 +188,43 @@ contract TpBadgeModelController is
         }
 
         TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _newBadgeModel = TpBadgeModelControllerStore
-            .ThirdPartyBadgeModel(tcrListAddress);
+            .ThirdPartyBadgeModel(_callee, _badgeModelId, tcrListAddress, _governor, _admin);
         tpBadgeModelControllerStore.addBadgeModel(_newBadgeModel);
+        tpBadgeModelControllerStore.addAdministratorsToBadgeModel(_badgeModelId, args.administrators);
 
-        emit NewThirdPartyBadgeModel(badgeModelId, tcrListAddress);
+        emit NewThirdPartyBadgeModel(_badgeModelId, tcrListAddress);
     }
 
     /**
      * @notice adds a new badge directly to the tcr list
+     * @param callee the user that originally called the mint() function
      * @param badgeModelId the badgeModelId
      * @param badgeId the badgeId
-     * @param data extra data related to the badge, usually 0x
+     * @param data extra data related to the badge, contains the badgeDataUri
      */
     function mint(
-        address /*callee*/,
+        address callee,
         uint256 badgeModelId,
         uint256 badgeId,
         bytes calldata data,
         address /*destinationAddress*/
-    ) public payable onlyTheBadge returns (uint256) {
-        uint256 mintCost = this.mintValue(badgeModelId);
+    ) public payable onlyTheBadge onlyBadgeModelAdministrator(badgeModelId, callee) returns (uint256) {
+        uint256 _badgeModelId = badgeModelId;
+        uint256 _badgeId = badgeId;
+        bytes calldata _data = data;
+        uint256 mintCost = this.mintValue(_badgeModelId);
         if (msg.value != mintCost) {
             revert LibTpBadgeModelController.ThirdPartyModelController__mintBadge_wrongValue();
         }
 
         TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _badgeModel = tpBadgeModelControllerStore.getBadgeModel(
-            badgeModelId
+            _badgeModelId
         );
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_badgeModel.tcrList);
-        TpBadgeModelControllerStore.MintParams memory args = abi.decode(data, (TpBadgeModelControllerStore.MintParams));
+        TpBadgeModelControllerStore.MintParams memory args = abi.decode(
+            _data,
+            (TpBadgeModelControllerStore.MintParams)
+        );
 
         lightGeneralizedTCR.addItemDirectly(args.badgeDataUri);
 
@@ -186,12 +234,12 @@ contract TpBadgeModelController is
 
         TpBadgeModelControllerStore.ThirdPartyBadge memory _newBadge = TpBadgeModelControllerStore.ThirdPartyBadge(
             tcrItemID,
-            badgeModelId,
-            badgeId,
+            _badgeModelId,
+            _badgeId,
             true
         );
-        tpBadgeModelControllerStore.addBadge(badgeId, _newBadge);
-        emit ThirdPartyBadgeMinted(badgeId, tcrItemID);
+        tpBadgeModelControllerStore.addBadge(_badgeId, _newBadge);
+        emit ThirdPartyBadgeMinted(_badgeId, tcrItemID);
         return uint256(tcrItemID);
     }
 
@@ -199,12 +247,28 @@ contract TpBadgeModelController is
      * @notice moves a badge from the controller to the final recipient address
      * @param badgeId the id of the badge
      * @param data contains the recipient address
+     * @param caller the address of the user that originally called the claim() function
      */
-    function claim(uint256 badgeId, bytes calldata data) public onlyTheBadge returns (address) {
+    function claim(uint256 badgeId, bytes calldata data, address caller) public onlyTheBadge returns (address) {
         TpBadgeModelControllerStore.ClaimParams memory args = abi.decode(
             data,
             (TpBadgeModelControllerStore.ClaimParams)
         );
+
+        if (args.recipientAddress == address(0)) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__claimBadge_invalidRecipient();
+        }
+
+        uint256 ownBalance = theBadge.balanceOf(address(this), badgeId);
+        if (ownBalance == 0) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__claimBadge_invalidBadgeOrAlreadyClaimed();
+        }
+
+        // This is the role assigned to the relayer
+        if (!hasRole(CLAIMER_ROLE, caller)) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__claimBadge_userNotAllowed();
+        }
+
         theBadge.safeTransferFrom(address(this), args.recipientAddress, badgeId, 1, "0x");
         emit ThirdPartyBadgeClaimed(address(this), args.recipientAddress, badgeId);
         return args.recipientAddress;
@@ -288,18 +352,7 @@ contract TpBadgeModelController is
      * @notice Returns true if the badge is ready to be claimed to the destination address, otherwise returns false
      * @param badgeId the badgeId
      */
-    function isClaimable(uint256 badgeId, bytes calldata data, address caller) external view returns (bool) {
-        TpBadgeModelControllerStore.ClaimParams memory args = abi.decode(
-            data,
-            (TpBadgeModelControllerStore.ClaimParams)
-        );
-        if (args.recipientAddress == address(0)) {
-            return false;
-        }
-        // This is the role assigned to the relayer
-        if (!hasRole(CLAIMER_ROLE, caller)) {
-            return false;
-        }
+    function isClaimable(uint256 badgeId) external view returns (bool) {
         uint256 ownBalance = theBadge.balanceOf(address(this), badgeId);
         if (ownBalance > 0) {
             return true;
