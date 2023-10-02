@@ -306,7 +306,7 @@ contract TpBadgeModelController is
         _tpUser.verificationStatus = LibTpBadgeModelController.VerificationStatus.VerificationSubmitted;
         _tpUser.userMetadata = userMetadata;
         _tpUser.verificationEvidence = evidenceUri;
-        tpBadgeModelControllerStore.updateUser(_user, _tpUser);
+        tpBadgeModelControllerStore.registerTpUser(_user, _tpUser);
     }
 
     /**
