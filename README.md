@@ -105,6 +105,10 @@ This command will upload the contract source to Etherescan
 yarn hardhat --network <network> etherscan-verify
 ```
 
+## Deployments
+
+- Please check the list of our deployed contracts [here](./deployments.md)
+
 ## Documentation
 
 - You can check our badges architecture [here](./ERC1155-721%20Architecture.md)
