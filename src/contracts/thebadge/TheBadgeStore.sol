@@ -9,7 +9,6 @@ import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadgeStore } from "../libraries/LibTheBadgeStore.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-// TODO: Maybe we can use abstract classes to type the store
 contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
@@ -45,10 +44,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     CountersUpgradeable.Counter internal badgeModelIdsCounter;
     CountersUpgradeable.Counter internal badgeIdsCounter;
 
-    // TODO: does this var makes sense? it was thought to define a min value to mint a badge.
-    // For example, if the badge is going to have a cost (it can be free) it has to be bigger than this variable.
-    // badgeModel1 = mint cost is 4 because minBadgeMintValue is 4.
-    // uint256 public minBadgeMintValue;
     uint256 public registerUserProtocolFee;
     uint256 public createBadgeModelProtocolFee;
     uint256 public mintBadgeProtocolDefaultFeeInBps;
@@ -140,7 +135,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         createBadgeModelProtocolFee = uint256(0);
         mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        // TODO Verify that this works if we call this outside
     }
 
     /**
