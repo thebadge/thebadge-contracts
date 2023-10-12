@@ -23,7 +23,6 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
      * =========================
      */
     event UserRegistered(address indexed user, string metadata);
-    event CreatorRegistered(address indexed user);
     event UserVerificationRequested(address indexed user, string metadata, string controllerName);
     event UserVerificationExecuted(address indexed user, string controllerName, bool verify);
     event UpdatedUser(address indexed userAddress, string metadata, bool suspended, bool isCreator, bool deleted);
