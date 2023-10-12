@@ -266,6 +266,19 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         badgeIdsCounter.increment();
     }
 
+    /**
+     * @notice Creates a ThirdPartyUser's details.
+     * @param userAddress The address of the user to be created.
+     * @param newUser The new ThirdPartyUser struct.
+     */
+    function registerTpUser(address userAddress, ThirdPartyUser memory newUser) external onlyPermittedContract {
+        ThirdPartyUser memory _user = thirdPartyUsers[userAddress];
+        if (_user.initialized == true) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationAlreadyStarted();
+        }
+        thirdPartyUsers[userAddress] = newUser;
+    }
+
     function updateUser(address userAddress, ThirdPartyUser memory updatedUser) external onlyPermittedContract {
         ThirdPartyUser memory _user = thirdPartyUsers[userAddress];
         if (bytes(_user.userMetadata).length == 0) {
