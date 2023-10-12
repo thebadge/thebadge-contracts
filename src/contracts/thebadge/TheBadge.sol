@@ -224,7 +224,7 @@ contract TheBadge is
         );
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        controller.challenge{ value: (msg.value) }(badgeId, data);
+        controller.challenge{ value: (msg.value) }(badgeId, data, _msgSender());
     }
 
     /**
@@ -240,7 +240,7 @@ contract TheBadge is
         );
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        controller.removeItem{ value: (msg.value) }(badgeId, data);
+        controller.removeItem{ value: (msg.value) }(badgeId, data, _msgSender());
     }
 
     /**
@@ -256,7 +256,7 @@ contract TheBadge is
         );
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        controller.submitEvidence(badgeId, data);
+        controller.submitEvidence(badgeId, data, _msgSender());
     }
 
     /*

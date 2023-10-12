@@ -15,11 +15,11 @@ interface IBadgeModelController {
 
     function claim(uint256 badgeId, bytes calldata data, address caller) external returns (address);
 
-    function challenge(uint256 badgeId, bytes calldata data) external payable;
+    function challenge(uint256 badgeId, bytes calldata data, address caller) external payable;
 
-    function removeItem(uint256 badgeId, bytes calldata data) external payable;
+    function removeItem(uint256 badgeId, bytes calldata data, address caller) external payable;
 
-    function submitEvidence(uint256 badgeId, bytes calldata data) external;
+    function submitEvidence(uint256 badgeId, bytes calldata data, address caller) external;
 
     // Write methods
     function submitUserVerification(address _user, string memory userMetadata, string memory evidenceUri) external;

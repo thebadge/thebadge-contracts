@@ -275,18 +275,18 @@ contract TpBadgeModelController is
     }
 
     // Should not be implemented
-    function challenge(uint256 /*badgeId*/, bytes calldata /*data*/) external payable {
+    function challenge(uint256 /*badgeId*/, bytes calldata /*data*/, address /*caller*/) external payable {
         revert LibTpBadgeModelController.ThirdPartyModelController__method_not_supported();
     }
 
     // Should remove the item directly from the user and from the tcr list
-    function removeItem(uint256 /*badgeId*/, bytes calldata /*data*/) external payable {
+    function removeItem(uint256 /*badgeId*/, bytes calldata /*data*/, address /*caller*/) external payable {
         // TOOD: IMPLEMENT
         revert LibTpBadgeModelController.ThirdPartyModelController__method_not_supported();
     }
 
     // Should not be implemented
-    function submitEvidence(uint256 /*badgeId*/, bytes calldata /*data*/) external pure {
+    function submitEvidence(uint256 /*badgeId*/, bytes calldata /*data*/, address /*caller*/) external pure {
         revert LibTpBadgeModelController.ThirdPartyModelController__method_not_supported();
     }
 

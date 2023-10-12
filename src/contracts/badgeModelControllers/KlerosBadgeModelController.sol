@@ -69,6 +69,7 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
      * Events
      * =========================
      */
+    event Initialize(address indexed admin, address indexed tcrFactory);
     event NewKlerosBadgeModel(
         uint256 indexed badgeModelId,
         address indexed tcrAddress,
@@ -76,9 +77,9 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
         string clearingMetaEvidence
     );
     event MintKlerosBadge(uint256 indexed badgeId, string evidence);
-    event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed wallet, string evidence, address sender);
+    event KlerosBadgeChallenged(uint256 indexed badgeId, address indexed challenger, string evidence);
+    event KlerosChallengeEvidenceAdded(uint256 indexed badgeId, address indexed challenger, string evidence);
     event DepositReturned(address indexed recipient, uint256 amount, uint256 indexed badgeId);
-    event Initialize(address indexed admin, address indexed tcrFactory);
     event ProtocolSettingsUpdated();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -260,7 +261,7 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
      * @param badgeId the id of the badge
      * @param data encoded evidenceHash ipfs hash containing the evidence to generate the challenge
      */
-    function challenge(uint256 badgeId, bytes calldata data) external payable onlyTheBadge {
+    function challenge(uint256 badgeId, bytes calldata data, address caller) external payable onlyTheBadge {
         KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
             .getKlerosBadge(badgeId);
 
@@ -278,6 +279,7 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
         );
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         lightGeneralizedTCR.challengeRequest{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash.evidence);
+        emit KlerosBadgeChallenged(badgeId, caller, evidenceHash.evidence);
     }
 
     /**
@@ -285,7 +287,7 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
      * @param badgeId the id of the badge
      * @param data encoded evidenceHash ipfs hash containing the evidence to generate the removal request
      */
-    function removeItem(uint256 badgeId, bytes calldata data) external payable onlyTheBadge {
+    function removeItem(uint256 badgeId, bytes calldata data, address caller) external payable onlyTheBadge {
         KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
             .getKlerosBadge(badgeId);
 
@@ -303,6 +305,7 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
         );
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         lightGeneralizedTCR.removeItem{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash.evidence);
+        emit KlerosBadgeChallenged(badgeId, caller, evidenceHash.evidence);
     }
 
     /**
@@ -310,7 +313,7 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
      * @param badgeId the id of the badge
      * @param data encoded evidenceHash ipfs hash adding more evidence to a submission
      */
-    function submitEvidence(uint256 badgeId, bytes calldata data) external onlyTheBadge {
+    function submitEvidence(uint256 badgeId, bytes calldata data, address caller) external onlyTheBadge {
         KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
             .getKlerosBadge(badgeId);
 
@@ -328,6 +331,7 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
         );
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         lightGeneralizedTCR.submitEvidence(_klerosBadge.itemID, evidenceHash.evidence);
+        emit KlerosChallengeEvidenceAdded(badgeId, caller, evidenceHash.evidence);
     }
 
     /**

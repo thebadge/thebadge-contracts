@@ -28,6 +28,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
      * Events
      * =========================
      */
+    event Initialize(address indexed admin);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     event BadgeModelUpdated(uint256 indexed badgeModelId);
     event BadgeModelControllerAdded(string indexed controllerName, address indexed controllerAddress);
@@ -93,8 +94,11 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     function initialize(address admin, address badgeStore, address badgeUsers) public initializer {
         __Ownable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(PAUSER_ROLE, admin);
+
         _badgeStore = TheBadgeStore(payable(badgeStore));
         _theBadgeUsers = TheBadgeUsers(payable(badgeUsers));
+        emit Initialize(admin);
     }
 
     /**
@@ -156,7 +160,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         _badgeModelController.paused = false;
 
         _badgeStore.updateBadgeModelController(controllerName, _badgeModelController);
-        emit BadgeModelControllerAdded(controllerName, controllerAddress);
+        emit BadgeModelControllerUpdated(controllerName, controllerAddress);
     }
 
     /*

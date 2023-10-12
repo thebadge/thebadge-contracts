@@ -22,6 +22,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
      * Events
      * =========================
      */
+    event Initialize(address indexed admin);
     event UserRegistered(address indexed user, string metadata);
     event UserVerificationRequested(address indexed user, string metadata, string controllerName);
     event UserVerificationExecuted(address indexed user, string controllerName, bool verify);
@@ -73,7 +74,12 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
     function initialize(address admin, address badgeStore) public initializer {
         __Ownable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(USER_MANAGER_ROLE, admin);
+        _grantRole(PAUSER_ROLE, admin);
+        _grantRole(UPGRADER_ROLE, admin);
+        _grantRole(VERIFIER_ROLE, admin);
         _badgeStore = TheBadgeStore(payable(badgeStore));
+        emit Initialize(admin);
     }
 
     /**
