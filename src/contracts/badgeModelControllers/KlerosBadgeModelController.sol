@@ -16,8 +16,15 @@ import { TheBadge } from "../thebadge/TheBadge.sol";
 import { LibKlerosBadgeModelController } from "../libraries/LibKlerosBadgeModelController.sol";
 import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
 import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeRoles, IBadgeModelController {
+contract KlerosBadgeModelController is
+    Initializable,
+    UUPSUpgradeable,
+    TheBadgeRoles,
+    IBadgeModelController,
+    ReentrancyGuardUpgradeable
+{
     using CappedMath for uint256;
     KlerosBadgeModelControllerStore public klerosBadgeModelControllerStore;
     TheBadge public theBadge;
@@ -231,7 +238,11 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
      * this method can be called by anyone
      * @param badgeId the klerosBadgeId
      */
-    function claim(uint256 badgeId, bytes calldata /*data*/, address /*caller*/) public onlyTheBadge returns (address) {
+    function claim(
+        uint256 badgeId,
+        bytes calldata /*data*/,
+        address /*caller*/
+    ) public onlyTheBadge nonReentrant returns (address) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
             .getKlerosBadge(badgeId);
@@ -247,7 +258,6 @@ contract KlerosBadgeModelController is Initializable, UUPSUpgradeable, TheBadgeR
         uint256 balanceToDeposit = _klerosBadge.deposit;
         klerosBadgeModelControllerStore.clearKlerosBadgeDepositAmount(badgeId);
         // Then we return the deposit from within our contract to the callee address
-        // TODO: review if this is safe enough
         (bool badgeDepositSent, ) = payable(_klerosBadge.callee).call{ value: balanceToDeposit }("");
         if (badgeDepositSent == false) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__depositReturnFailed();

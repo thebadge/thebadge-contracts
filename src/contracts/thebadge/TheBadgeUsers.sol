@@ -13,8 +13,9 @@ import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
+contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     TheBadgeStore public _badgeStore;
 
     /**
@@ -182,7 +183,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
     function submitUserVerification(
         string memory controllerName,
         string memory evidenceUri
-    ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(controllerName) {
+    ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(controllerName) nonReentrant {
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             controllerName
         );
