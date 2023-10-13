@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
-import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
@@ -10,8 +9,6 @@ import { LibTheBadgeStore } from "../libraries/LibTheBadgeStore.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
     /**
      * =========================
      * Events
@@ -41,8 +38,8 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         _;
     }
 
-    CountersUpgradeable.Counter internal badgeModelIdsCounter;
-    CountersUpgradeable.Counter internal badgeIdsCounter;
+    uint256 internal badgeModelIdsCounter;
+    uint256 internal badgeIdsCounter;
 
     uint256 public registerUserProtocolFee;
     uint256 public createBadgeModelProtocolFee;
@@ -129,7 +126,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     function initialize(address admin, address _feeCollector) public initializer {
-        __Ownable_init();
+        __Ownable_init(admin);
         feeCollector = _feeCollector;
         registerUserProtocolFee = uint256(0);
         createBadgeModelProtocolFee = uint256(0);
@@ -165,11 +162,11 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     function getCurrentBadgeModelsIdCounter() external view returns (uint256) {
-        return badgeModelIdsCounter.current();
+        return badgeModelIdsCounter;
     }
 
     function getCurrentBadgeIdCounter() external view returns (uint256) {
-        return badgeIdsCounter.current();
+        return badgeIdsCounter;
     }
 
     function getUserMintedBadgesByBadgeModel(
@@ -227,9 +224,9 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     function addBadgeModel(BadgeModel memory badgeModel) external onlyPermittedContract {
-        badgeModels[badgeModelIdsCounter.current()] = badgeModel;
+        badgeModels[badgeModelIdsCounter] = badgeModel;
 
-        badgeModelIdsCounter.increment();
+        badgeModelIdsCounter++;
     }
 
     function updateBadgeModel(uint256 badgeModelId, BadgeModel memory badgeModel) external onlyPermittedContract {
@@ -249,7 +246,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         address _account = badge.account;
         badges[badgeId] = badge;
         userMintedBadgesByBadgeModel[_badgeModelId][_account].push(badgeId);
-        badgeIdsCounter.increment();
+        badgeIdsCounter++;
     }
 
     function transferBadge(uint256 badgeId, address origin, address destination) external onlyPermittedContract {

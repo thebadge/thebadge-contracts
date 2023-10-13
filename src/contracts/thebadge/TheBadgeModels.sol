@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 /**
  * =========================
  * Contains all the logic related to badge models (but not badges)
@@ -7,7 +7,6 @@ pragma solidity ^0.8.17;
  */
 
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
-import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
@@ -20,8 +19,6 @@ import { TheBadgeUsers } from "./TheBadgeUsers.sol";
 contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     TheBadgeStore public _badgeStore;
     TheBadgeUsers public _theBadgeUsers;
-    // Allows to use current() and increment() for badgeModelIds or badgeIds
-    using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /**
      * =========================
@@ -92,7 +89,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     }
 
     function initialize(address admin, address badgeStore, address badgeUsers) public initializer {
-        __Ownable_init();
+        __Ownable_init(admin);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);
 
