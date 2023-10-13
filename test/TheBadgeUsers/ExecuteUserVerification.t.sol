@@ -61,14 +61,14 @@ contract ExecuteUserVerification is Config {
 
     function testRevertsWhenWrongRole() public {
         // TODO Fix expect revert message
-//        vm.expectRevert(
-//            abi.encodePacked(
-//                "AccessControl: account ",
-//                Strings.toHexString(u2),
-//                " is missing role ",
-//                Strings.toHexString(uint256(verifierRole), 32)
-//            )
-//        );
+        //        vm.expectRevert(
+        //            abi.encodePacked(
+        //                "AccessControl: account ",
+        //                Strings.toHexString(u2),
+        //                " is missing role ",
+        //                Strings.toHexString(uint256(verifierRole), 32)
+        //            )
+        //        );
         vm.expectRevert();
         vm.prank(u2);
         badgeUsers.executeUserVerification(u1, "KlerosBadgeModelController", true);

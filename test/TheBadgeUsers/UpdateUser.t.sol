@@ -32,17 +32,15 @@ contract UpdateUser is Config {
 
         string memory newMetadata = "ipfs://creatorMetadata.json";
 
-        bytes32 adminRole = 0x00;
-
         // TODO Fix to match the revert message
-//        vm.expectRevert(
-//            abi.encodePacked(
-//                "AccessControl: account ",
-//                StringsUpgradeable.toHexString(u1),
-//                " is missing role ",
-//                StringsUpgradeable.toHexString(uint256(adminRole), 32)
-//            )
-//        );
+        //        vm.expectRevert(
+        //            abi.encodePacked(
+        //                "AccessControl: account ",
+        //                StringsUpgradeable.toHexString(u1),
+        //                " is missing role ",
+        //                StringsUpgradeable.toHexString(uint256(0x00), 32)
+        //            )
+        //        );
         vm.expectRevert();
 
         vm.prank(u1);

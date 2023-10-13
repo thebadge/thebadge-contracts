@@ -30,14 +30,14 @@ contract AddPermittedContract is Config {
         address contractAddress = vm.addr(11);
 
         // TODO Fix expect revert message
-//        vm.expectRevert(
-//            abi.encodePacked(
-//                "AccessControl: account ",
-//                Strings.toHexString(u1),
-//                " is missing role ",
-//                Strings.toHexString(uint256(adminRole), 32)
-//            )
-//        );
+        //        vm.expectRevert(
+        //            abi.encodePacked(
+        //                "AccessControl: account ",
+        //                Strings.toHexString(u1),
+        //                " is missing role ",
+        //                Strings.toHexString(uint256(adminRole), 32)
+        //            )
+        //        );
 
         vm.expectRevert();
         vm.prank(u1);

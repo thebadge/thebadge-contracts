@@ -6,7 +6,7 @@
  *  @deployments: []
  */
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 /**
  * @title CappedMath

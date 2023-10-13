@@ -31,14 +31,14 @@ contract RemovePermittedContract is Config {
     function testRevertsWhenNoAdminRole() public {
         string memory contractName = "ContractName";
         // TODO Fix expect revert message
-//        vm.expectRevert(
-//            abi.encodePacked(
-//                "AccessControl: account ",
-//                Strings.toHexString(u1),
-//                " is missing role ",
-//                Strings.toHexString(uint256(adminRole), 32)
-//            )
-//        );
+        //        vm.expectRevert(
+        //            abi.encodePacked(
+        //                "AccessControl: account ",
+        //                Strings.toHexString(u1),
+        //                " is missing role ",
+        //                Strings.toHexString(uint256(adminRole), 32)
+        //            )
+        //        );
 
         vm.expectRevert();
         vm.prank(u1);
