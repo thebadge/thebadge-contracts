@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 /**
  * =========================
  * Contains all the logic related to TheBadge users
@@ -72,7 +72,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
     }
 
     function initialize(address admin, address badgeStore) public initializer {
-        __Ownable_init();
+        __Ownable_init(admin);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(USER_MANAGER_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);

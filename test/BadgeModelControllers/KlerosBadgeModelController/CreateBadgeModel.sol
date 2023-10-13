@@ -1,4 +1,4 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import { TheBadgeModels } from "../../../src/contracts/thebadge/TheBadgeModels.sol"; // Use the appropriate Solidity version
 import { TheBadgeStore } from "../../../src/contracts/thebadge/TheBadgeStore.sol";
@@ -7,9 +7,7 @@ import { KlerosBadgeModelController } from "../../../src/contracts/badgeModelCon
 import { KlerosBadgeModelControllerStore } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
 import { ILightGeneralizedTCR } from "../../../src/interfaces/ILightGeneralizedTCR.sol";
 import { Config } from "./Config.sol";
-import "../../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 import "forge-std/console.sol";
-import "openzeppelin-contracts-upgradeable/contracts/utils/CountersUpgradeable.sol";
 
 contract CreateBadgeModel is Config {
     function testCreateKlerosBadgeModel() public {

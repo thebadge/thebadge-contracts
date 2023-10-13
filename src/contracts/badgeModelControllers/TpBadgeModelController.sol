@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.17;
+pragma solidity ^0.8.20;
 
 import { ILightGeneralizedTCR } from "../../interfaces/ILightGeneralizedTCR.sol";
 import { ILightGTCRFactory } from "../../interfaces/ILightGTCRFactory.sol";
@@ -7,7 +7,6 @@ import { ILightGTCRFactory } from "../../interfaces/ILightGTCRFactory.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { ERC1155HolderUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol";
-import { ERC1155ReceiverUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155ReceiverUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadge } from "../thebadge/TheBadge.sol";
@@ -438,7 +437,7 @@ contract TpBadgeModelController is
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(AccessControlUpgradeable, ERC1155ReceiverUpgradeable) returns (bool) {
+    ) public view override(AccessControlUpgradeable, ERC1155HolderUpgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
