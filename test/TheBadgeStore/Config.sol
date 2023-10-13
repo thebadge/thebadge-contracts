@@ -1,7 +1,7 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import { Test } from "forge-std/Test.sol";
-import { ClonesUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
+import { Clones }  from "@openzeppelin/contracts/proxy/Clones.sol";
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
 
 contract Config is Test {
@@ -16,7 +16,7 @@ contract Config is Test {
         vm.deal(u1, 1 ether);
         vm.deal(feeCollector, 0 ether);
 
-        address badgeStoreProxy = ClonesUpgradeable.clone(address(new TheBadgeStore()));
+        address badgeStoreProxy = Clones.clone(address(new TheBadgeStore()));
         badgeStore = TheBadgeStore(payable(badgeStoreProxy));
         badgeStore.initialize(admin, feeCollector);
     }

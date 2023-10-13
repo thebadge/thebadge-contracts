@@ -1,7 +1,7 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import { Test } from "forge-std/Test.sol";
-import { ClonesUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
+import { Clones }  from "@openzeppelin/contracts/proxy/Clones.sol";
 import { TheBadgeStore } from "../../../src/contracts/thebadge/TheBadgeStore.sol";
 import { TheBadgeUsers } from "../../../src/contracts/thebadge/TheBadgeUsers.sol";
 import { TheBadgeModels } from "../../../src/contracts/thebadge/TheBadgeModels.sol";
@@ -28,25 +28,25 @@ contract Config is Test {
     function setUp() public virtual {
         // Instantiates the store
         address theBadgeStoreImp = address(new TheBadgeStore());
-        address theBadgeStoreProxy = ClonesUpgradeable.clone(theBadgeStoreImp);
+        address theBadgeStoreProxy = Clones.clone(theBadgeStoreImp);
         badgeStoreInstance = TheBadgeStore(payable(theBadgeStoreProxy));
         badgeStoreInstance.initialize(admin, feeCollector); //
 
         // Instantiates the TheBadgeUsers
         address theBadgeUsersImp = address(new TheBadgeUsers());
-        address theBadgeUsersProxy = ClonesUpgradeable.clone(theBadgeUsersImp);
+        address theBadgeUsersProxy = Clones.clone(theBadgeUsersImp);
         badgeUsersInstance = TheBadgeUsers(payable(theBadgeUsersProxy));
         badgeUsersInstance.initialize(admin, address(badgeStoreInstance));
 
         // Instantiates the TheBadgeModels
         address badgeModelsInstanceImp = address(new TheBadgeModels());
-        address theBadgeModelsProxy = ClonesUpgradeable.clone(badgeModelsInstanceImp);
+        address theBadgeModelsProxy = Clones.clone(badgeModelsInstanceImp);
         badgeModelsInstance = TheBadgeModels(payable(theBadgeModelsProxy));
         badgeModelsInstance.initialize(admin, address(badgeStoreInstance), address(badgeUsersInstance));
 
         // Instantiates the KlerosBadgeModelControllerStore
         address klerosBadgeModelControllerStoreInstanceImp = address(new KlerosBadgeModelControllerStore());
-        address klerosBadgeModelControllerStoreProxy = ClonesUpgradeable.clone(
+        address klerosBadgeModelControllerStoreProxy = Clones.clone(
             klerosBadgeModelControllerStoreInstanceImp
         );
         klerosBadgeModelControllerStoreInstance = KlerosBadgeModelControllerStore(
@@ -59,7 +59,7 @@ contract Config is Test {
         address _badgeContractAddress = vm.addr(5);
 
         address klerosBadgeModelInstanceImp = address(new KlerosBadgeModelController());
-        address klerosBadgeModelControllerProxy = ClonesUpgradeable.clone(klerosBadgeModelInstanceImp);
+        address klerosBadgeModelControllerProxy = Clones.clone(klerosBadgeModelInstanceImp);
         klerosBadgeModelControllerInstance = KlerosBadgeModelController(payable(klerosBadgeModelControllerProxy));
         klerosBadgeModelControllerInstance.initialize(
             admin,
