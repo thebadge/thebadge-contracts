@@ -47,6 +47,15 @@ async function main() {
     constructorArguments: [],
   });
 
+  const klerosBadgeModelControllerStoreDeployedAddress =
+    contracts.KlerosBadgeModelControllerStore.address[chainId as Chains];
+
+  console.log("Verifying KlerosBadgeModelControllerStore contract on Etherscan...");
+  await run(`verify:verify`, {
+    address: klerosBadgeModelControllerStoreDeployedAddress,
+    constructorArguments: [],
+  });
+
   const tpBadgeModelControllerDeployedAddress = contracts.TpBadgeModelController.address[chainId as Chains];
   console.log("Verifying TpBadgeModelController contract on Etherscan...");
   await run(`verify:verify`, {
@@ -87,6 +96,11 @@ async function main() {
     {
       name: "KlerosBadgeModelController",
       address: await getImplementationAddress(ethers.provider, klerosBadgeModelControllerDeployedAddress),
+      network: chainId.toString(),
+    },
+    {
+      name: "KlerosBadgeModelControllerStore",
+      address: await getImplementationAddress(ethers.provider, klerosBadgeModelControllerStoreDeployedAddress),
       network: chainId.toString(),
     },
     {
