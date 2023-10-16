@@ -18,7 +18,7 @@ contract CreateBadgeModel is Config {
         // Create a badge model
         TheBadgeStore.CreateBadgeModel memory badgeModel = TheBadgeStore.CreateBadgeModel({
             metadata: "ipfs://badgeModelMetadata.json",
-            controllerName: "Kleros",
+            controllerName: "kleros",
             mintCreatorFee: 100, // Adjust fee as needed
             validFor: 365 days // Adjust validity period as needed
         });
@@ -85,7 +85,7 @@ contract CreateBadgeModel is Config {
         // Create a badge model
         TheBadgeStore.CreateBadgeModel memory badgeModel = TheBadgeStore.CreateBadgeModel({
             metadata: "ipfs://badgeModelMetadata.json",
-            controllerName: "Kleros",
+            controllerName: "kleros",
             mintCreatorFee: 100, // Adjust fee as needed
             validFor: 365 days // Adjust validity period as needed
         });
