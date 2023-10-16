@@ -145,7 +145,6 @@ contract KlerosBadgeModelController is
         );
 
         IArbitrator _arbitrator = klerosBadgeModelControllerStore.getArbitrator();
-        address admin = address(0);
         address governor = args.governor != address(0) ? args.governor : callee;
         lightGTCRFactory.deploy(
             _arbitrator, // Arbitrator address
@@ -157,12 +156,11 @@ contract KlerosBadgeModelController is
             args.baseDeposits, // The base deposits for requests/challenges (4 values: submit, remove, challenge and removal request)
             args.challengePeriodDuration, // The time in seconds parties have to challenge a request.
             args.stakeMultipliers, // Multipliers of the arbitration cost in basis points (see LightGeneralizedTCR MULTIPLIER_DIVISOR)
-            admin // The address of the relay contract allowed to add/remove items directly, it should be 0x for decentralized badges
+            address(0) // The admin address of the relay contract allowed to add/remove items directly, it should be 0x for decentralized badges
         );
 
         // Get the address for the kleros badge model created
-        uint256 index = lightGTCRFactory.count() - 1;
-        address klerosTcrListAddress = address(lightGTCRFactory.instances(index));
+        address klerosTcrListAddress = address(lightGTCRFactory.instances(lightGTCRFactory.count() - 1));
         if (klerosTcrListAddress == address(0)) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
         }
@@ -172,7 +170,7 @@ contract KlerosBadgeModelController is
             callee,
             klerosTcrListAddress,
             governor,
-            admin
+            address(0)
         );
 
         emit NewKlerosBadgeModel(
