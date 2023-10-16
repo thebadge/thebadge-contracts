@@ -304,7 +304,7 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
                 .KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
         }
 
-        KlerosBadgeModel memory newBadgeModel = KlerosBadgeModel({
+        klerosBadgeModels[_badgeModelId] = KlerosBadgeModel({
             owner: _owner,
             badgeModelId: _badgeModelId,
             tcrList: _tcrList,
@@ -313,7 +313,6 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
             initialized: true
         });
 
-        klerosBadgeModels[_badgeModelId] = newBadgeModel;
         klerosBadgeModelIdsCounter++;
     }
 

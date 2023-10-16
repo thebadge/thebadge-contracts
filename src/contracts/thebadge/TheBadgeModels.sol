@@ -176,25 +176,25 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         }
 
         // move fees to collector
-        address feeCollector = _badgeStore.feeCollector();
         if (msg.value > 0) {
-            payable(feeCollector).transfer(msg.value);
+            payable(_badgeStore.feeCollector()).transfer(msg.value);
         }
 
         uint256 mintBadgeProtocolDefaultFeeInBps = _badgeStore.mintBadgeProtocolDefaultFeeInBps();
-        TheBadgeStore.BadgeModel memory _newBadgeModel = TheBadgeStore.BadgeModel(
-            _msgSender(),
-            args.controllerName,
-            false,
-            args.mintCreatorFee,
-            args.validFor,
-            mintBadgeProtocolDefaultFeeInBps,
-            true,
-            "v1.0.0"
+        uint256 currentBadgeModelId = _badgeStore.getCurrentBadgeModelsIdCounter();
+        _badgeStore.addBadgeModel(
+            TheBadgeStore.BadgeModel(
+                _msgSender(),
+                args.controllerName,
+                false,
+                args.mintCreatorFee,
+                args.validFor,
+                mintBadgeProtocolDefaultFeeInBps,
+                true,
+                "v1.0.0"
+            )
         );
 
-        uint256 currentBadgeModelId = _badgeStore.getCurrentBadgeModelsIdCounter();
-        _badgeStore.addBadgeModel(_newBadgeModel);
         emit BadgeModelCreated(currentBadgeModelId, args.metadata);
         TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
         if (user.isCreator == false) {

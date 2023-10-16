@@ -129,7 +129,6 @@ contract KlerosBadgeModelController is
      * @param data Encoded data required to create a Kleros TCR list
      */
     function createBadgeModel(address callee, uint256 badgeModelId, bytes calldata data) public onlyTheBadgeModels {
-        address _callee = callee;
         KlerosBadgeModelControllerStore.KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModelControllerStore
             .getKlerosBadgeModel(badgeModelId);
         if (_klerosBadgeModel.tcrList != address(0)) {
@@ -147,7 +146,7 @@ contract KlerosBadgeModelController is
 
         IArbitrator _arbitrator = klerosBadgeModelControllerStore.getArbitrator();
         address admin = address(0);
-        address governor = args.governor != address(0) ? args.governor : _callee;
+        address governor = args.governor != address(0) ? args.governor : callee;
         lightGTCRFactory.deploy(
             _arbitrator, // Arbitrator address
             bytes.concat(abi.encodePacked(args.courtId), abi.encodePacked(args.numberOfJurors)), // ArbitratorExtraData
@@ -170,7 +169,7 @@ contract KlerosBadgeModelController is
 
         klerosBadgeModelControllerStore.createKlerosBadgeModel(
             badgeModelId,
-            _callee,
+            callee,
             klerosTcrListAddress,
             governor,
             admin
