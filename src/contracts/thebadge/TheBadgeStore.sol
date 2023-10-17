@@ -181,7 +181,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * Setters
      * =========================
      */
-    function createUser(address userAddress, User memory newUser) external onlyPermittedContract {
+    function createUser(address userAddress, User calldata newUser) external onlyPermittedContract {
         User storage user = registeredUsers[userAddress];
         if (bytes(user.metadata).length != 0) {
             revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
@@ -190,7 +190,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     // todo refactor with modifier to check that the user actually exists
-    function updateUser(address userAddress, User memory updatedUser) external onlyPermittedContract {
+    function updateUser(address userAddress, User calldata updatedUser) external onlyPermittedContract {
         User storage _user = registeredUsers[userAddress];
         if (bytes(_user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
@@ -200,7 +200,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     function addBadgeModelController(
         string memory controllerName,
-        BadgeModelController memory badgeModelController
+        BadgeModelController calldata badgeModelController
     ) external onlyPermittedContract {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
         if (_badgeModelController.controller != address(0)) {
@@ -212,7 +212,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     function updateBadgeModelController(
         string memory controllerName,
-        BadgeModelController memory badgeModelController
+        BadgeModelController calldata badgeModelController
     ) external onlyPermittedContract {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
         if (_badgeModelController.controller == address(0)) {
@@ -223,13 +223,13 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         badgeModelControllersByAddress[badgeModelController.controller] = badgeModelController;
     }
 
-    function addBadgeModel(BadgeModel memory badgeModel) external onlyPermittedContract {
+    function addBadgeModel(BadgeModel calldata badgeModel) external onlyPermittedContract {
         badgeModels[badgeModelIdsCounter] = badgeModel;
 
         badgeModelIdsCounter++;
     }
 
-    function updateBadgeModel(uint256 badgeModelId, BadgeModel memory badgeModel) external onlyPermittedContract {
+    function updateBadgeModel(uint256 badgeModelId, BadgeModel calldata badgeModel) external onlyPermittedContract {
         BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 
         if (_badgeModel.creator == address(0)) {
@@ -241,7 +241,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         _badgeModel.paused = badgeModel.paused;
     }
 
-    function addBadge(uint256 badgeId, Badge memory badge) external onlyPermittedContract {
+    function addBadge(uint256 badgeId, Badge calldata badge) external onlyPermittedContract {
         uint256 _badgeModelId = badge.badgeModelId;
         address _account = badge.account;
         badges[badgeId] = badge;

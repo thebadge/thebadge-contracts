@@ -167,7 +167,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
      */
     function createBadgeModel(
         TheBadgeStore.CreateBadgeModel memory args,
-        bytes memory data
+        bytes calldata data
     ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(args.controllerName) {
         uint256 createBadgeModelProtocolFee = _badgeStore.createBadgeModelProtocolFee();
         // check values

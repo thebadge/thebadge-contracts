@@ -79,6 +79,11 @@
       "address": "0xd319B3dE32084B2763aa57612ba52D6d18470F66",
       "txHash": "0x34711856ce90afe62db4b447ec049287d3b85745f34d76ef734a216b7f0f8ade",
       "kind": "transparent"
+    },
+    {
+      "address": "0x40358153D49e4Fa1be9bF4acADB008870eE16cf1",
+      "txHash": "0x8d4fffa8dfba5ff0223400f849fb585cadadeb1f6cf261b710c6c26667657bda",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -747,7 +752,11 @@
           },
           "t_enum(VerificationStatus)4698": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
+            "members": [
+              "VerificationSubmitted",
+              "Verified",
+              "VerificationRejected"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -1546,7 +1555,11 @@
           },
           "t_enum(VerificationStatus)4698": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
+            "members": [
+              "VerificationSubmitted",
+              "Verified",
+              "VerificationRejected"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -2859,7 +2872,11 @@
           },
           "t_enum(VerificationStatus)4840": {
             "label": "enum KlerosBadgeModelControllerStore.VerificationStatus",
-            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
+            "members": [
+              "VerificationSubmitted",
+              "Verified",
+              "VerificationRejected"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -3599,7 +3616,11 @@
           },
           "t_enum(VerificationStatus)9833": {
             "label": "enum LibKlerosBadgeModelController.VerificationStatus",
-            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
+            "members": [
+              "VerificationSubmitted",
+              "Verified",
+              "VerificationRejected"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -3978,7 +3999,11 @@
           },
           "t_enum(VerificationStatus)10017": {
             "label": "enum LibTpBadgeModelController.VerificationStatus",
-            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
+            "members": [
+              "VerificationSubmitted",
+              "Verified",
+              "VerificationRejected"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -4189,6 +4214,322 @@
           "t_contract(TpBadgeModelControllerStore)9827": {
             "label": "contract TpBadgeModelControllerStore",
             "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "5ab1e9171dda349c8d87d95d8190b2018aaf409b9c270ad934a029d7e1036a5d": {
+      "address": "0x3b612Deee5F034478A1DB76856FDd9AfcD22D04C",
+      "txHash": "0x1d28224240bf98abd4dc2c222e100a2f9168139c6e16ae97ebe216c743a0d133",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "klerosBadgeModelIdsCounter",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:90"
+          },
+          {
+            "label": "klerosBadgeIdsCounter",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:91"
+          },
+          {
+            "label": "arbitrator",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(IArbitrator)5575",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:92"
+          },
+          {
+            "label": "tcrFactory",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:93"
+          },
+          {
+            "label": "verifyUserProtocolFee",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:94"
+          },
+          {
+            "label": "allowedContractAddresses",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:97"
+          },
+          {
+            "label": "allowedContractAddressesByContractName",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_string_memory_ptr,t_address)",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:98"
+          },
+          {
+            "label": "klerosBadgeModels",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_uint256,t_struct(KlerosBadgeModel)7196_storage)",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:99"
+          },
+          {
+            "label": "klerosBadges",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_uint256,t_struct(KlerosBadge)7210_storage)",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:100"
+          },
+          {
+            "label": "klerosUsers",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_struct(KlerosUser)7222_storage)",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:101"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "KlerosBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:227"
+          },
+          {
+            "label": "theBadge",
+            "offset": 0,
+            "slot": "60",
+            "type": "t_contract(TheBadge)11103",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:30"
+          },
+          {
+            "label": "theBadgeModels",
+            "offset": 0,
+            "slot": "61",
+            "type": "t_contract(TheBadgeModels)11886",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:31"
+          },
+          {
+            "label": "theBadgeUsers",
+            "offset": 0,
+            "slot": "62",
+            "type": "t_contract(TheBadgeUsers)13610",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:32"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IArbitrator)5575": {
+            "label": "contract IArbitrator",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadge)11103": {
+            "label": "contract TheBadge",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeModels)11886": {
+            "label": "contract TheBadgeModels",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeUsers)13610": {
+            "label": "contract TheBadgeUsers",
+            "numberOfBytes": "20"
+          },
+          "t_enum(VerificationStatus)9371": {
+            "label": "enum LibKlerosBadgeModelController.VerificationStatus",
+            "members": [
+              "VerificationSubmitted",
+              "Verified",
+              "VerificationRejected"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(KlerosUser)7222_storage)": {
+            "label": "mapping(address => struct KlerosBadgeModelControllerStore.KlerosUser)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_address)": {
+            "label": "mapping(string => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(KlerosBadge)7210_storage)": {
+            "label": "mapping(uint256 => struct KlerosBadgeModelControllerStore.KlerosBadge)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(KlerosBadgeModel)7196_storage)": {
+            "label": "mapping(uint256 => struct KlerosBadgeModelControllerStore.KlerosBadgeModel)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(KlerosBadge)7210_storage": {
+            "label": "struct KlerosBadgeModelControllerStore.KlerosBadge",
+            "members": [
+              {
+                "label": "itemID",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "badgeModelId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "callee",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "deposit",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "destinationAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "initialized",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(KlerosBadgeModel)7196_storage": {
+            "label": "struct KlerosBadgeModelControllerStore.KlerosBadgeModel",
+            "members": [
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "badgeModelId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "tcrList",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "governor",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "admin",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "initialized",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(KlerosUser)7222_storage": {
+            "label": "struct KlerosBadgeModelControllerStore.KlerosUser",
+            "members": [
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "userMetadata",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "verificationEvidence",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "verificationStatus",
+                "type": "t_enum(VerificationStatus)9371",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "initialized",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
           },
           "t_uint256": {
             "label": "uint256",

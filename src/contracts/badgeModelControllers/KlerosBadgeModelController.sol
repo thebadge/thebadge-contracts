@@ -23,10 +23,10 @@ contract KlerosBadgeModelController is
     UUPSUpgradeable,
     TheBadgeRoles,
     IBadgeModelController,
-    ReentrancyGuardUpgradeable
+    ReentrancyGuardUpgradeable,
+    KlerosBadgeModelControllerStore
 {
     using CappedMath for uint256;
-    KlerosBadgeModelControllerStore public klerosBadgeModelControllerStore;
     TheBadge public theBadge;
     TheBadgeModels public theBadgeModels;
     TheBadgeUsers public theBadgeUsers;
@@ -59,9 +59,7 @@ contract KlerosBadgeModelController is
     }
 
     modifier onlyUserOnVerification(address _user) {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
-            _user
-        );
+        KlerosUser memory _klerosUser = klerosUsers[_user];
         if (_klerosUser.initialized == false) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userNotFound();
         }
@@ -100,7 +98,8 @@ contract KlerosBadgeModelController is
         address _theBadge,
         address _theBadgeModels,
         address _theBadgeUsers,
-        address _klerosBadgeModelControllerStore
+        address _arbitrator,
+        address _tcrFactory
     ) public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);
@@ -108,8 +107,9 @@ contract KlerosBadgeModelController is
         theBadge = TheBadge(payable(_theBadge));
         theBadgeModels = TheBadgeModels(payable(_theBadgeModels));
         theBadgeUsers = TheBadgeUsers(payable(_theBadgeUsers));
-        klerosBadgeModelControllerStore = KlerosBadgeModelControllerStore(payable(_klerosBadgeModelControllerStore));
-        address _tcrFactory = klerosBadgeModelControllerStore.getTCRFactory();
+        arbitrator = IArbitrator(_arbitrator);
+        tcrFactory = _tcrFactory;
+        verifyUserProtocolFee = uint256(0);
         emit Initialize(admin, _tcrFactory);
     }
 
@@ -118,7 +118,7 @@ contract KlerosBadgeModelController is
      * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each user verification (in bps)
      */
     function updateVerifyUserProtocolFee(uint256 _verifyUserProtocolFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        klerosBadgeModelControllerStore.setVerifyUserProtocolFee(_verifyUserProtocolFee);
+        verifyUserProtocolFee = _verifyUserProtocolFee;
         emit ProtocolSettingsUpdated();
     }
 
@@ -129,25 +129,19 @@ contract KlerosBadgeModelController is
      * @param data Encoded data required to create a Kleros TCR list
      */
     function createBadgeModel(address callee, uint256 badgeModelId, bytes calldata data) public onlyTheBadgeModels {
-        KlerosBadgeModelControllerStore.KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModelControllerStore
-            .getKlerosBadgeModel(badgeModelId);
+        KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModels[badgeModelId];
         if (_klerosBadgeModel.tcrList != address(0)) {
             revert LibKlerosBadgeModelController
                 .KlerosBadgeModelController__createBadgeModel_badgeModelAlreadyCreated();
         }
 
-        address _tcrFactory = klerosBadgeModelControllerStore.getTCRFactory();
-        ILightGTCRFactory lightGTCRFactory = ILightGTCRFactory(_tcrFactory);
+        ILightGTCRFactory lightGTCRFactory = ILightGTCRFactory(tcrFactory);
 
-        KlerosBadgeModelControllerStore.CreateBadgeModel memory args = abi.decode(
-            data,
-            (KlerosBadgeModelControllerStore.CreateBadgeModel)
-        );
+        CreateBadgeModel memory args = abi.decode(data, (CreateBadgeModel));
 
-        IArbitrator _arbitrator = klerosBadgeModelControllerStore.getArbitrator();
         address governor = args.governor != address(0) ? args.governor : callee;
         lightGTCRFactory.deploy(
-            _arbitrator, // Arbitrator address
+            arbitrator, // Arbitrator address
             bytes.concat(abi.encodePacked(args.courtId), abi.encodePacked(args.numberOfJurors)), // ArbitratorExtraData
             address(0), // TODO: check this. The address of the TCR that stores related TCR addresses. This parameter can be left empty.
             args.registrationMetaEvidence, // The URI of the meta evidence object for registration requests.
@@ -165,13 +159,7 @@ contract KlerosBadgeModelController is
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
         }
 
-        klerosBadgeModelControllerStore.createKlerosBadgeModel(
-            badgeModelId,
-            callee,
-            klerosTcrListAddress,
-            governor,
-            address(0)
-        );
+        createKlerosBadgeModel(badgeModelId, callee, klerosTcrListAddress, governor, address(0));
 
         emit NewKlerosBadgeModel(
             badgeModelId,
@@ -202,13 +190,9 @@ contract KlerosBadgeModelController is
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__mintBadge_wrongValue();
         }
 
-        KlerosBadgeModelControllerStore.KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModelControllerStore
-            .getKlerosBadgeModel(badgeModelId);
+        KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModels[badgeModelId];
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
-        KlerosBadgeModelControllerStore.MintParams memory args = abi.decode(
-            data,
-            (KlerosBadgeModelControllerStore.MintParams)
-        );
+        MintParams memory args = abi.decode(data, (MintParams));
 
         // and the klerosItemID (which can be calculated here, before adding the item in TCR)
         // but could it cause some issues if the item it's not added on the next line?
@@ -220,9 +204,15 @@ contract KlerosBadgeModelController is
         // Its needed on the subgraph to check the disputes status for that item
         bytes32 klerosItemID = keccak256(abi.encodePacked(args.evidence));
         // save deposit amount for callee as it has to be returned if it was not challenged.
-        KlerosBadgeModelControllerStore.KlerosBadge memory _newKlerosBadge = KlerosBadgeModelControllerStore
-            .KlerosBadge(klerosItemID, badgeModelId, callee, msg.value, destinationAddress, true);
-        klerosBadgeModelControllerStore.addKlerosBadge(badgeId, _newKlerosBadge);
+        KlerosBadge memory _newKlerosBadge = KlerosBadge(
+            klerosItemID,
+            badgeModelId,
+            callee,
+            msg.value,
+            destinationAddress,
+            true
+        );
+        addKlerosBadge(badgeId, _newKlerosBadge);
 
         emit MintKlerosBadge(badgeId, args.evidence);
         return uint256(klerosItemID);
@@ -241,8 +231,7 @@ contract KlerosBadgeModelController is
         address /*caller*/
     ) public onlyTheBadge nonReentrant returns (address) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
-        KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
-            .getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
 
         // This changes the state of the item from Requested to Accepted and returns the deposit to our contract
         lightGeneralizedTCR.executeRequest(_klerosBadge.itemID);
@@ -253,7 +242,7 @@ contract KlerosBadgeModelController is
         }
 
         uint256 balanceToDeposit = _klerosBadge.deposit;
-        klerosBadgeModelControllerStore.clearKlerosBadgeDepositAmount(badgeId);
+        clearKlerosBadgeDepositAmount(badgeId);
         // Then we return the deposit from within our contract to the callee address
         (bool badgeDepositSent, ) = payable(_klerosBadge.callee).call{ value: balanceToDeposit }("");
         if (badgeDepositSent == false) {
@@ -269,8 +258,7 @@ contract KlerosBadgeModelController is
      * @param data encoded evidenceHash ipfs hash containing the evidence to generate the challenge
      */
     function challenge(uint256 badgeId, bytes calldata data, address caller) external payable onlyTheBadge {
-        KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
-            .getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
 
         if (_klerosBadge.initialized == false) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__klerosBadgeNotFound();
@@ -280,10 +268,7 @@ contract KlerosBadgeModelController is
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__klerosBadgeNotFound();
         }
 
-        KlerosBadgeModelControllerStore.AddEvidenceParams memory evidenceHash = abi.decode(
-            data,
-            (KlerosBadgeModelControllerStore.AddEvidenceParams)
-        );
+        AddEvidenceParams memory evidenceHash = abi.decode(data, (AddEvidenceParams));
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         lightGeneralizedTCR.challengeRequest{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash.evidence);
         emit KlerosBadgeChallenged(badgeId, caller, evidenceHash.evidence);
@@ -295,8 +280,7 @@ contract KlerosBadgeModelController is
      * @param data encoded evidenceHash ipfs hash containing the evidence to generate the removal request
      */
     function removeItem(uint256 badgeId, bytes calldata data, address caller) external payable onlyTheBadge {
-        KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
-            .getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
 
         if (_klerosBadge.initialized == false) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__klerosBadgeNotFound();
@@ -306,10 +290,7 @@ contract KlerosBadgeModelController is
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__klerosBadgeNotFound();
         }
 
-        KlerosBadgeModelControllerStore.AddEvidenceParams memory evidenceHash = abi.decode(
-            data,
-            (KlerosBadgeModelControllerStore.AddEvidenceParams)
-        );
+        AddEvidenceParams memory evidenceHash = abi.decode(data, (AddEvidenceParams));
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         lightGeneralizedTCR.removeItem{ value: (msg.value) }(_klerosBadge.itemID, evidenceHash.evidence);
         emit KlerosBadgeChallenged(badgeId, caller, evidenceHash.evidence);
@@ -321,8 +302,7 @@ contract KlerosBadgeModelController is
      * @param data encoded evidenceHash ipfs hash adding more evidence to a submission
      */
     function submitEvidence(uint256 badgeId, bytes calldata data, address caller) external onlyTheBadge {
-        KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
-            .getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
 
         if (_klerosBadge.initialized == false) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__klerosBadgeNotFound();
@@ -332,10 +312,7 @@ contract KlerosBadgeModelController is
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__klerosBadgeNotFound();
         }
 
-        KlerosBadgeModelControllerStore.AddEvidenceParams memory evidenceHash = abi.decode(
-            data,
-            (KlerosBadgeModelControllerStore.AddEvidenceParams)
-        );
+        AddEvidenceParams memory evidenceHash = abi.decode(data, (AddEvidenceParams));
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         lightGeneralizedTCR.submitEvidence(_klerosBadge.itemID, evidenceHash.evidence);
         emit KlerosChallengeEvidenceAdded(badgeId, caller, evidenceHash.evidence);
@@ -352,9 +329,7 @@ contract KlerosBadgeModelController is
         string memory userMetadata,
         string memory evidenceUri
     ) public onlyTheBadgeUsers {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
-            _user
-        );
+        KlerosUser memory _klerosUser = klerosUsers[_user];
 
         if (_klerosUser.initialized) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userVerificationAlreadyStarted();
@@ -365,7 +340,7 @@ contract KlerosBadgeModelController is
         _klerosUser.userMetadata = userMetadata;
         _klerosUser.verificationEvidence = evidenceUri;
 
-        klerosBadgeModelControllerStore.registerKlerosUser(_user, _klerosUser);
+        registerKlerosUser(_user, _klerosUser);
     }
 
     /**
@@ -377,9 +352,8 @@ contract KlerosBadgeModelController is
         address _user,
         bool verify
     ) public onlyTheBadgeUsers onlyUserOnVerification(_user) {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
-            _user
-        );
+        KlerosUser memory _klerosUser = klerosUsers[_user];
+
         if (!_klerosUser.initialized) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userNotFound();
         }
@@ -387,7 +361,8 @@ contract KlerosBadgeModelController is
         LibKlerosBadgeModelController.VerificationStatus _verificationStatus = verify
             ? LibKlerosBadgeModelController.VerificationStatus.Verified
             : LibKlerosBadgeModelController.VerificationStatus.VerificationRejected;
-        klerosBadgeModelControllerStore.updateKlerosUserVerificationStatus(_user, _verificationStatus);
+
+        updateKlerosUserVerificationStatus(_user, _verificationStatus);
     }
 
     /**
@@ -395,13 +370,11 @@ contract KlerosBadgeModelController is
      * @param badgeModelId the badgeModelId
      */
     function mintValue(uint256 badgeModelId) public view returns (uint256) {
-        KlerosBadgeModelControllerStore.KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModelControllerStore
-            .getKlerosBadgeModel(badgeModelId);
+        KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModels[badgeModelId];
 
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_klerosBadgeModel.tcrList);
 
-        IArbitrator _arbitrator = klerosBadgeModelControllerStore.getArbitrator();
-        uint256 arbitrationCost = _arbitrator.arbitrationCost(lightGeneralizedTCR.arbitratorExtraData());
+        uint256 arbitrationCost = arbitrator.arbitrationCost(lightGeneralizedTCR.arbitratorExtraData());
         uint256 baseDeposit = lightGeneralizedTCR.submissionBaseDeposit();
 
         return arbitrationCost + baseDeposit;
@@ -420,8 +393,7 @@ contract KlerosBadgeModelController is
      */
     function isClaimable(uint256 badgeId) public view returns (bool) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
-        KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
-            .getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
 
         if (_klerosBadge.initialized == false) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__klerosBadgeNotFound();
@@ -456,8 +428,7 @@ contract KlerosBadgeModelController is
      */
     function isAssetActive(uint256 badgeId) public view returns (bool) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
-        KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
-            .getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
 
         (uint8 klerosItemStatus, , ) = lightGeneralizedTCR.getItemInfo(_klerosBadge.itemID);
         // The status is REGISTERED or ClearingRequested
@@ -473,8 +444,7 @@ contract KlerosBadgeModelController is
      * @param badgeId the klerosBadgeId
      */
     function getChallengeDepositValue(uint256 badgeId) public view returns (uint256) {
-        KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
-            .getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
 
         if (_klerosBadge.initialized == false) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__klerosBadgeNotFound();
@@ -529,7 +499,7 @@ contract KlerosBadgeModelController is
      * @notice returns the current configured user verification fee
      */
     function getVerifyUserProtocolFee() public view returns (uint256) {
-        return klerosBadgeModelControllerStore.getVerifyUserProtocolFee();
+        return verifyUserProtocolFee;
     }
 
     /**
@@ -537,9 +507,7 @@ contract KlerosBadgeModelController is
      * @param _user the userAddress
      */
     function isUserVerified(address _user) public view returns (bool) {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
-            _user
-        );
+        KlerosUser memory _klerosUser = klerosUsers[_user];
         if (_klerosUser.initialized == false) {
             return false;
         }
@@ -554,10 +522,9 @@ contract KlerosBadgeModelController is
      * @param badgeId the klerosBadgeId
      */
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
-        KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
-            .getKlerosBadge(badgeId);
-        KlerosBadgeModelControllerStore.KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModelControllerStore
-            .getKlerosBadgeModel(_klerosBadge.badgeModelId);
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
+        KlerosBadgeModel memory _klerosBadgeModel = klerosBadgeModels[_klerosBadge.badgeModelId];
+
         if (_klerosBadgeModel.tcrList == address(0)) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
         }
@@ -570,8 +537,7 @@ contract KlerosBadgeModelController is
      * @param badgeId the klerosBadgeId
      */
     function getBadgeIdArbitrationCosts(uint256 badgeId) internal view returns (uint256) {
-        KlerosBadgeModelControllerStore.KlerosBadge memory _klerosBadge = klerosBadgeModelControllerStore
-            .getKlerosBadge(badgeId);
+        KlerosBadge memory _klerosBadge = klerosBadges[badgeId];
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         (, , uint120 requestCount) = lightGeneralizedTCR.items(_klerosBadge.itemID);
         uint256 lastRequestIndex = requestCount - 1;
@@ -581,8 +547,7 @@ contract KlerosBadgeModelController is
             lastRequestIndex
         );
 
-        IArbitrator _arbitrator = klerosBadgeModelControllerStore.getArbitrator();
-        return _arbitrator.arbitrationCost(requestArbitratorExtraData);
+        return arbitrator.arbitrationCost(requestArbitratorExtraData);
     }
 
     /**
@@ -593,13 +558,6 @@ contract KlerosBadgeModelController is
     /// Required by the OZ UUPS module
     // solhint-disable-next-line
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
-
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-     */
-    uint256[50] private __gap;
 
     /**
      * @notice we need a receive function to receive deposits devolution from kleros

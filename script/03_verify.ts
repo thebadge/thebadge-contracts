@@ -17,8 +17,6 @@ async function main() {
   const theBadgeUsers = contracts.TheBadgeUsers.address[chainId as Chains];
   const theBadgeModels = contracts.TheBadgeModels.address[chainId as Chains];
   const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
-  const klerosBadgeModelControllerStoreDeployedAddress =
-    contracts.KlerosBadgeModelControllerStore.address[chainId as Chains];
   const tpBadgeModelControllerDeployedAddress = contracts.TpBadgeModelController.address[chainId as Chains];
   const tpBadgeModelControllerStoreDeployedAddress = contracts.TpBadgeModelControllerStore.address[chainId as Chains];
 
@@ -49,12 +47,6 @@ async function main() {
   console.log("Verifying KlerosBadgeModelController contract on Etherscan...");
   await run(`verify:verify`, {
     address: klerosBadgeModelControllerDeployedAddress,
-    constructorArguments: [],
-  });
-
-  console.log("Verifying KlerosBadgeModelControllerStore contract on Etherscan...");
-  await run(`verify:verify`, {
-    address: klerosBadgeModelControllerStoreDeployedAddress,
     constructorArguments: [],
   });
 
@@ -96,11 +88,6 @@ async function main() {
     {
       name: "KlerosBadgeModelController",
       address: await getImplementationAddress(ethers.provider, klerosBadgeModelControllerDeployedAddress),
-      network: chainId.toString(),
-    },
-    {
-      name: "KlerosBadgeModelControllerStore",
-      address: await getImplementationAddress(ethers.provider, klerosBadgeModelControllerStoreDeployedAddress),
       network: chainId.toString(),
     },
     {

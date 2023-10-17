@@ -44,14 +44,6 @@ contract Config is Test {
         badgeModelsInstance = TheBadgeModels(payable(theBadgeModelsProxy));
         badgeModelsInstance.initialize(admin, address(badgeStoreInstance), address(badgeUsersInstance));
 
-        // Instantiates the KlerosBadgeModelControllerStore
-        address klerosBadgeModelControllerStoreInstanceImp = address(new KlerosBadgeModelControllerStore());
-        address klerosBadgeModelControllerStoreProxy = Clones.clone(klerosBadgeModelControllerStoreInstanceImp);
-        klerosBadgeModelControllerStoreInstance = KlerosBadgeModelControllerStore(
-            payable(klerosBadgeModelControllerStoreProxy)
-        );
-        klerosBadgeModelControllerStoreInstance.initialize(admin, _arbitrator, _tcrFactory);
-
         // Instantiates the KlerosBadgeModelController
         // TODO: this _badgeContractAddress should be also a instance of TheBadge.sol contract and should be initialized the same way the rest of the contracts showed here
         address _badgeContractAddress = vm.addr(5);
@@ -64,7 +56,8 @@ contract Config is Test {
             _badgeContractAddress,
             address(badgeModelsInstance),
             address(badgeUsersInstance),
-            address(klerosBadgeModelControllerStoreInstance)
+            _arbitrator,
+            _tcrFactory
         );
 
         // Adds the permissions to TheBadgeModels and TheBadgeUsers to access the store...
@@ -82,13 +75,6 @@ contract Config is Test {
         // Changes the msg.sender to be the badgeModelsInstance which is the contract allowed to run addBadgeModelController()
         vm.prank(address(badgeModelsInstance));
         badgeStoreInstance.addBadgeModelController(klerosControllerName, klerosBadgeModelController);
-
-        // Finally adds the permission to KlerosBadgeModelController to access the KlerosBadgeModelControllerStore...
-        vm.prank(admin);
-        klerosBadgeModelControllerStoreInstance.addPermittedContract(
-            "KlerosBadgeModelController",
-            address(klerosBadgeModelControllerInstance)
-        );
 
         // Finally gives the role USER_MANAGER_ROLE to the contract TheBadgeModels to allow it to call the method makeUserCreator on the contract TheBadgeUsers
         // Fore more details you can check the 01_deploy.ts script inside the /script folder

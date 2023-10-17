@@ -35,15 +35,8 @@ export const contracts = {
   },
   KlerosBadgeModelController: {
     address: {
-      [Chains.goerli]: "0x2eB78fEC61CD7bc9780A3E45b2b2b794CB9B568D",
-      [Chains.sepolia]: "0xF07ED3196B56DE833fFe82508DbD42dC427D6Ae9",
-      [Chains.gnosis]: "",
-    },
-  },
-  KlerosBadgeModelControllerStore: {
-    address: {
-      [Chains.goerli]: "0xda7E0959607211ede9659D0331659dEE063933F1",
-      [Chains.sepolia]: "0x5914d3C5008c19cC22a39b78FA0d08b3adD4933A",
+      [Chains.goerli]: "0xb3B6021e366Eb66C1ffF86e5efeB56FaBE06A265",
+      [Chains.sepolia]: "0x40358153D49e4Fa1be9bF4acADB008870eE16cf1",
       [Chains.gnosis]: "",
     },
   },
