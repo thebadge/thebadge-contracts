@@ -4,62 +4,62 @@
 
 | Network | ChainID  | Tag    | Address                                    | Transaction Hash                                                   |
 | ------- | -------- | ------ | ------------------------------------------ | ------------------------------------------------------------------ |
-| Goerli  | 5        | v2.0.0 | 0x24a2cC73D3b33fa92B9dc299835ec3715FB033fB | 0x0aa9d9067c1d4306d119997ed8a9de1f3547dece1f2f3efe4bd040988bb189cd |
-| Sepolia | 11155111 | v2.0.0 | 0xE60E872Bb117AC85DBf62377557023DA9BB0e45f | 0x5437e67e2490fa61da79e7a18ed0f3beaa185f5281634deb8bfc1024ab1db162 |
+| Goerli  | 5        | v2.0.0 | 0xF118b243eBBAB8166D23Eb98Ace86fEFdE62A748 | 0x0a8baae07bf005ce3f3992442297967861c75754f0e3eadfb5c13f4840981c08 |
+| Sepolia | 11155111 | v2.0.0 | 0x70d6b6cdB3ce3FE21EefE4F967Bb2d8e12E0F701 | 0xe113ebbc343715bedd1f9d5ddb717ca59746c3db67e26a25090e6486d4144687 |
 | xDai    | 100      | v2.0.0 |                                            |                                                                    |
 
 ## TheBadgeStore
 
 | Network | ChainID  | Tag    | Address                                    | Transaction Hash                                                   |
 | ------- | -------- | ------ | ------------------------------------------ | ------------------------------------------------------------------ |
-| Goerli  | 5        | v2.0.0 | 0x93CE70D9dfF140F33D5F7b2Cc7291D11768eCdA7 | 0xa6af248de30ed66155c3c65c7c6ac486adeaccca7c7393088b77bfdc2c6a3ed3 |
-| Sepolia | 11155111 | v2.0.0 | 0xDE11Ada7643C4A7d07eBacA22b44178Ca01185A8 | 0xd8416d1acf805a9299a292f9fc8a1f3b3bcaa26246620e367a37f9f4e4e71eff |
+| Goerli  | 5        | v2.0.0 | 0x41055729e96661Db8125A114dCDEa6aF55B74523 | 0xbed4981ff5a12c6b7e59be6975eb5d144cda7b2613ba843262c0c9cc9f1dbea9 |
+| Sepolia | 11155111 | v2.0.0 | 0x156d65224376Aed425A551CD85fCbAa1e56C3568 | 0x5ee83ce054e7f2231c386e683c2bde83203524853929aeabc256b247ff431227 |
 | xDai    | 100      | v2.0.0 |                                            |                                                                    |
 
 ## TheBadgeUsers
 
 | Network | ChainID  | Tag    | Address                                    | Transaction Hash                                                   |
 | ------- | -------- | ------ | ------------------------------------------ | ------------------------------------------------------------------ |
-| Goerli  | 5        | v2.0.0 | 0x1e2D6FCF076726049F5554f848Fc332c052e0e5b | 0x8a3d172ab91b6fb97cf5b6821c314e5ba2d2b1072cebd1992f2a083caec03d57 |
-| Sepolia | 11155111 | v2.0.0 | 0xCd22f18524e6eCE2Fec58574184c0c713446229e | 0x0118eba55b80eeb572b9d56db0e2483664304705d7f87798276bf8ff33844b7f |
+| Goerli  | 5        | v2.0.0 | 0x5Db75bA250eE4B675D9C7627BC11F2BC3b8c099f | 0xe840a960c57eb74c6187a305f548933ad10b666eaa0450d1c5a46c5c01dac846 |
+| Sepolia | 11155111 | v2.0.0 | 0x38779E2d51181b461234B85Ee8D49cc2D24F2895 | 0xb18290ac1a57ad33802b0f019fb99e0aef1b110cbcf804e8809a5f48df934961 |
 | xDai    | 100      | v2.0.0 |                                            |                                                                    |
 
 ## TheBadgeModels
 
 | Network | ChainID  | Tag    | Address                                    | Transaction Hash                                                   |
 | ------- | -------- | ------ | ------------------------------------------ | ------------------------------------------------------------------ |
-| Goerli  | 5        | v2.0.0 | 0x17179b1c18AB35c78C95dE4c57eDb08b6286D60a | 0x5452e5ba65f859135b1f62bdb856c920102937eac5013151056e3c3d2f5c8f5b |
-| Sepolia | 11155111 | v2.0.0 | 0x874D3BCb8ac6fE0229F62aD2eddfe338E2500407 | 0xaadd9f8c5b416b6b114c2ae593be50508cac103351f15ee533c2e254de996db3 |
+| Goerli  | 5        | v2.0.0 | 0xBaF92b831Ed905F791355fe9ECF0fce144712bdb | 0xff97c85eac4cc7b94c53cb0273d55ccd2f4391e5060d2f95d8976c6403f36a67 |
+| Sepolia | 11155111 | v2.0.0 | 0xB7a687C965EF94478FB9a19812086B43A1Ca6ddb | 0xe08c88d655a45da436ce56ff43231ce1f8cd465b11cbfc607ea2dbccb7aafedf |
 | xDai    | 100      | v2.0.0 |                                            |                                                                    |
 
 ## KlerosBadgeModelController
 
 | Network | ChainID  | Tag    | Address                                    | Transaction Hash                                                   |
 | ------- | -------- | ------ | ------------------------------------------ | ------------------------------------------------------------------ |
-| Goerli  | 5        | v2.0.0 | 0x2eB78fEC61CD7bc9780A3E45b2b2b794CB9B568D | 0xa7f7b7f7b5c825700cd21f0df3aa5eeaeefd5e2985dad59eda5def60a59a9c94 |
-| Sepolia | 11155111 | v2.0.0 | 0xF07ED3196B56DE833fFe82508DbD42dC427D6Ae9 | 0xa8fab9233cabe3442afde3b063108a460f96463d2d2892982a5af350386dd946 |
+| Goerli  | 5        | v2.0.0 | 0xbCA482008Bfe1ABBF44d451b810911007e5b7764 | 0xb621d9c6bf3e6fdda9d9e03917d3c1503576ca1cb08074cb527f5f20532634b4 |
+| Sepolia | 11155111 | v2.0.0 | 0xF6f544D306C2b56226cC3E771d45F2c21731C739 | 0x69bdd4cc3372e053b45bfec03581f55c9020c5a9c4393032ccd26a93118d237f |
 | xDai    | 100      | v2.0.0 |                                            |                                                                    |
 
 ## KlerosBadgeModelControllerStore
 
 | Network | ChainID  | Tag    | Address                                    | Transaction Hash                                                   |
 | ------- | -------- | ------ | ------------------------------------------ | ------------------------------------------------------------------ |
-| Goerli  | 5        | v2.0.0 | 0xda7E0959607211ede9659D0331659dEE063933F1 | 0xd80c14faa51e9478ddadb3df692fd7ed2d209e5f86ecee94c69075df3aa710cb |
-| Sepolia | 11155111 | v2.0.0 | 0x5914d3C5008c19cC22a39b78FA0d08b3adD4933A | 0xf3b3c2f63b2b705542c4671d27eb2ba7a738d9ebcd77d6a6977cfb60b6c7e001 |
+| Goerli  | 5        | v2.0.0 | 0x55cB7227EE660C596d8d4d4BB427F90e3feEB684 | 0x9e8fe6c87c77b07795dca4191bd83d9f97f0db21210e3c53c265ecd2deac7863 |
+| Sepolia | 11155111 | v2.0.0 | 0x1848F0Ec7dDcCbf6aa8D451A06F3557018e394d0 | 0x8362b05abac3f7f648c0bb06216b35933b80bfa9094b05df7039376949d95213 |
 | xDai    | 100      | v2.0.0 |                                            |                                                                    |
 
 ## TpBadgeModelController
 
 | Network | ChainID  | Tag    | Address                                    | Transaction Hash                                                   |
 | ------- | -------- | ------ | ------------------------------------------ | ------------------------------------------------------------------ |
-| Goerli  | 5        | v2.0.0 | 0x3157c445bF3De73E66260203678Fef4FDf028104 | 0x0638f529eb41d218db8f3a93bcc0e5df4bcce9c6602a666db1afac8a8ecd137b |
-| Sepolia | 11155111 | v2.0.0 | 0xd319B3dE32084B2763aa57612ba52D6d18470F66 | 0x34711856ce90afe62db4b447ec049287d3b85745f34d76ef734a216b7f0f8ade |
+| Goerli  | 5        | v2.0.0 | 0xE424fD75Dec6DBFAf3782d0A7A0DA23FBFCD91C7 | 0xf615c84ad773ee084a47387863febfccd3dbbeb6f61e04b345b6d2aebade4a4e |
+| Sepolia | 11155111 | v2.0.0 | 0xba689941f0a7b7dE12563987aA5f09B649b55ae1 | 0x1208330da6aeeb849a1a8c5b17fab86c34b5a170f69e2d24fa3aa5b5dad359f1 |
 | xDai    | 100      | v2.0.0 |                                            |                                                                    |
 
 ## TpBadgeModelControllerStore
 
 | Network | ChainID  | Tag    | Address                                    | Transaction Hash                                                   |
 | ------- | -------- | ------ | ------------------------------------------ | ------------------------------------------------------------------ |
-| Goerli  | 5        | v2.0.0 | 0x0c84711AaA2CebAA889cD0340C3Bf1EA721a22E6 | 0xb3dc800d35ba215a43f6bf0599f6c2623a956e9775e2d089ee093aed8e619dcd |
-| Sepolia | 11155111 | v2.0.0 | 0x57547BaA62DD300C67d7d3Df4e9814d8E058150A | 0xfeb360b788d0f7eb3ecc8197fcae307e550a195c6a78941684b3b548c8c77360 |
+| Goerli  | 5        | v2.0.0 | 0x883D0927bDB1471bCfC77bB6EbaA334eCfbdC1F5 | 0x516d07d400a56babe311c47e867767a6dca0c367e49f33bfbb3cb459cc6997a9 |
+| Sepolia | 11155111 | v2.0.0 | 0x87aD3a2EF03804a874Fdf560C18186b2b956D840 | 0x14b9db8a4a9b35a1846fa2e99fd2995233e9f2af6d55772e1046ee68d14069ad |
 | xDai    | 100      | v2.0.0 |                                            |                                                                    |
