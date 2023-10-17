@@ -88,6 +88,16 @@ const updateControllers = async (hre: HardhatRuntimeEnvironment): Promise<string
   );
   await klerosBadgeModelController.deployed();
 
+  console.log("Upgrading KlerosBadgeModelControllerStore...");
+  const KlerosBadgeModelControllerStore = await ethers.getContractFactory("KlerosBadgeModelControllerStore");
+  const klerosBadgeModelControllerStoreDeployment =
+    contracts.KlerosBadgeModelControllerStore.address[chainId as Chains];
+  const klerosBadgeModelControllerStore = await upgrades.upgradeProxy(
+    klerosBadgeModelControllerStoreDeployment,
+    KlerosBadgeModelControllerStore,
+  );
+  await klerosBadgeModelControllerStore.deployed();
+
   console.log("Upgrading TpBadgeModelController...");
   const TpBadgeModelController = await ethers.getContractFactory("TpBadgeModelController");
   const tpBadgeModelControllerDeployment = contracts.TpBadgeModelController.address[chainId as Chains];
@@ -105,6 +115,7 @@ const updateControllers = async (hre: HardhatRuntimeEnvironment): Promise<string
 
   return [
     ["KlerosBadgeModelController", klerosBadgeModelController.address],
+    ["KlerosBadgeModelControllerStore", klerosBadgeModelControllerStore.address],
     ["TpBadgeModelController", tpBadgeModelController.address],
     ["TpBadgeModelControllerStore", tpBadgeModelControllerStore.address],
   ];

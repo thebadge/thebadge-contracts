@@ -40,6 +40,15 @@ export const contracts = {
       [Chains.gnosis]: "",
     },
   },
+  KlerosBadgeModelControllerStore: {
+    address: {
+      [Chains.goerli]: "0xda7E0959607211ede9659D0331659dEE063933F1",
+      [Chains.sepolia]: "0x5914d3C5008c19cC22a39b78FA0d08b3adD4933A",
+      [Chains.goerli]: "0xb3B6021e366Eb66C1ffF86e5efeB56FaBE06A265",
+      [Chains.sepolia]: "0x40358153D49e4Fa1be9bF4acADB008870eE16cf1",
+      [Chains.gnosis]: "",
+    },
+  },
   TpBadgeModelController: {
     address: {
       [Chains.goerli]: "0x37dDEF28629aFCefF4F2F54C0eab6BaFD910F69B",

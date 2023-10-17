@@ -106,14 +106,14 @@ contract CreateBadgeModel is Config {
 
         bytes memory data = abi.encode(klerosBadgeModel);
 
-        uint256 initialBadgeModelCount = klerosBadgeModelControllerInstance.getCurrentBadgeModelsIdCounter();
+        uint256 initialBadgeModelCount = badgeStoreInstance.getCurrentBadgeModelsIdCounter();
 
         // Perform the createBadgeModel transaction
         vm.prank(user1);
         badgeModelsInstance.createBadgeModel(badgeModel, data);
 
         // Check if the badge model was created
-        uint256 newBadgeModelCount = klerosBadgeModelControllerInstance.getCurrentBadgeModelsIdCounter();
+        uint256 newBadgeModelCount = badgeStoreInstance.getCurrentBadgeModelsIdCounter();
         assertTrue(newBadgeModelCount > initialBadgeModelCount, "Badge model should be created");
         uint256 newBadgeModelId = newBadgeModelCount - 1;
 

@@ -119,19 +119,33 @@ const deployControllers = async (
   // The admin that is allowed to upgrade the contracts
   const contractsAdmin = deployer.address;
 
+  console.log("Deploying KlerosBadgeModelControllerStore...");
+  const KlerosBadgeModelControllerStore = await ethers.getContractFactory("KlerosBadgeModelControllerStore");
+  const klerosBadgeModelControllerStore = await upgrades.deployProxy(KlerosBadgeModelControllerStore, [
+    contractsAdmin,
+    klerosArbitror,
+    lightGTCRFactory,
+  ]);
+  await klerosBadgeModelControllerStore.deployed();
+  console.log(`KlerosBadgeModelControllerStore deployed with address: ${klerosBadgeModelControllerStore.address}`);
+
   console.log("Deploying KlerosBadgeModelController...");
   // Deploys and adds all the controllers
   const KlerosBadgeModelController = await ethers.getContractFactory("KlerosBadgeModelController");
   const klerosBadgeModelController = await upgrades.deployProxy(KlerosBadgeModelController, [
-    contractsAdmin,
-    "0x24a2cC73D3b33fa92B9dc299835ec3715FB033fB",
-    "0x17179b1c18AB35c78C95dE4c57eDb08b6286D60a",
-    "0x1e2D6FCF076726049F5554f848Fc332c052e0e5b",
-    klerosArbitror,
-    lightGTCRFactory,
+    theBadge.address,
+    theBadgeModels.address,
+    theBadgeUsers.address,
+    klerosBadgeModelControllerStore.address,
   ]);
   await klerosBadgeModelController.deployed();
   console.log(`KlerosBadgeModelController deployed with address: ${klerosBadgeModelController.address}`);
+
+  console.log("Allowing KlerosBadgeModelController to access KlerosBadgeModelControllerStore...");
+  await klerosBadgeModelControllerStore.addPermittedContract(
+    "KlerosBadgeModelController",
+    klerosBadgeModelController.address,
+  );
 
   console.log("Adding KlerosBadgeModelController to TheBadge...");
   theBadgeModels.connect(deployer);
@@ -173,6 +187,7 @@ const deployControllers = async (
 
   return [
     ["klerosBadgeModelController", klerosBadgeModelController.address],
+    ["klerosBadgeModelControllerStore", klerosBadgeModelControllerStore.address],
     ["ThirdPartyModelController", tpBadgeModelController.address],
     ["TpBadgeModelControllerStore", tpBadgeModelControllerStore.address],
   ];
