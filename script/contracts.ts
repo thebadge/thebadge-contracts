@@ -8,49 +8,49 @@ export const contracts = {
   TheBadge: {
     address: {
       [Chains.goerli]: "0x24a2cC73D3b33fa92B9dc299835ec3715FB033fB",
-      [Chains.sepolia]: "0xE60E872Bb117AC85DBf62377557023DA9BB0e45f",
+      [Chains.sepolia]: "0x276c3FDc29ef2c7CD621446448fadfcFA4acd1D6",
       [Chains.gnosis]: "",
     },
   },
   TheBadgeStore: {
     address: {
       [Chains.goerli]: "0x93CE70D9dfF140F33D5F7b2Cc7291D11768eCdA7",
-      [Chains.sepolia]: "0xDE11Ada7643C4A7d07eBacA22b44178Ca01185A8",
+      [Chains.sepolia]: "0xec3e7F54FD1553008f181037D8E85390d840ec02",
       [Chains.gnosis]: "",
     },
   },
   TheBadgeUsers: {
     address: {
       [Chains.goerli]: "0x1e2D6FCF076726049F5554f848Fc332c052e0e5b",
-      [Chains.sepolia]: "0xCd22f18524e6eCE2Fec58574184c0c713446229e",
+      [Chains.sepolia]: "0x0b04F0a99c77892805308e5CFc92d84D2dDDD3d3",
       [Chains.gnosis]: "",
     },
   },
   TheBadgeModels: {
     address: {
       [Chains.goerli]: "0x17179b1c18AB35c78C95dE4c57eDb08b6286D60a",
-      [Chains.sepolia]: "0x874D3BCb8ac6fE0229F62aD2eddfe338E2500407",
+      [Chains.sepolia]: "0x2A01D3c85B410eC22C90A536859D1f1cf77ED02C",
       [Chains.gnosis]: "",
     },
   },
   KlerosBadgeModelController: {
     address: {
       [Chains.goerli]: "0xb3B6021e366Eb66C1ffF86e5efeB56FaBE06A265",
-      [Chains.sepolia]: "0x40358153D49e4Fa1be9bF4acADB008870eE16cf1",
+      [Chains.sepolia]: "0x0dcAe922A6349D4E5934b7c5Fc71bA13a22FD074",
       [Chains.gnosis]: "",
     },
   },
   TpBadgeModelController: {
     address: {
-      [Chains.goerli]: "0x3157c445bF3De73E66260203678Fef4FDf028104",
-      [Chains.sepolia]: "0xd319B3dE32084B2763aa57612ba52D6d18470F66",
+      [Chains.goerli]: "0x37dDEF28629aFCefF4F2F54C0eab6BaFD910F69B",
+      [Chains.sepolia]: "0x9af211eEB3010e00c078E6ae9AcE1fFF5a3Fa04B",
       [Chains.gnosis]: "",
     },
   },
   TpBadgeModelControllerStore: {
     address: {
       [Chains.goerli]: "0x0c84711AaA2CebAA889cD0340C3Bf1EA721a22E6",
-      [Chains.sepolia]: "0x57547BaA62DD300C67d7d3Df4e9814d8E058150A",
+      [Chains.sepolia]: "0xec33015Fe4E6BdA42c40081e63d9a88fcdB0C095",
       [Chains.gnosis]: "",
     },
   },
