@@ -439,6 +439,71 @@
       "address": "0xb3B6021e366Eb66C1ffF86e5efeB56FaBE06A265",
       "txHash": "0x58e6360ceaa25c108cb14f6c48028d4753f05de7d86c234d01466d098537caa7",
       "kind": "transparent"
+    },
+    {
+      "address": "0x366b3C6c7Fea65AE1D8940fd462BD7A26FbdeC20",
+      "txHash": "0xba06dae151c24c652976f7f436048d244f6b09b013a4f57ae9c0c5bd79bcfadd",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xcd06372Eb7f7098C6B1e0c2D7CCfD7D61a41f0E7",
+      "txHash": "0xc77856998661f5072f29bc8e8192b2dd22caa4ad78415e4e589e2c9c778c2413",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xa5963236546a48fcCde8f2F96EB0bC9413442B16",
+      "txHash": "0x1a1fb5701a1a3ca0fde7d7892d96a4d3a676a63d8168376c685d06df504ba820",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x6354e145A9f91D33E3cbB2acf30777fc9fb00239",
+      "txHash": "0x14fb49fa51ac982885b3908d69abf3e6db398585170b5a27ddf075067c6ece91",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xaaD3F00Ec47589bD345cb85ae8Ee8D77E6364995",
+      "txHash": "0x9459414e9d73f3b7c03234a9411e1310157fef7e63f37a317c1e4e49f254ca9f",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x41055729e96661Db8125A114dCDEa6aF55B74523",
+      "txHash": "0xbed4981ff5a12c6b7e59be6975eb5d144cda7b2613ba843262c0c9cc9f1dbea9",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x5Db75bA250eE4B675D9C7627BC11F2BC3b8c099f",
+      "txHash": "0xe840a960c57eb74c6187a305f548933ad10b666eaa0450d1c5a46c5c01dac846",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xBaF92b831Ed905F791355fe9ECF0fce144712bdb",
+      "txHash": "0xff97c85eac4cc7b94c53cb0273d55ccd2f4391e5060d2f95d8976c6403f36a67",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xF118b243eBBAB8166D23Eb98Ace86fEFdE62A748",
+      "txHash": "0x0a8baae07bf005ce3f3992442297967861c75754f0e3eadfb5c13f4840981c08",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x55cB7227EE660C596d8d4d4BB427F90e3feEB684",
+      "txHash": "0x9e8fe6c87c77b07795dca4191bd83d9f97f0db21210e3c53c265ecd2deac7863",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xbCA482008Bfe1ABBF44d451b810911007e5b7764",
+      "txHash": "0xb621d9c6bf3e6fdda9d9e03917d3c1503576ca1cb08074cb527f5f20532634b4",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x883D0927bDB1471bCfC77bB6EbaA334eCfbdC1F5",
+      "txHash": "0x516d07d400a56babe311c47e867767a6dca0c367e49f33bfbb3cb459cc6997a9",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xE424fD75Dec6DBFAf3782d0A7A0DA23FBFCD91C7",
+      "txHash": "0xf615c84ad773ee084a47387863febfccd3dbbeb6f61e04b345b6d2aebade4a4e",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -24715,6 +24780,81 @@
             "numberOfBytes": "20"
           },
           "t_contract(TheBadgeUsers)13558": {
+            "label": "contract TheBadgeUsers",
+            "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "d218954edc9e9b971de70f480545d15a691e91f5bdd9089347f78de99b671de1": {
+      "address": "0xaa95d3BEa49E93ba96765636C95E297C1855756B",
+      "txHash": "0x289cc4681296f13dd4f3cc8257803a3a84ccb21478c2772a6a09dcdb1ef00bab",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "klerosBadgeModelControllerStore",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(KlerosBadgeModelControllerStore)7905",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:31"
+          },
+          {
+            "label": "theBadge",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(TheBadge)11555",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:32"
+          },
+          {
+            "label": "theBadgeModels",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(TheBadgeModels)12338",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:33"
+          },
+          {
+            "label": "theBadgeUsers",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(TheBadgeUsers)14062",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:34"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:602"
+          }
+        ],
+        "types": {
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_contract(KlerosBadgeModelControllerStore)7905": {
+            "label": "contract KlerosBadgeModelControllerStore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadge)11555": {
+            "label": "contract TheBadge",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeModels)12338": {
+            "label": "contract TheBadgeModels",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeUsers)14062": {
             "label": "contract TheBadgeUsers",
             "numberOfBytes": "20"
           },

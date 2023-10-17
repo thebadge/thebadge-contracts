@@ -119,6 +119,46 @@
       "address": "0x9af211eEB3010e00c078E6ae9AcE1fFF5a3Fa04B",
       "txHash": "0xd76fb3706c8e0f76bbb8d67edf6f257c8a29138c65414bfa337ee687e5cad5fe",
       "kind": "transparent"
+    },
+    {
+      "address": "0x156d65224376Aed425A551CD85fCbAa1e56C3568",
+      "txHash": "0x5ee83ce054e7f2231c386e683c2bde83203524853929aeabc256b247ff431227",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x38779E2d51181b461234B85Ee8D49cc2D24F2895",
+      "txHash": "0xb18290ac1a57ad33802b0f019fb99e0aef1b110cbcf804e8809a5f48df934961",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xB7a687C965EF94478FB9a19812086B43A1Ca6ddb",
+      "txHash": "0xe08c88d655a45da436ce56ff43231ce1f8cd465b11cbfc607ea2dbccb7aafedf",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x70d6b6cdB3ce3FE21EefE4F967Bb2d8e12E0F701",
+      "txHash": "0xe113ebbc343715bedd1f9d5ddb717ca59746c3db67e26a25090e6486d4144687",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x1848F0Ec7dDcCbf6aa8D451A06F3557018e394d0",
+      "txHash": "0x8362b05abac3f7f648c0bb06216b35933b80bfa9094b05df7039376949d95213",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xF6f544D306C2b56226cC3E771d45F2c21731C739",
+      "txHash": "0x69bdd4cc3372e053b45bfec03581f55c9020c5a9c4393032ccd26a93118d237f",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x87aD3a2EF03804a874Fdf560C18186b2b956D840",
+      "txHash": "0x14b9db8a4a9b35a1846fa2e99fd2995233e9f2af6d55772e1046ee68d14069ad",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xba689941f0a7b7dE12563987aA5f09B649b55ae1",
+      "txHash": "0x1208330da6aeeb849a1a8c5b17fab86c34b5a170f69e2d24fa3aa5b5dad359f1",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -4953,6 +4993,81 @@
             "numberOfBytes": "20"
           },
           "t_contract(TheBadgeUsers)13558": {
+            "label": "contract TheBadgeUsers",
+            "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "d218954edc9e9b971de70f480545d15a691e91f5bdd9089347f78de99b671de1": {
+      "address": "0x1b562329DFF36d531F3e732857eFCc595e47C856",
+      "txHash": "0x0f7d6a23864c51d5fc5d304fd8241c7a8331feee1c935ce5449de56ed1df0707",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "klerosBadgeModelControllerStore",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(KlerosBadgeModelControllerStore)7905",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:31"
+          },
+          {
+            "label": "theBadge",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(TheBadge)11555",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:32"
+          },
+          {
+            "label": "theBadgeModels",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(TheBadgeModels)12338",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:33"
+          },
+          {
+            "label": "theBadgeUsers",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(TheBadgeUsers)14062",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:34"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "KlerosBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:602"
+          }
+        ],
+        "types": {
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_contract(KlerosBadgeModelControllerStore)7905": {
+            "label": "contract KlerosBadgeModelControllerStore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadge)11555": {
+            "label": "contract TheBadge",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeModels)12338": {
+            "label": "contract TheBadgeModels",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeUsers)14062": {
             "label": "contract TheBadgeUsers",
             "numberOfBytes": "20"
           },

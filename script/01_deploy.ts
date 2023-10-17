@@ -133,6 +133,7 @@ const deployControllers = async (
   // Deploys and adds all the controllers
   const KlerosBadgeModelController = await ethers.getContractFactory("KlerosBadgeModelController");
   const klerosBadgeModelController = await upgrades.deployProxy(KlerosBadgeModelController, [
+    contractsAdmin,
     theBadge.address,
     theBadgeModels.address,
     theBadgeUsers.address,
