@@ -100,7 +100,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         uint256 mintProtocolFee; // amount that the protocol will charge for this
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
         string version; // The version of the badgeModel, used in case of updates.
-        bool suspended; // If true, the badge ahs been suspended from the administrators and is not listed anymore on the UI
+        bool suspended; // If true, the badge has been suspended from the administrator of TB contract and users won't be able to interact with anymore
     }
 
     struct Badge {
