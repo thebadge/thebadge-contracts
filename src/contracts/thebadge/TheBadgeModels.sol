@@ -232,7 +232,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         }
 
         if (_badgeModel.suspended == true) {
-            revert LibTheBadge.TheBadge__badgeModel_isSuspended();
+            revert LibTheBadgeModels.TheBadge__badgeModel_isSuspended();
         }
 
         _badgeModel.mintCreatorFee = mintCreatorFee;
@@ -267,7 +267,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         }
 
         if (_badgeModel.suspended == true) {
-            revert LibTheBadge.TheBadge__badgeModel_isSuspended();
+            revert LibTheBadgeModels.TheBadge__badgeModel_isSuspended();
         }
 
         _badgeModel.mintProtocolFee = feeInBps;
