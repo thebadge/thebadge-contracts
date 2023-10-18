@@ -94,12 +94,13 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     struct BadgeModel {
         address creator;
         string controllerName;
-        bool paused;
+        bool paused; // If true it cannot be mintable, configured by the badge model creator
         uint256 mintCreatorFee; // in bps (%). It is taken from mintCreatorFee
         uint256 validFor;
         uint256 mintProtocolFee; // amount that the protocol will charge for this
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
         string version; // The version of the badgeModel, used in case of updates.
+        bool suspended; // If true, the badge ahs been suspended from the administrators and is not listed anymore on the UI
     }
 
     struct Badge {
@@ -232,13 +233,24 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     function updateBadgeModel(uint256 badgeModelId, BadgeModel calldata badgeModel) external onlyPermittedContract {
         BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 
-        if (_badgeModel.creator == address(0)) {
+        if (_badgeModel.initialized == false) {
             revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
         }
 
         _badgeModel.mintProtocolFee = badgeModel.mintProtocolFee;
         _badgeModel.mintCreatorFee = badgeModel.mintCreatorFee;
         _badgeModel.paused = badgeModel.paused;
+    }
+
+
+    function suspendBadgeModel(uint256 badgeModelId, bool suspended) external onlyPermittedContract {
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
+
+        if (_badgeModel.initialized == false) {
+            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        _badgeModel.suspended = suspended;
     }
 
     function addBadge(uint256 badgeId, Badge calldata badge) external onlyPermittedContract {

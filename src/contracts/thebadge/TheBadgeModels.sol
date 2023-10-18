@@ -28,6 +28,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     event Initialize(address indexed admin);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     event BadgeModelUpdated(uint256 indexed badgeModelId);
+    event BadgeModelSuspended(uint256 indexed badgeModelId, bool suspended);
     event BadgeModelControllerAdded(string indexed controllerName, address indexed controllerAddress);
     event BadgeModelControllerUpdated(string indexed controllerName, address indexed controllerAddress);
 
@@ -191,7 +192,8 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
                 args.validFor,
                 mintBadgeProtocolDefaultFeeInBps,
                 true,
-                "v1.0.0"
+                "v1.0.0",
+                false
             )
         );
 
@@ -236,10 +238,16 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         emit BadgeModelUpdated(badgeModelId);
     }
 
-    function suspendBadgeModel() public view onlyRole(DEFAULT_ADMIN_ROLE) {
-        // TODO: suspend badgeModel. I think we don't as we might want to use a Kleros list to handle the creations of lists.
-        // TODO remove the view modifier and implement
-        revert LibTheBadgeModels.TheBadge__method_not_supported();
+    function suspendBadgeModel(uint256 badgeModelId, bool suspended) public onlyRole(PAUSER_ROLE) {
+        TheBadgeStore.BadgeModel memory badgeModel = _badgeStore.getBadgeModel(badgeModelId);
+
+        if (badgeModel.initialized == false) {
+            revert LibTheBadgeModels.TheBadge__updateBadgeModel_badgeModelNotFound();
+        }
+
+        _badgeStore.suspendBadgeModel(badgeModelId, suspended);
+
+        emit BadgeModelSuspended(badgeModelId, suspended);
     }
 
     /*
@@ -268,6 +276,10 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
 
         if (_badgeModel.creator == address(0)) {
             revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        if (_badgeModel.suspended == true) {
+            return true;
         }
 
         TheBadgeStore.User memory creator = _badgeStore.getUser(_badgeModel.creator);
