@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 /**
  * =========================
  * Contains all the logic related to badge models (but not badges)
@@ -7,7 +7,6 @@ pragma solidity ^0.8.17;
  */
 
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
-import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
@@ -20,14 +19,13 @@ import { TheBadgeUsers } from "./TheBadgeUsers.sol";
 contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     TheBadgeStore public _badgeStore;
     TheBadgeUsers public _theBadgeUsers;
-    // Allows to use current() and increment() for badgeModelIds or badgeIds
-    using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /**
      * =========================
      * Events
      * =========================
      */
+    event Initialize(address indexed admin);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     event BadgeModelUpdated(uint256 indexed badgeModelId);
     event BadgeModelControllerAdded(string indexed controllerName, address indexed controllerAddress);
@@ -91,10 +89,13 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     }
 
     function initialize(address admin, address badgeStore, address badgeUsers) public initializer {
-        __Ownable_init();
+        __Ownable_init(admin);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(PAUSER_ROLE, admin);
+
         _badgeStore = TheBadgeStore(payable(badgeStore));
         _theBadgeUsers = TheBadgeUsers(payable(badgeUsers));
+        emit Initialize(admin);
     }
 
     /**
@@ -156,7 +157,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         _badgeModelController.paused = false;
 
         _badgeStore.updateBadgeModelController(controllerName, _badgeModelController);
-        emit BadgeModelControllerAdded(controllerName, controllerAddress);
+        emit BadgeModelControllerUpdated(controllerName, controllerAddress);
     }
 
     /*
@@ -166,7 +167,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
      */
     function createBadgeModel(
         TheBadgeStore.CreateBadgeModel memory args,
-        bytes memory data
+        bytes calldata data
     ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(args.controllerName) {
         uint256 createBadgeModelProtocolFee = _badgeStore.createBadgeModelProtocolFee();
         // check values
@@ -175,25 +176,25 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         }
 
         // move fees to collector
-        address feeCollector = _badgeStore.feeCollector();
         if (msg.value > 0) {
-            payable(feeCollector).transfer(msg.value);
+            payable(_badgeStore.feeCollector()).transfer(msg.value);
         }
 
         uint256 mintBadgeProtocolDefaultFeeInBps = _badgeStore.mintBadgeProtocolDefaultFeeInBps();
-        TheBadgeStore.BadgeModel memory _newBadgeModel = TheBadgeStore.BadgeModel(
-            _msgSender(),
-            args.controllerName,
-            false,
-            args.mintCreatorFee,
-            args.validFor,
-            mintBadgeProtocolDefaultFeeInBps,
-            true,
-            "v1.0.0"
+        uint256 currentBadgeModelId = _badgeStore.getCurrentBadgeModelsIdCounter();
+        _badgeStore.addBadgeModel(
+            TheBadgeStore.BadgeModel(
+                _msgSender(),
+                args.controllerName,
+                false,
+                args.mintCreatorFee,
+                args.validFor,
+                mintBadgeProtocolDefaultFeeInBps,
+                true,
+                "v1.0.0"
+            )
         );
 
-        uint256 currentBadgeModelId = _badgeStore.getCurrentBadgeModelsIdCounter();
-        _badgeStore.addBadgeModel(_newBadgeModel);
         emit BadgeModelCreated(currentBadgeModelId, args.metadata);
         TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
         if (user.isCreator == false) {

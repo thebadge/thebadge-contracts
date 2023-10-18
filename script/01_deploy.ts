@@ -116,21 +116,37 @@ const deployControllers = async (
   const chainId = network.config.chainId;
   const lightGTCRFactory = contracts.LightGTCRFactory.address[chainId as Chains];
   const klerosArbitror = contracts.KlerosArbitror.address[chainId as Chains];
+  // The admin that is allowed to upgrade the contracts
+  const contractsAdmin = deployer.address;
+
+  console.log("Deploying KlerosBadgeModelControllerStore...");
+  const KlerosBadgeModelControllerStore = await ethers.getContractFactory("KlerosBadgeModelControllerStore");
+  const klerosBadgeModelControllerStore = await upgrades.deployProxy(KlerosBadgeModelControllerStore, [
+    contractsAdmin,
+    klerosArbitror,
+    lightGTCRFactory,
+  ]);
+  await klerosBadgeModelControllerStore.deployed();
+  console.log(`KlerosBadgeModelControllerStore deployed with address: ${klerosBadgeModelControllerStore.address}`);
+
   console.log("Deploying KlerosBadgeModelController...");
   // Deploys and adds all the controllers
   const KlerosBadgeModelController = await ethers.getContractFactory("KlerosBadgeModelController");
-  // The admin that is allowed to upgrade the contracts
-  const contractsAdmin = deployer.address;
   const klerosBadgeModelController = await upgrades.deployProxy(KlerosBadgeModelController, [
     contractsAdmin,
     theBadge.address,
     theBadgeModels.address,
     theBadgeUsers.address,
-    klerosArbitror,
-    lightGTCRFactory,
+    klerosBadgeModelControllerStore.address,
   ]);
   await klerosBadgeModelController.deployed();
   console.log(`KlerosBadgeModelController deployed with address: ${klerosBadgeModelController.address}`);
+
+  console.log("Allowing KlerosBadgeModelController to access KlerosBadgeModelControllerStore...");
+  await klerosBadgeModelControllerStore.addPermittedContract(
+    "KlerosBadgeModelController",
+    klerosBadgeModelController.address,
+  );
 
   console.log("Adding KlerosBadgeModelController to TheBadge...");
   theBadgeModels.connect(deployer);
@@ -172,6 +188,7 @@ const deployControllers = async (
 
   return [
     ["klerosBadgeModelController", klerosBadgeModelController.address],
+    ["klerosBadgeModelControllerStore", klerosBadgeModelControllerStore.address],
     ["ThirdPartyModelController", tpBadgeModelController.address],
     ["TpBadgeModelControllerStore", tpBadgeModelControllerStore.address],
   ];

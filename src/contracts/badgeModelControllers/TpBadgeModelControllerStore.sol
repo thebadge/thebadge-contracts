@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
-import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { LibTheBadgeStore } from "../libraries/LibTheBadgeStore.sol";
 import { LibTpBadgeModelController } from "../libraries/LibTpBadgeModelController.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -12,7 +11,6 @@ import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 
 contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     using CappedMath for uint256;
-    using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /**
      * =========================
@@ -111,8 +109,8 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      * =========================
      */
 
-    CountersUpgradeable.Counter internal badgeModelIdsCounter;
-    CountersUpgradeable.Counter internal badgeIdsCounter;
+    uint256 internal badgeModelIdsCounter;
+    uint256 internal badgeIdsCounter;
 
     TpBadgeModelController public thirdPartyModelController;
     IArbitrator public arbitrator;
@@ -141,7 +139,7 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         address _arbitrator,
         address _tcrFactory
     ) public initializer {
-        __Ownable_init();
+        __Ownable_init(admin);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         feeCollector = _feeCollector;
         arbitrator = IArbitrator(_arbitrator);
@@ -173,11 +171,11 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     }
 
     function getCurrentBadgeModelsIdCounter() external view returns (uint256) {
-        return badgeModelIdsCounter.current();
+        return badgeModelIdsCounter;
     }
 
     function getCurrentBadgeIdCounter() external view returns (uint256) {
-        return badgeIdsCounter.current();
+        return badgeIdsCounter;
     }
 
     function isBadgeModelOwner(uint256 badgeModelId, address userAddress) external view returns (bool) {
@@ -256,14 +254,14 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     }
 
     function addBadgeModel(ThirdPartyBadgeModel memory badgeModel) external onlyPermittedContract {
-        thirdPartyBadgeModels[badgeModelIdsCounter.current()] = badgeModel;
+        thirdPartyBadgeModels[badgeModelIdsCounter] = badgeModel;
 
-        badgeModelIdsCounter.increment();
+        badgeModelIdsCounter++;
     }
 
     function addBadge(uint256 badgeId, ThirdPartyBadge memory badge) external onlyPermittedContract {
         thirdPartyBadges[badgeId] = badge;
-        badgeIdsCounter.increment();
+        badgeIdsCounter++;
     }
 
     /**

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 /**
  * =========================
  * Contains all the logic related to TheBadge users
@@ -13,8 +13,9 @@ import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
+contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     TheBadgeStore public _badgeStore;
 
     /**
@@ -22,8 +23,8 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
      * Events
      * =========================
      */
+    event Initialize(address indexed admin);
     event UserRegistered(address indexed user, string metadata);
-    event CreatorRegistered(address indexed user);
     event UserVerificationRequested(address indexed user, string metadata, string controllerName);
     event UserVerificationExecuted(address indexed user, string controllerName, bool verify);
     event UpdatedUser(address indexed userAddress, string metadata, bool suspended, bool isCreator, bool deleted);
@@ -72,9 +73,14 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
     }
 
     function initialize(address admin, address badgeStore) public initializer {
-        __Ownable_init();
+        __Ownable_init(admin);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(USER_MANAGER_ROLE, admin);
+        _grantRole(PAUSER_ROLE, admin);
+        _grantRole(UPGRADER_ROLE, admin);
+        _grantRole(VERIFIER_ROLE, admin);
         _badgeStore = TheBadgeStore(payable(badgeStore));
+        emit Initialize(admin);
     }
 
     /**
@@ -177,7 +183,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable {
     function submitUserVerification(
         string memory controllerName,
         string memory evidenceUri
-    ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(controllerName) {
+    ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(controllerName) nonReentrant {
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             controllerName
         );

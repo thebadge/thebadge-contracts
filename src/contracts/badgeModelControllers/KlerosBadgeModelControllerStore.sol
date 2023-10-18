@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.17;
+pragma solidity ^0.8.20;
 
-import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -10,7 +9,6 @@ import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 
 contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     using CappedMath for uint256;
-    using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /**
      * =========================
@@ -119,8 +117,8 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      * Store
      * =========================
      */
-    CountersUpgradeable.Counter internal klerosBadgeModelIdsCounter;
-    CountersUpgradeable.Counter internal klerosBadgeIdsCounter;
+    uint256 internal klerosBadgeModelIdsCounter;
+    uint256 internal klerosBadgeIdsCounter;
     IArbitrator public arbitrator;
     address public tcrFactory;
     uint256 internal verifyUserProtocolFee;
@@ -139,7 +137,7 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     }
 
     function initialize(address admin, address _arbitrator, address _tcrFactory) public initializer {
-        __Ownable_init();
+        __Ownable_init(admin);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         arbitrator = IArbitrator(_arbitrator);
         tcrFactory = _tcrFactory;
@@ -207,7 +205,7 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      * @return The current badgeModelId counter
      */
     function getCurrentBadgeModelsIdCounter() external view returns (uint256) {
-        return klerosBadgeModelIdsCounter.current();
+        return klerosBadgeModelIdsCounter;
     }
 
     /**
@@ -215,7 +213,7 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      * @return The current badgeId counter
      */
     function getCurrentBadgeIdCounter() external view returns (uint256) {
-        return klerosBadgeIdsCounter.current();
+        return klerosBadgeIdsCounter;
     }
 
     /**
@@ -316,7 +314,7 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         });
 
         klerosBadgeModels[_badgeModelId] = newBadgeModel;
-        klerosBadgeModelIdsCounter.increment();
+        klerosBadgeModelIdsCounter++;
     }
 
     /**
@@ -344,7 +342,7 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      */
     function addKlerosBadge(uint256 badgeId, KlerosBadge memory badge) external onlyPermittedContract {
         klerosBadges[badgeId] = badge;
-        klerosBadgeIdsCounter.increment();
+        klerosBadgeIdsCounter++;
     }
 
     /**

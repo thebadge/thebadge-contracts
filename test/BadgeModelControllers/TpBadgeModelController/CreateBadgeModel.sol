@@ -1,4 +1,4 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import { TheBadgeModels } from "../../../src/contracts/thebadge/TheBadgeModels.sol"; // Use the appropriate Solidity version
 import { TheBadgeStore } from "../../../src/contracts/thebadge/TheBadgeStore.sol";
@@ -6,9 +6,7 @@ import { TheBadgeUsers } from "../../../src/contracts/thebadge/TheBadgeUsers.sol
 import { TpBadgeModelControllerStore } from "../../../src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol";
 import { ILightGeneralizedTCR } from "../../../src/interfaces/ILightGeneralizedTCR.sol";
 import { Config } from "./Config.sol";
-import { ClonesUpgradeable } from "../../../lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 import "forge-std/console.sol";
-import { CountersUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/utils/CountersUpgradeable.sol";
 
 contract CreateBadgeModel is Config {
     string private controllerName = "thirdParty";

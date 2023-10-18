@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.17;
-import { IERC1155Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
+pragma solidity ^0.8.20;
 
-interface ITheBadge is IERC1155Upgradeable {
+import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+
+interface ITheBadge is IERC1155 {
     // Write methods
     function mint(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data) external payable;
 

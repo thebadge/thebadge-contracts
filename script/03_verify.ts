@@ -12,49 +12,58 @@ async function main() {
     throw new Error(`Network: ${chainId} is not defined or is not supported`);
   }
 
-  console.log("Verifying TheBadge contract on Etherscan...");
   const theBadgeDeployedAddress = contracts.TheBadge.address[chainId as Chains];
+  const theBadgeStore = contracts.TheBadgeStore.address[chainId as Chains];
+  const theBadgeUsers = contracts.TheBadgeUsers.address[chainId as Chains];
+  const theBadgeModels = contracts.TheBadgeModels.address[chainId as Chains];
+  const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
+  const tpBadgeModelControllerDeployedAddress = contracts.TpBadgeModelController.address[chainId as Chains];
+  const tpBadgeModelControllerStoreDeployedAddress = contracts.TpBadgeModelControllerStore.address[chainId as Chains];
+  const klerosBadgeModelControllerStoreDeployedAddress =
+    contracts.KlerosBadgeModelControllerStore.address[chainId as Chains];
+
+  console.log("Verifying TheBadge contract on Etherscan...");
   await run(`verify:verify`, {
     address: theBadgeDeployedAddress,
     constructorArguments: [],
   });
 
   console.log("Verifying TheBadgeStore contract on Etherscan...");
-  const theBadgeStore = contracts.TheBadgeStore.address[chainId as Chains];
   await run(`verify:verify`, {
     address: theBadgeStore,
     constructorArguments: [],
   });
 
   console.log("Verifying TheBadgeUsers contract on Etherscan...");
-  const theBadgeUsers = contracts.TheBadgeUsers.address[chainId as Chains];
   await run(`verify:verify`, {
     address: theBadgeUsers,
     constructorArguments: [],
   });
 
   console.log("Verifying TheBadgeModels contract on Etherscan...");
-  const theBadgeModels = contracts.TheBadgeModels.address[chainId as Chains];
   await run(`verify:verify`, {
     address: theBadgeModels,
     constructorArguments: [],
   });
 
-  const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
   console.log("Verifying KlerosBadgeModelController contract on Etherscan...");
   await run(`verify:verify`, {
     address: klerosBadgeModelControllerDeployedAddress,
     constructorArguments: [],
   });
 
-  const tpBadgeModelControllerDeployedAddress = contracts.TpBadgeModelController.address[chainId as Chains];
+  console.log("Verifying KlerosBadgeModelControllerStore contract on Etherscan...");
+  await run(`verify:verify`, {
+    address: klerosBadgeModelControllerStoreDeployedAddress,
+    constructorArguments: [],
+  });
+
   console.log("Verifying TpBadgeModelController contract on Etherscan...");
   await run(`verify:verify`, {
     address: tpBadgeModelControllerDeployedAddress,
     constructorArguments: [],
   });
 
-  const tpBadgeModelControllerStoreDeployedAddress = contracts.TpBadgeModelControllerStore.address[chainId as Chains];
   console.log("Verifying tpBadgeModelControllerStore contract on Etherscan...");
   await run(`verify:verify`, {
     address: tpBadgeModelControllerStoreDeployedAddress,
@@ -87,6 +96,11 @@ async function main() {
     {
       name: "KlerosBadgeModelController",
       address: await getImplementationAddress(ethers.provider, klerosBadgeModelControllerDeployedAddress),
+      network: chainId.toString(),
+    },
+    {
+      name: "KlerosBadgeModelControllerStore",
+      address: await getImplementationAddress(ethers.provider, klerosBadgeModelControllerStoreDeployedAddress),
       network: chainId.toString(),
     },
     {

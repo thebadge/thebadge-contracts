@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
-import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
@@ -9,10 +8,7 @@ import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadgeStore } from "../libraries/LibTheBadgeStore.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-// TODO: Maybe we can use abstract classes to type the store
 contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
     /**
      * =========================
      * Events
@@ -42,13 +38,9 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         _;
     }
 
-    CountersUpgradeable.Counter internal badgeModelIdsCounter;
-    CountersUpgradeable.Counter internal badgeIdsCounter;
+    uint256 internal badgeModelIdsCounter;
+    uint256 internal badgeIdsCounter;
 
-    // TODO: does this var makes sense? it was thought to define a min value to mint a badge.
-    // For example, if the badge is going to have a cost (it can be free) it has to be bigger than this variable.
-    // badgeModel1 = mint cost is 4 because minBadgeMintValue is 4.
-    // uint256 public minBadgeMintValue;
     uint256 public registerUserProtocolFee;
     uint256 public createBadgeModelProtocolFee;
     uint256 public mintBadgeProtocolDefaultFeeInBps;
@@ -134,13 +126,12 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     function initialize(address admin, address _feeCollector) public initializer {
-        __Ownable_init();
+        __Ownable_init(admin);
         feeCollector = _feeCollector;
         registerUserProtocolFee = uint256(0);
         createBadgeModelProtocolFee = uint256(0);
         mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        // TODO Verify that this works if we call this outside
     }
 
     /**
@@ -171,11 +162,11 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     function getCurrentBadgeModelsIdCounter() external view returns (uint256) {
-        return badgeModelIdsCounter.current();
+        return badgeModelIdsCounter;
     }
 
     function getCurrentBadgeIdCounter() external view returns (uint256) {
-        return badgeIdsCounter.current();
+        return badgeIdsCounter;
     }
 
     function getUserMintedBadgesByBadgeModel(
@@ -190,7 +181,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * Setters
      * =========================
      */
-    function createUser(address userAddress, User memory newUser) external onlyPermittedContract {
+    function createUser(address userAddress, User calldata newUser) external onlyPermittedContract {
         User storage user = registeredUsers[userAddress];
         if (bytes(user.metadata).length != 0) {
             revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
@@ -199,7 +190,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     // todo refactor with modifier to check that the user actually exists
-    function updateUser(address userAddress, User memory updatedUser) external onlyPermittedContract {
+    function updateUser(address userAddress, User calldata updatedUser) external onlyPermittedContract {
         User storage _user = registeredUsers[userAddress];
         if (bytes(_user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
@@ -209,7 +200,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     function addBadgeModelController(
         string memory controllerName,
-        BadgeModelController memory badgeModelController
+        BadgeModelController calldata badgeModelController
     ) external onlyPermittedContract {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
         if (_badgeModelController.controller != address(0)) {
@@ -221,7 +212,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     function updateBadgeModelController(
         string memory controllerName,
-        BadgeModelController memory badgeModelController
+        BadgeModelController calldata badgeModelController
     ) external onlyPermittedContract {
         BadgeModelController storage _badgeModelController = badgeModelControllers[controllerName];
         if (_badgeModelController.controller == address(0)) {
@@ -232,13 +223,13 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         badgeModelControllersByAddress[badgeModelController.controller] = badgeModelController;
     }
 
-    function addBadgeModel(BadgeModel memory badgeModel) external onlyPermittedContract {
-        badgeModels[badgeModelIdsCounter.current()] = badgeModel;
+    function addBadgeModel(BadgeModel calldata badgeModel) external onlyPermittedContract {
+        badgeModels[badgeModelIdsCounter] = badgeModel;
 
-        badgeModelIdsCounter.increment();
+        badgeModelIdsCounter++;
     }
 
-    function updateBadgeModel(uint256 badgeModelId, BadgeModel memory badgeModel) external onlyPermittedContract {
+    function updateBadgeModel(uint256 badgeModelId, BadgeModel calldata badgeModel) external onlyPermittedContract {
         BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 
         if (_badgeModel.creator == address(0)) {
@@ -250,12 +241,12 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         _badgeModel.paused = badgeModel.paused;
     }
 
-    function addBadge(uint256 badgeId, Badge memory badge) external onlyPermittedContract {
+    function addBadge(uint256 badgeId, Badge calldata badge) external onlyPermittedContract {
         uint256 _badgeModelId = badge.badgeModelId;
         address _account = badge.account;
         badges[badgeId] = badge;
         userMintedBadgesByBadgeModel[_badgeModelId][_account].push(badgeId);
-        badgeIdsCounter.increment();
+        badgeIdsCounter++;
     }
 
     function transferBadge(uint256 badgeId, address origin, address destination) external onlyPermittedContract {

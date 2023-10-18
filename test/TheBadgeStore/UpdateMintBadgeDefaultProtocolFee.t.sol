@@ -1,4 +1,4 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
 import "../../src/contracts/libraries/LibTheBadgeStore.sol";

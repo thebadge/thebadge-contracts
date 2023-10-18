@@ -6,8 +6,8 @@
     "forge": "forge",
     "build": "forge build",
     "clean": "forge clean",
-    "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 9681756",
-    "test:all": "yarn forge test -vv --fork-url $(grep ALCHEMY_ENDPOINT_URL .env | cut -d '=' -f2) --fork-block-number 9681756",
+    "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 9883736",
+    "test:all": "yarn forge test -vv --fork-url $(grep ALCHEMY_ENDPOINT_URL .env | cut -d '=' -f2) --fork-block-number 9883736",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json \"src/**/*.sol\"",
     "lint:ts": "eslint --config ./.eslintrc.js --ignore-path ./.eslintignore --ext .js,.ts .",
@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",
-    "@kleros/kathari": "^0.25.0",
-    "@openzeppelin/contracts-upgradeable": "^4.9.3"
+    "@openzeppelin/contracts": "5.0.0",
+    "@openzeppelin/contracts-upgradeable": "5.0.0"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",

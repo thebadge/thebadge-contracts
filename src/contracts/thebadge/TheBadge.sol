@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import { ERC1155Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import { ERC1155URIStorageUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
-import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
 import { ITheBadge } from "../../interfaces/ITheBadge.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 /// @custom:security-contact hello@thebadge.com
 contract TheBadge is
@@ -22,11 +22,9 @@ contract TheBadge is
     PausableUpgradeable,
     UUPSUpgradeable,
     TheBadgeRoles,
-    ITheBadge
+    ITheBadge,
+    ReentrancyGuardUpgradeable
 {
-    // Allows to use current() and increment() for badgeModelIds or badgeIds
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
     TheBadgeStore public _badgeStore;
     string public name;
     string public symbol;
@@ -121,7 +119,7 @@ contract TheBadge is
         address account,
         string memory tokenURI,
         bytes memory data
-    ) external payable onlyBadgeModelMintable(badgeModelId) {
+    ) external payable onlyBadgeModelMintable(badgeModelId) nonReentrant {
         // Re-declaring variables reduces the stack tree and avoid compilation errors
         uint256 _badgeModelId = badgeModelId;
         address _account = account;
@@ -224,7 +222,7 @@ contract TheBadge is
         );
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        controller.challenge{ value: (msg.value) }(badgeId, data);
+        controller.challenge{ value: (msg.value) }(badgeId, data, _msgSender());
     }
 
     /**
@@ -240,7 +238,7 @@ contract TheBadge is
         );
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        controller.removeItem{ value: (msg.value) }(badgeId, data);
+        controller.removeItem{ value: (msg.value) }(badgeId, data, _msgSender());
     }
 
     /**
@@ -256,7 +254,7 @@ contract TheBadge is
         );
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
-        controller.submitEvidence(badgeId, data);
+        controller.submitEvidence(badgeId, data, _msgSender());
     }
 
     /*
@@ -516,13 +514,11 @@ contract TheBadge is
         revert LibTheBadge.TheBadge__SBT();
     }
 
-    function _beforeTokenTransfer(
-        address operator,
+    function _update(
         address from,
         address to,
         uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        uint256[] memory amounts
     ) internal override whenNotPaused {
         // Check if the from address is one of the badgeModelControllers
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelControllerByAddress(
@@ -533,7 +529,7 @@ contract TheBadge is
             revert LibTheBadge.TheBadge__SBT();
         }
 
-        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+        super._update(from, to, ids, amounts);
     }
 
     // solhint-disable-next-line
