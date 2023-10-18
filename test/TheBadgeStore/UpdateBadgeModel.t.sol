@@ -54,7 +54,8 @@ contract UpdateBadgeModel is Config {
         vm.prank(badgeUsersAddress);
         badgeStore.updateBadgeModel(0, updatedBadgeModel);
 
-        (, , bool _paused, uint256 _mintCreatorFee, , uint256 _mintProtocolFee, , , bool _suspended) = badgeStore.badgeModels(0);
+        (, , bool _paused, uint256 _mintCreatorFee, , uint256 _mintProtocolFee, , , bool _suspended) = badgeStore
+            .badgeModels(0);
 
         assertEq(_paused, true);
         assertEq(_mintCreatorFee, 1 ether);

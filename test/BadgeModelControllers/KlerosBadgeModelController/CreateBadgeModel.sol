@@ -38,7 +38,7 @@ contract CreateBadgeModel is Config {
             });
         TheBadgeStore.CreateBadgeModel memory _badgeModel = badgeModel;
 
-            bytes memory data = abi.encode(klerosBadgeModel);
+        bytes memory data = abi.encode(klerosBadgeModel);
 
         uint256 initialBadgeModelCount = badgeStoreInstance.getCurrentBadgeModelsIdCounter();
 

@@ -242,7 +242,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         _badgeModel.paused = badgeModel.paused;
     }
 
-
     function suspendBadgeModel(uint256 badgeModelId, bool suspended) external onlyPermittedContract {
         BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 
