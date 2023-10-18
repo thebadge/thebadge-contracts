@@ -42,6 +42,9 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         if (bytes(user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
+        if (user.suspended == true) {
+            revert LibTheBadgeUsers.TheBadge__onlyCreator_creatorIsSuspended();
+        }
         _;
     }
 
@@ -232,7 +235,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         }
 
         if (_badgeModel.suspended == true) {
-            revert LibTheBadgeModels.TheBadge__badgeModel_isSuspended();
+            revert LibTheBadgeModels.TheBadge__onlyCreator_creatorIsSuspended();
         }
 
         _badgeModel.mintCreatorFee = mintCreatorFee;
