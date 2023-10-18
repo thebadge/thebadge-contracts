@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",
-    "@kleros/kathari": "^0.25.0",
     "@openzeppelin/contracts": "5.0.0",
     "@openzeppelin/contracts-upgradeable": "5.0.0"
   },
