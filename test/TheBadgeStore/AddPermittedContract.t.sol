@@ -2,7 +2,7 @@ pragma solidity ^0.8.20;
 
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
 import "../../src/contracts/libraries/LibTheBadgeStore.sol";
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { IAccessControl } from "@openzeppelin/contracts/access/IAccessControl.sol";
 import { Config } from "./Config.sol";
 
 contract AddPermittedContract is Config {
@@ -29,17 +29,10 @@ contract AddPermittedContract is Config {
         string memory contractName = "ContractName";
         address contractAddress = vm.addr(11);
 
-        // TODO Fix expect revert message
-        //        vm.expectRevert(
-        //            abi.encodePacked(
-        //                "AccessControl: account ",
-        //                Strings.toHexString(u1),
-        //                " is missing role ",
-        //                Strings.toHexString(uint256(adminRole), 32)
-        //            )
-        //        );
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, u1, adminRole)
+        );
 
-        vm.expectRevert();
         vm.prank(u1);
         badgeStore.addPermittedContract(contractName, contractAddress);
     }
