@@ -71,7 +71,7 @@ async function main() {
   });
 
   // Verify on tenderly
-  console.log("Verifying contracts on Tenderly...");
+  console.log("Verifying main contracts on Tenderly...");
   const deployedContracts = [
     {
       name: "TheBadge",
@@ -93,6 +93,11 @@ async function main() {
       address: await getImplementationAddress(ethers.provider, theBadgeModels),
       network: chainId.toString(),
     },
+  ];
+  await tenderly.verify(...deployedContracts);
+
+  console.log("Verifying controller contracts on Tenderly...");
+  const deployedControllerContracts = [
     {
       name: "KlerosBadgeModelController",
       address: await getImplementationAddress(ethers.provider, klerosBadgeModelControllerDeployedAddress),
@@ -114,7 +119,7 @@ async function main() {
       network: chainId.toString(),
     },
   ];
-  await tenderly.verify(...deployedContracts);
+  await tenderly.verify(...deployedControllerContracts);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

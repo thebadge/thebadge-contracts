@@ -36,6 +36,7 @@ contract CreateBadgeModel is Config {
                 baseDeposits: baseDeposits,
                 stakeMultipliers: stakeMultipliers
             });
+        TheBadgeStore.CreateBadgeModel memory _badgeModel = badgeModel;
 
         bytes memory data = abi.encode(klerosBadgeModel);
 
@@ -52,27 +53,29 @@ contract CreateBadgeModel is Config {
         // Retrieve the created badge model
         (
             address creator,
-            string memory controllerName,
+            string memory _controllerName,
             bool paused,
             uint256 mintCreatorFee,
             uint256 validFor,
             uint256 mintProtocolFee,
             bool initialized,
-
+            ,
+            bool _suspended
         ) = badgeStoreInstance.badgeModels(newBadgeModelCount - 1); // Assuming the last badge model was created
 
         // Perform assertions
         assertEq(creator, user1, "Creator should match");
-        assertEq(controllerName, badgeModel.controllerName, "Controller name should match");
+        assertEq(_controllerName, _badgeModel.controllerName, "Controller name should match");
         assertEq(paused, false, "Badge model should not be paused");
-        assertEq(mintCreatorFee, badgeModel.mintCreatorFee, "Mint creator fee should match");
-        assertEq(validFor, badgeModel.validFor, "Valid for should match");
+        assertEq(mintCreatorFee, _badgeModel.mintCreatorFee, "Mint creator fee should match");
+        assertEq(validFor, _badgeModel.validFor, "Valid for should match");
         assertEq(
             mintProtocolFee,
             badgeStoreInstance.mintBadgeProtocolDefaultFeeInBps(),
             "Mint protocol fee should match"
         );
         assertTrue(initialized, "Badge model should be initialized");
+        assertEq(_suspended, false);
 
         // TODO: Assert creation event if needed
     }

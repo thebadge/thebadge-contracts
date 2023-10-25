@@ -58,7 +58,8 @@ contract CreateBadgeModel is Config {
             uint256 _validFor,
             uint256 _mintProtocolFee,
             bool initialized,
-
+            ,
+            bool _suspended
         ) = badgeStoreInstance.badgeModels(newBadgeModelCount - 1); // Assuming the last badge model was created
 
         // Perform assertions
@@ -73,6 +74,7 @@ contract CreateBadgeModel is Config {
         assertEq(controllerName, _controllerName, "Controller name should match");
         assertEq(mintCreatorFee, _mintCreatorFee, "Mint creator fee should match");
         assertEq(validFor, _validFor, "Valid for should match");
+        assertEq(_suspended, false);
 
         // TODO: Assert creation event if needed
     }

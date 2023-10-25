@@ -13,6 +13,8 @@ library LibTheBadgeModels {
     error TheBadge__updateBadgeModel_badgeModelNotFound();
     error TheBadge__createBadgeModel_wrongValue();
     error TheBadge__updateBadgeModel_notBadgeModelOwner();
+    error TheBadge__badgeModel_isSuspended();
     error TheBadge__badgeModel_badgeModelNotFound();
     error TheBadge__method_not_supported();
+    error TheBadge__onlyCreator_creatorIsSuspended();
 }
