@@ -105,7 +105,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     struct Badge {
         uint256 badgeModelId;
-        address account;
+        address account; // The minting address owner of the badge
         uint256 dueDate;
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
     }

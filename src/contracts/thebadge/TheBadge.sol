@@ -208,9 +208,14 @@ contract TheBadge is
             revert LibTheBadge.TheBadge__requestBadge_badgeNotClaimable();
         }
 
+        address tempStoredBadgeAddress = badge.account;
+        if (tempStoredBadgeAddress == address(0)) {
+            tempStoredBadgeAddress = address(_badgeModelController.controller);
+        }
         address claimAddress = controller.claim(badgeId, data, _msgSender());
-        _badgeStore.transferBadge(badgeId, address(_badgeModelController.controller), claimAddress);
-        emit BadgeTransferred(badgeId, address(_badgeModelController.controller), claimAddress);
+
+        _badgeStore.transferBadge(badgeId, tempStoredBadgeAddress, claimAddress);
+        emit BadgeTransferred(badgeId, tempStoredBadgeAddress, claimAddress);
     }
 
     /**
