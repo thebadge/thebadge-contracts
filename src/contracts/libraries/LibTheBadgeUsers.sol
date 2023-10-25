@@ -15,6 +15,7 @@ library LibTheBadgeUsers {
     error TheBadge__registerUser_wrongValue();
     error TheBadge__registerUser_alreadyRegistered();
     error TheBadge__updateUser_notFound();
+    error TheBadge__updateUser_wrongMetadata();
 
     error TheBadge__verifyUser_wrongValue();
     error TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();

@@ -124,21 +124,42 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
     }
 
     /**
+     * @notice Allows users to update their profile metadata
+     * @param _metadata IPFS url
+     */
+    function updateProfile(string memory _metadata) public {
+        TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
+
+        if (bytes(user.metadata).length == 0) {
+            revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
+        }
+
+        if (bytes(_metadata).length == 0) {
+            revert LibTheBadgeUsers.TheBadge__updateUser_wrongMetadata();
+        }
+
+        user.metadata = _metadata;
+        _badgeStore.updateUser(_msgSender(), user);
+        emit UpdatedUser(_msgSender(), user.metadata, user.suspended, user.isCreator, false);
+    }
+
+    /**
      * @notice Given an user and new metadata, updates the metadata of the user
      * @param _userAddress user address
      * @param _metadata IPFS url
      */
-    function updateUser(address _userAddress, string memory _metadata) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateUser(address _userAddress, string memory _metadata) public onlyRole(USER_MANAGER_ROLE) {
         TheBadgeStore.User memory user = _badgeStore.getUser(_userAddress);
 
         if (bytes(user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
 
-        if (bytes(_metadata).length > 0) {
-            user.metadata = _metadata;
+        if (bytes(_metadata).length == 0) {
+            revert LibTheBadgeUsers.TheBadge__updateUser_wrongMetadata();
         }
 
+        user.metadata = _metadata;
         _badgeStore.updateUser(_userAddress, user);
         emit UpdatedUser(_userAddress, user.metadata, user.suspended, user.isCreator, false);
     }

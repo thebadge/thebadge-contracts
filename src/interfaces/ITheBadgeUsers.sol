@@ -5,6 +5,8 @@ interface ITheBadgeUsers {
     // Write methods
     function registerUser(string memory _metadata, bool _isCompany) external payable;
 
+    function updateProfile(string memory _metadata) external;
+
     function updateUser(address _creator, string memory _metadata) external;
 
     function suspendUser(address _creator, bool suspended) external;
