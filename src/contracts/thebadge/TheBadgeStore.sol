@@ -273,7 +273,20 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
 
         badge.account = destination;
-        delete userMintedBadgesByBadgeModel[badge.badgeModelId][origin][badgeId];
+        uint256[] storage badgeList = userMintedBadgesByBadgeModel[badge.badgeModelId][origin];
+
+        for (uint256 i = 0; i < badgeList.length; i++) {
+            if (badgeList[i] == badgeId) {
+                uint256 lastIndex = badgeList.length - 1;
+                if (i != lastIndex) {
+                    // Move the last element to the position of the removed element
+                    badgeList[i] = badgeList[lastIndex];
+                }
+                badgeList.pop(); // Remove the last element
+                break;
+            }
+        }
+
         userMintedBadgesByBadgeModel[badge.badgeModelId][destination].push(badgeId);
     }
 
