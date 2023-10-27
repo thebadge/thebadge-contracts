@@ -550,6 +550,13 @@ contract KlerosBadgeModelController is
     }
 
     /**
+     * @notice If if this badgeModel can be updated or not
+     */
+    function isBadgeModelPolicyUpdatable() external pure returns (bool) {
+        return true;
+    }
+
+    /**
      * @notice Internal function that returns the TCR contract instance for a given klerosBadgeModel
      * @param badgeId the klerosBadgeId
      */

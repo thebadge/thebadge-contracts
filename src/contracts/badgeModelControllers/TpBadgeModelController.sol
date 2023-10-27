@@ -413,6 +413,13 @@ contract TpBadgeModelController is
     }
 
     /**
+     * @notice If if this badgeModel can be updated or not
+     */
+    function isBadgeModelPolicyUpdatable() external pure returns (bool) {
+        return false;
+    }
+
+    /**
      * @notice Internal function that returns the TCR contract instance for a given badgeId
      * @param badgeId the badgeId
      */

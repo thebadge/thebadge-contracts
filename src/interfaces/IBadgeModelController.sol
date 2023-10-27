@@ -44,4 +44,6 @@ interface IBadgeModelController {
     function getVerifyUserProtocolFee() external view returns (uint256);
 
     function isUserVerified(address _user) external view returns (bool);
+
+    function isBadgeModelPolicyUpdatable() external view returns (bool);
 }
