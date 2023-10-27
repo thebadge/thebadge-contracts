@@ -24,6 +24,7 @@ contract AddBadgeModel is Config {
             string memory version = "v1";
             uint256 versionV2 = 1;
             bool suspended = false;
+            bool deprecated = false;
 
             TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
                 creator,
@@ -35,7 +36,8 @@ contract AddBadgeModel is Config {
                 initialized,
                 version,
                 suspended,
-                versionV2
+                versionV2,
+                deprecated
             );
 
             vm.prank(badgeUsersAddress);
@@ -52,7 +54,8 @@ contract AddBadgeModel is Config {
             bool _initialized,
             string memory _version,
             bool _suspended,
-            uint256 _versionV2
+            uint256 _versionV2,
+            bool _deprecated
         ) = badgeStore.badgeModels(0);
 
         assertEq(_creator, creator);
@@ -65,6 +68,7 @@ contract AddBadgeModel is Config {
         assertEq(_version, "v1");
         assertEq(_suspended, false);
         assertEq(_versionV2, 1);
+        assertEq(_deprecated, false);
 
         uint256 counter = badgeStore.getCurrentBadgeModelsIdCounter();
 
@@ -85,6 +89,7 @@ contract AddBadgeModel is Config {
         string memory version = "v1";
         bool suspended = false;
         uint256 versionV2 = 1;
+        bool deprecated = false;
 
         TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
             creator,
@@ -96,7 +101,8 @@ contract AddBadgeModel is Config {
             initialized,
             version,
             suspended,
-            versionV2
+            versionV2,
+            deprecated
         );
 
         vm.prank(badgeUsersAddress);
