@@ -37,7 +37,8 @@ contract AddBadgeModel is Config {
                 version,
                 suspended,
                 versionV2,
-                deprecated
+                deprecated,
+                "ipfs://"
             );
 
             vm.prank(badgeUsersAddress);
@@ -55,7 +56,8 @@ contract AddBadgeModel is Config {
             string memory _version,
             bool _suspended,
             uint256 _versionV2,
-            bool _deprecated
+            bool _deprecated,
+            string memory _metadata
         ) = badgeStore.badgeModels(0);
 
         assertEq(_creator, creator);
@@ -69,6 +71,7 @@ contract AddBadgeModel is Config {
         assertEq(_suspended, false);
         assertEq(_versionV2, 1);
         assertEq(_deprecated, false);
+        assertEq(_metadata, "ipfs://");
 
         uint256 counter = badgeStore.getCurrentBadgeModelsIdCounter();
 
@@ -102,7 +105,8 @@ contract AddBadgeModel is Config {
             version,
             suspended,
             versionV2,
-            deprecated
+            deprecated,
+            "ipfs://"
         );
 
         vm.prank(badgeUsersAddress);

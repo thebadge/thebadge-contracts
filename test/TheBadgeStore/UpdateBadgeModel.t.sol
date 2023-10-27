@@ -25,6 +25,7 @@ contract UpdateBadgeModel is Config {
         uint256 versionV2 = 1;
         bool suspended = false;
         bool deprecated = true;
+        string memory metadata = "ipfs://";
 
         TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
             creator,
@@ -37,7 +38,8 @@ contract UpdateBadgeModel is Config {
             version,
             suspended,
             versionV2,
-            deprecated
+            deprecated,
+            metadata
         );
 
         vm.prank(badgeUsersAddress);
@@ -54,13 +56,14 @@ contract UpdateBadgeModel is Config {
             version,
             suspended,
             versionV2,
-            deprecated
+            deprecated,
+            metadata
         );
 
         vm.prank(badgeUsersAddress);
         badgeStore.updateBadgeModel(0, updatedBadgeModel);
 
-        (, , bool _paused, uint256 _mintCreatorFee, , uint256 _mintProtocolFee, , , bool _suspended,,) = badgeStore
+        (, , bool _paused, uint256 _mintCreatorFee, , uint256 _mintProtocolFee, , , bool _suspended, , ,) = badgeStore
             .badgeModels(0);
 
         assertEq(_paused, true);
@@ -84,8 +87,9 @@ contract UpdateBadgeModel is Config {
         uint256 versionV2 = 1;
         bool suspended = false;
         bool deprecated = false;
+        string memory metadata = "ipfs://";
 
-    TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
+        TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
             creator,
             controllerName,
             paused,
@@ -96,7 +100,8 @@ contract UpdateBadgeModel is Config {
             version,
             suspended,
             versionV2,
-            deprecated
+            deprecated,
+            metadata
         );
 
         vm.prank(badgeUsersAddress);
@@ -122,6 +127,7 @@ contract UpdateBadgeModel is Config {
         uint256 versionV2 = 1;
         bool suspended = false;
         bool deprecated = false;
+        string memory metadata = "ipfs://";
 
         TheBadgeStore.BadgeModel memory updateBadgeModel = TheBadgeStore.BadgeModel(
             creator,
@@ -134,7 +140,8 @@ contract UpdateBadgeModel is Config {
             version,
             suspended,
             versionV2,
-            deprecated
+            deprecated,
+            metadata
         );
 
         vm.prank(badgeUsersAddress);

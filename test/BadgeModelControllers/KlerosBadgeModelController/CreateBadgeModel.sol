@@ -63,6 +63,7 @@ contract CreateBadgeModel is Config {
             bool _suspended
             ,
             ,
+            ,
         ) = badgeStoreInstance.badgeModels(newBadgeModelCount - 1); // Assuming the last badge model was created
 
         // Perform assertions
