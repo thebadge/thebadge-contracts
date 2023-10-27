@@ -413,9 +413,16 @@ contract TpBadgeModelController is
     }
 
     /**
+     * @notice If if this badgeModel can be upgraded or not
+     */
+    function isBadgeModelMetadataUpgradeable() external pure returns (bool) {
+        return true;
+    }
+
+    /**
      * @notice If if this badgeModel can be updated or not
      */
-    function isBadgeModelPolicyUpdatable() external pure returns (bool) {
+    function isBadgeModelMetadataUpdatable() external pure returns (bool) {
         return false;
     }
 

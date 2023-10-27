@@ -45,5 +45,7 @@ interface IBadgeModelController {
 
     function isUserVerified(address _user) external view returns (bool);
 
-    function isBadgeModelPolicyUpdatable() external view returns (bool);
+    function isBadgeModelMetadataUpgradeable() external view returns (bool);
+
+    function isBadgeModelMetadataUpdatable() external view returns (bool);
 }

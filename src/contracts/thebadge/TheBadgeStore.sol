@@ -103,6 +103,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         bool suspended; // If true, the badge has been suspended from the administrator of TB contract and users won't be able to interact with anymore
         uint256 versionV2; // The version of the badgeModel, used in case of updates.
         bool deprecated; // If true, the badge cannot be minted anymore as there is a newer version for this badge, old badges are still valid to maintain backwards compatibility
+        string metadata; // The ips hash metadata of the badgeModel
     }
 
     struct Badge {
@@ -253,6 +254,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
 
         _badgeModel.suspended = suspended;
+        _badgeModel.metadata = "ipfs://"; // TODO this can be hardcoded to a disabled ipfs hash
     }
 
     function addBadge(uint256 badgeId, Badge calldata badge) external onlyPermittedContract {
