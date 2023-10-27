@@ -28,6 +28,11 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     event Initialize(address indexed admin);
     event BadgeModelCreated(uint256 indexed badgeModelId, string metadata);
     event BadgeModelUpdated(uint256 indexed badgeModelId);
+    event BadgeModelVersionUpdated(
+        uint256 indexed badgeModelId,
+        uint256 indexed newBadgeModelId,
+        uint256 indexed version
+    );
     event BadgeModelSuspended(uint256 indexed badgeModelId, bool suspended);
     event BadgeModelControllerAdded(string indexed controllerName, address indexed controllerAddress);
     event BadgeModelControllerUpdated(string indexed controllerName, address indexed controllerAddress);
@@ -197,7 +202,8 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
                 true,
                 "v1.0.0",
                 false,
-                1
+                1,
+                false
             )
         );
 
@@ -244,6 +250,63 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
 
         _badgeStore.updateBadgeModel(badgeModelId, _badgeModel);
         emit BadgeModelUpdated(badgeModelId);
+    }
+
+    /*
+     * @notice Updates a badge model version, this creates a new badge model with the same old configurations but with updated metadata
+     * @param badgeModelId
+     * @param mintCreatorFee fee that the creator charges for each mint TODO REMOVE
+     * @param validFor is the badge has expiration time
+     * @param paused if the creator wants to stop the minting of this badges
+     */
+    function updateBadgeModelPolicy(
+        uint256 badgeModelId,
+        bytes calldata data
+    ) public onlyBadgeModelOwnerCreator(badgeModelId, _msgSender()) {
+        TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
+
+        if (_badgeModel.creator == address(0)) {
+            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        if (_badgeModel.suspended == true) {
+            revert LibTheBadgeModels.TheBadge__onlyCreator_creatorIsSuspended();
+        }
+
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            _badgeModel.controllerName
+        );
+
+        if (IBadgeModelController(_badgeModelController.controller).isBadgeModelPolicyUpdatable() == false) {
+            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotUpdatable();
+        }
+
+        // Deprecates the old model
+        _badgeModel.deprecated = true;
+        _badgeStore.updateBadgeModel(badgeModelId, _badgeModel);
+
+        // If the validation policy of the given badgeModel is not updatable, a new badgeModel with a newer version has to be created
+        // This maintains backwards compatibility and protects users with already-issued badges against attacks
+        uint256 newModelVersion = _badgeModel.versionV2 + 1;
+        uint256 newBadgeModelId = _badgeStore.getCurrentBadgeModelsIdCounter();
+        _badgeStore.addBadgeModel(
+            TheBadgeStore.BadgeModel(
+                _msgSender(),
+                _badgeModel.controllerName,
+                false,
+                _badgeModel.mintCreatorFee,
+                _badgeModel.validFor,
+                _badgeModel.mintProtocolFee,
+                true,
+                "v1.0.0", // TODO REMOVE
+                false,
+                newModelVersion,
+                false
+            )
+        );
+
+        IBadgeModelController(_badgeModelController.controller).createBadgeModel(_msgSender(), newBadgeModelId, data);
+        emit BadgeModelVersionUpdated(badgeModelId, newBadgeModelId, newModelVersion);
     }
 
     function suspendBadgeModel(uint256 badgeModelId, bool suspended) public onlyRole(PAUSER_ROLE) {

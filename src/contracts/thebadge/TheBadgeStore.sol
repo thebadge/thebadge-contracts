@@ -242,6 +242,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         _badgeModel.mintProtocolFee = badgeModel.mintProtocolFee;
         _badgeModel.mintCreatorFee = badgeModel.mintCreatorFee;
         _badgeModel.paused = badgeModel.paused;
+        _badgeModel.deprecated = badgeModel.deprecated;
     }
 
     function suspendBadgeModel(uint256 badgeModelId, bool suspended) external onlyPermittedContract {
