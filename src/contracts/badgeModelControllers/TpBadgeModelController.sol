@@ -89,10 +89,9 @@ contract TpBadgeModelController is
         if (_thirdPartyUser.initialized == false) {
             revert LibTpBadgeModelController.ThirdPartyModelController__user__userNotFound();
         }
-        if (_thirdPartyUser.verificationStatus == LibTpBadgeModelController.VerificationStatus.VerificationRejected) {
+        if (_thirdPartyUser.verificationStatus != LibTpBadgeModelController.VerificationStatus.Verified) {
             revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationRejected();
         }
-        // TODO Maybe also add onlyVerifiedUser?
         _;
     }
 
