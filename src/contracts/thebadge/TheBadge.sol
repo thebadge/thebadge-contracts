@@ -77,6 +77,10 @@ contract TheBadge is
             revert LibTheBadge.TheBadge__requestBadge_isSuspended();
         }
 
+        if(_badgeModel.deprecated) {
+            revert LibTheBadge.TheBadge__requestBadge_isDeprecated();
+        }
+
         if (_badgeModelController.paused) {
             revert LibTheBadge.TheBadge__requestBadge_controllerIsPaused();
         }
