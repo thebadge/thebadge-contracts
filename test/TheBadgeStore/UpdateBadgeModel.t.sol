@@ -22,6 +22,7 @@ contract UpdateBadgeModel is Config {
         uint256 mintProtocolFee = 0.2 ether;
         bool initialized = true;
         string memory version = "v1";
+        uint256 versionV2 = 1;
         bool suspended = false;
 
         TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
@@ -33,7 +34,8 @@ contract UpdateBadgeModel is Config {
             mintProtocolFee,
             initialized,
             version,
-            suspended
+            suspended,
+            versionV2
         );
 
         vm.prank(badgeUsersAddress);
@@ -48,13 +50,14 @@ contract UpdateBadgeModel is Config {
             2 ether,
             initialized,
             version,
-            suspended
+            suspended,
+            versionV2
         );
 
         vm.prank(badgeUsersAddress);
         badgeStore.updateBadgeModel(0, updatedBadgeModel);
 
-        (, , bool _paused, uint256 _mintCreatorFee, , uint256 _mintProtocolFee, , , bool _suspended) = badgeStore
+        (, , bool _paused, uint256 _mintCreatorFee, , uint256 _mintProtocolFee, , , bool _suspended,) = badgeStore
             .badgeModels(0);
 
         assertEq(_paused, true);
@@ -75,6 +78,7 @@ contract UpdateBadgeModel is Config {
         uint256 mintProtocolFee = 0.2 ether;
         bool initialized = true;
         string memory version = "v1";
+        uint256 versionV2 = 1;
         bool suspended = false;
 
         TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
@@ -86,7 +90,8 @@ contract UpdateBadgeModel is Config {
             mintProtocolFee,
             initialized,
             version,
-            suspended
+            suspended,
+            versionV2
         );
 
         vm.prank(badgeUsersAddress);
@@ -109,6 +114,7 @@ contract UpdateBadgeModel is Config {
         uint256 mintProtocolFee = 0.2 ether;
         bool initialized = true;
         string memory version = "v1";
+        uint256 versionV2 = 1;
         bool suspended = false;
 
         TheBadgeStore.BadgeModel memory updateBadgeModel = TheBadgeStore.BadgeModel(
@@ -120,7 +126,8 @@ contract UpdateBadgeModel is Config {
             mintProtocolFee,
             initialized,
             version,
-            suspended
+            suspended,
+            versionV2
         );
 
         vm.prank(badgeUsersAddress);

@@ -196,7 +196,8 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
                 mintBadgeProtocolDefaultFeeInBps,
                 true,
                 "v1.0.0",
-                false
+                false,
+                1
             )
         );
 

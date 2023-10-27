@@ -22,6 +22,7 @@ contract AddBadgeModel is Config {
             uint256 mintProtocolFee = 0.2 ether;
             bool initialized = true;
             string memory version = "v1";
+            uint256 versionV2 = 1;
             bool suspended = false;
 
             TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
@@ -33,7 +34,8 @@ contract AddBadgeModel is Config {
                 mintProtocolFee,
                 initialized,
                 version,
-                suspended
+                suspended,
+                versionV2
             );
 
             vm.prank(badgeUsersAddress);
@@ -49,7 +51,8 @@ contract AddBadgeModel is Config {
             uint256 _mintProtocolFee,
             bool _initialized,
             string memory _version,
-            bool _suspended
+            bool _suspended,
+            uint256 _versionV2
         ) = badgeStore.badgeModels(0);
 
         assertEq(_creator, creator);
@@ -61,6 +64,7 @@ contract AddBadgeModel is Config {
         assertEq(_initialized, true);
         assertEq(_version, "v1");
         assertEq(_suspended, false);
+        assertEq(_versionV2, 1);
 
         uint256 counter = badgeStore.getCurrentBadgeModelsIdCounter();
 
@@ -80,6 +84,7 @@ contract AddBadgeModel is Config {
         bool initialized = true;
         string memory version = "v1";
         bool suspended = false;
+        uint256 versionV2 = 1;
 
         TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
             creator,
@@ -90,7 +95,8 @@ contract AddBadgeModel is Config {
             mintProtocolFee,
             initialized,
             version,
-            suspended
+            suspended,
+            versionV2
         );
 
         vm.prank(badgeUsersAddress);
