@@ -355,6 +355,12 @@ contract TheBadge is
         }
 
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badge.badgeModelId);
+
+        // The badgeModel has been suspended for breaking the TYC
+        if(_badgeModel.suspended == true) {
+            return 0;
+        }
+
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             _badgeModel.controllerName
         );
