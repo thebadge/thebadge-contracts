@@ -186,8 +186,8 @@ contract TpBadgeModelController is
         }
 
         TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _newBadgeModel = TpBadgeModelControllerStore
-            .ThirdPartyBadgeModel(_callee, _badgeModelId, tcrListAddress, _governor, _admin);
-        tpBadgeModelControllerStore.addBadgeModel(_newBadgeModel);
+            .ThirdPartyBadgeModel(_callee, _badgeModelId, tcrListAddress, _governor, _admin, true);
+        tpBadgeModelControllerStore.addBadgeModel(_badgeModelId, _newBadgeModel);
         tpBadgeModelControllerStore.addAdministratorsToBadgeModel(_badgeModelId, args.administrators);
 
         emit NewThirdPartyBadgeModel(_badgeModelId, tcrListAddress);
