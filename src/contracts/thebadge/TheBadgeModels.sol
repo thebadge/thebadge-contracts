@@ -48,7 +48,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
             revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
         if (user.suspended == true) {
-            revert LibTheBadgeUsers.TheBadge__onlyCreator_creatorIsSuspended();
+            revert LibTheBadgeUsers.TheBadge__users__onlyCreator_creatorIsSuspended();
         }
         _;
     }
@@ -80,7 +80,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
             revert LibTheBadgeUsers.TheBadge__onlyCreator_senderIsNotACreator();
         }
         if (user.suspended == true) {
-            revert LibTheBadgeUsers.TheBadge__onlyCreator_creatorIsSuspended();
+            revert LibTheBadgeUsers.TheBadge__users__onlyCreator_creatorIsSuspended();
         }
         if (_badgeModel.creator == address(0)) {
             revert LibTheBadgeModels.TheBadge__updateBadgeModel_badgeModelNotFound();
@@ -243,7 +243,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         }
 
         if (_badgeModel.suspended == true) {
-            revert LibTheBadgeModels.TheBadge__onlyCreator_creatorIsSuspended();
+            revert LibTheBadgeUsers.TheBadge__users__onlyCreator_creatorIsSuspended();
         }
 
         _badgeModel.mintCreatorFee = mintCreatorFee;
@@ -271,7 +271,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         }
 
         if (_badgeModel.suspended == true) {
-            revert LibTheBadgeModels.TheBadge__onlyCreator_creatorIsSuspended();
+            revert LibTheBadgeUsers.TheBadge__users__onlyCreator_creatorIsSuspended();
         }
 
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
