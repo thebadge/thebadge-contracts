@@ -133,7 +133,8 @@ contract CreateBadgeModel is Config {
             uint256 badgeModelId,
             address tcrList,
             address tcrGovernor,
-            address tcrAdmin
+            address tcrAdmin,
+            bool initialized
         ) = tpBadgeModelControllerStoreInstance.thirdPartyBadgeModels(newBadgeModelCount - 1); // Assuming the last badge model was created
 
         // Perform assertions over thirdPartyBadgeModel
@@ -152,6 +153,7 @@ contract CreateBadgeModel is Config {
             address(tpBadgeModelControllerInstance),
             "The tcrAdmin should match the address of the tpBadgeModelController"
         );
+        assertEq(true, initialized);
 
         // Perform assertions over TCRList
         ILightGeneralizedTCR tcrListInstance = ILightGeneralizedTCR(tcrList);

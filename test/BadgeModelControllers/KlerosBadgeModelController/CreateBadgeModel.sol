@@ -60,10 +60,10 @@ contract CreateBadgeModel is Config {
             uint256 mintProtocolFee,
             bool initialized,
             ,
-            bool _suspended
+            bool _suspended,
             ,
             ,
-            ,
+
         ) = badgeStoreInstance.badgeModels(newBadgeModelCount - 1); // Assuming the last badge model was created
 
         // Perform assertions
