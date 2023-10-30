@@ -10,7 +10,7 @@ library LibTheBadgeUsers {
     error TheBadge__onlyUser_userNotFound();
     error TheBadge__onlyCreator_senderIsNotACreator();
     error TheBadge__onlyCreator_senderIsAlreadyACreator();
-    error TheBadge__onlyCreator_creatorIsSuspended();
+    error TheBadge__users__onlyCreator_creatorIsSuspended();
 
     error TheBadge__registerUser_wrongValue();
     error TheBadge__registerUser_alreadyRegistered();

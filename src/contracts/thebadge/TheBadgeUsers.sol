@@ -48,7 +48,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
             revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
         if (user.suspended == true) {
-            revert LibTheBadgeUsers.TheBadge__onlyCreator_creatorIsSuspended();
+            revert LibTheBadgeUsers.TheBadge__users__onlyCreator_creatorIsSuspended();
         }
         _;
     }
