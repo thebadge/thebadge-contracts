@@ -3,8 +3,7 @@ pragma solidity ^0.8.20;
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
 import "../../src/contracts/libraries/LibTheBadge.sol";
 import "../../src/contracts/libraries/LibTheBadgeUsers.sol";
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-
+import { IAccessControl } from "@openzeppelin/contracts/access/IAccessControl.sol";
 import { IBadgeModelController } from "../../src/interfaces/IBadgeModelController.sol";
 import { Config } from "./Config.sol";
 
@@ -60,16 +59,9 @@ contract ExecuteUserVerification is Config {
     }
 
     function testRevertsWhenWrongRole() public {
-        // TODO Fix expect revert message
-        //        vm.expectRevert(
-        //            abi.encodePacked(
-        //                "AccessControl: account ",
-        //                Strings.toHexString(u2),
-        //                " is missing role ",
-        //                Strings.toHexString(uint256(verifierRole), 32)
-        //            )
-        //        );
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, u2, verifierRole)
+        );
         vm.prank(u2);
         badgeUsers.executeUserVerification(u1, "KlerosBadgeModelController", true);
     }
