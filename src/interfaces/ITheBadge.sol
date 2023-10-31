@@ -32,6 +32,8 @@ interface ITheBadge is IERC1155 {
 
     function isExpired(uint256 badgeId) external view returns (bool);
 
+    function isClaimable(uint256 badgeId) external view returns (bool);
+
     function getChallengeDepositValue(uint256 badgeId) external view returns (uint256);
 
     function getRemovalDepositValue(uint256 badgeId) external view returns (uint256);

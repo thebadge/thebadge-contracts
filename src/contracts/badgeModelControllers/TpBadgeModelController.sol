@@ -347,7 +347,7 @@ contract TpBadgeModelController is
     }
 
     /**
-     * @notice Returns true if the badge is ready to be claimed to the destination address, otherwise returns false
+     * @notice Returns true if the badge is ready to be claimed to its destination address, otherwise returns false
      * @param badgeId the badgeId
      */
     function isClaimable(uint256 badgeId) external view returns (bool) {
