@@ -186,17 +186,16 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * =========================
      */
     function createUser(address userAddress, User calldata newUser) external onlyPermittedContract {
-        User storage user = registeredUsers[userAddress];
-        if (bytes(user.metadata).length != 0) {
-            revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
+        User storage _user = registeredUsers[userAddress];
+        if (_user.initialized == false) {
+            revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
         registeredUsers[userAddress] = newUser;
     }
 
-    // todo refactor with modifier to check that the user actually exists
     function updateUser(address userAddress, User calldata updatedUser) external onlyPermittedContract {
         User storage _user = registeredUsers[userAddress];
-        if (bytes(_user.metadata).length == 0) {
+        if (_user.initialized == false) {
             revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
         registeredUsers[userAddress] = updatedUser;
