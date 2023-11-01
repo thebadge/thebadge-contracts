@@ -245,6 +245,16 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         _badgeModel.deprecated = badgeModel.deprecated;
     }
 
+    function updateBadgeModelMetadata(uint256 badgeModelId, string memory metadata) external onlyPermittedContract {
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
+
+        if (_badgeModel.initialized == false) {
+            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        _badgeModel.metadata = metadata;
+    }
+
     function suspendBadgeModel(uint256 badgeModelId, bool suspended) external onlyPermittedContract {
         BadgeModel storage _badgeModel = badgeModels[badgeModelId];
 

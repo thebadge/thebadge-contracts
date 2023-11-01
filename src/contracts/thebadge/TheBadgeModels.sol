@@ -283,8 +283,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         }
 
         if (IBadgeModelController(_badgeModelController.controller).isBadgeModelMetadataUpdatable() == true) {
-            _badgeModel.metadata = metadata;
-            _badgeStore.updateBadgeModel(badgeModelId, _badgeModel);
+            _badgeStore.updateBadgeModelMetadata(badgeModelId, metadata);
             emit BadgeModelUpdated(badgeModelId);
         } else {
             // Deprecates the old model
@@ -311,6 +310,8 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
                     metadata
                 )
             );
+
+
 
             IBadgeModelController(_badgeModelController.controller).createBadgeModel(
                 _msgSender(),
