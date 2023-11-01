@@ -9,7 +9,6 @@ contract UpdateUser is Config {
     bytes32 adminRole = 0x00;
     bytes32 userManagerRole = keccak256("USER_MANAGER_ROLE");
 
-
     function testUpdateUser() public {
         string memory metadata = "ipfs://creatorMetadata.json";
         vm.prank(u1);

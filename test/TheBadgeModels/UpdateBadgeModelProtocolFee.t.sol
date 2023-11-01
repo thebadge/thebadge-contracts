@@ -19,19 +19,7 @@ contract UpdateBadgeModelProtocolFee is Config {
         // add badge model
         vm.prank(address(badgeModels));
         badgeStore.addBadgeModel(
-            TheBadgeStore.BadgeModel(
-                u1,
-                "ControllerName",
-                false,
-                0.2e18,
-                100,
-                1000,
-                true,
-                1,
-                false,
-                false,
-                "metadata"
-            )
+            TheBadgeStore.BadgeModel(u1, "ControllerName", false, 0.2e18, 100, 1000, true, 1, false, false, "metadata")
         );
 
         vm.expectEmit(true, false, false, true);
