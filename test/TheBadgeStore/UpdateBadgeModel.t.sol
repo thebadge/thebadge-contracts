@@ -21,8 +21,7 @@ contract UpdateBadgeModel is Config {
         uint256 validFor = 100;
         uint256 mintProtocolFee = 0.2 ether;
         bool initialized = true;
-        string memory version = "v1";
-        uint256 versionV2 = 1;
+        uint256 version = 1;
         bool suspended = false;
         bool deprecated = true;
         string memory metadata = "ipfs://";
@@ -37,7 +36,6 @@ contract UpdateBadgeModel is Config {
             initialized,
             version,
             suspended,
-            versionV2,
             deprecated,
             metadata
         );
@@ -55,7 +53,6 @@ contract UpdateBadgeModel is Config {
             initialized,
             version,
             suspended,
-            versionV2,
             deprecated,
             metadata
         );
@@ -63,7 +60,7 @@ contract UpdateBadgeModel is Config {
         vm.prank(badgeUsersAddress);
         badgeStore.updateBadgeModel(0, updatedBadgeModel);
 
-        (, , bool _paused, uint256 _mintCreatorFee, , uint256 _mintProtocolFee, , , bool _suspended, , , ) = badgeStore
+        (, , bool _paused, uint256 _mintCreatorFee, , uint256 _mintProtocolFee, , , bool _suspended, , ) = badgeStore
             .badgeModels(0);
 
         assertEq(_paused, true);
@@ -83,8 +80,7 @@ contract UpdateBadgeModel is Config {
         uint256 validFor = 100;
         uint256 mintProtocolFee = 0.2 ether;
         bool initialized = true;
-        string memory version = "v1";
-        uint256 versionV2 = 1;
+        uint256 version = 1;
         bool suspended = false;
         bool deprecated = false;
         string memory metadata = "ipfs://";
@@ -99,7 +95,6 @@ contract UpdateBadgeModel is Config {
             initialized,
             version,
             suspended,
-            versionV2,
             deprecated,
             metadata
         );
@@ -123,8 +118,7 @@ contract UpdateBadgeModel is Config {
         uint256 validFor = 100;
         uint256 mintProtocolFee = 0.2 ether;
         bool initialized = true;
-        string memory version = "v1";
-        uint256 versionV2 = 1;
+        uint256 version = 1;
         bool suspended = false;
         bool deprecated = false;
         string memory metadata = "ipfs://";
@@ -139,7 +133,6 @@ contract UpdateBadgeModel is Config {
             initialized,
             version,
             suspended,
-            versionV2,
             deprecated,
             metadata
         );

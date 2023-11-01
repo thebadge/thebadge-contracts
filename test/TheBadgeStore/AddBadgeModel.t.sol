@@ -21,8 +21,7 @@ contract AddBadgeModel is Config {
             uint256 validFor = 100;
             uint256 mintProtocolFee = 0.2 ether;
             bool initialized = true;
-            string memory version = "v1";
-            uint256 versionV2 = 1;
+            uint256 version = 1;
             bool suspended = false;
             bool deprecated = false;
 
@@ -36,7 +35,6 @@ contract AddBadgeModel is Config {
                 initialized,
                 version,
                 suspended,
-                versionV2,
                 deprecated,
                 "ipfs://"
             );
@@ -53,9 +51,8 @@ contract AddBadgeModel is Config {
             uint256 _validFor,
             uint256 _mintProtocolFee,
             bool _initialized,
-            string memory _version,
+            uint256 _version,
             bool _suspended,
-            uint256 _versionV2,
             bool _deprecated,
             string memory _metadata
         ) = badgeStore.badgeModels(0);
@@ -67,9 +64,8 @@ contract AddBadgeModel is Config {
         assertEq(_validFor, 100);
         assertEq(_mintProtocolFee, 0.2 ether);
         assertEq(_initialized, true);
-        assertEq(_version, "v1");
+        assertEq(_version, 1);
         assertEq(_suspended, false);
-        assertEq(_versionV2, 1);
         assertEq(_deprecated, false);
         assertEq(_metadata, "ipfs://");
 
@@ -89,9 +85,8 @@ contract AddBadgeModel is Config {
         uint256 validFor = 100;
         uint256 mintProtocolFee = 0.2 ether;
         bool initialized = true;
-        string memory version = "v1";
+        uint256 version = 1;
         bool suspended = false;
-        uint256 versionV2 = 1;
         bool deprecated = false;
 
         TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
@@ -104,7 +99,6 @@ contract AddBadgeModel is Config {
             initialized,
             version,
             suspended,
-            versionV2,
             deprecated,
             "ipfs://"
         );

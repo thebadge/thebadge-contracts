@@ -200,9 +200,8 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
                 args.validFor,
                 mintBadgeProtocolDefaultFeeInBps,
                 true,
-                "v1.0.0",
-                false,
                 1,
+                false,
                 false,
                 args.metadata
             )
@@ -292,7 +291,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
 
             // If the validation policy of the given badgeModel is not updatable, a new badgeModel with a newer version has to be created
             // This maintains backwards compatibility and protects users with already-issued badges against attacks
-            uint256 newModelVersion = _badgeModel.versionV2 + 1;
+            uint256 newModelVersion = _badgeModel.version + 1;
             uint256 newBadgeModelId = _badgeStore.getCurrentBadgeModelsIdCounter();
             _badgeStore.addBadgeModel(
                 TheBadgeStore.BadgeModel(
@@ -303,15 +302,12 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
                     _badgeModel.validFor,
                     _badgeModel.mintProtocolFee,
                     true,
-                    "v1.0.0", // TODO REMOVE
-                    false,
                     newModelVersion,
+                    false,
                     false,
                     metadata
                 )
             );
-
-
 
             IBadgeModelController(_badgeModelController.controller).createBadgeModel(
                 _msgSender(),

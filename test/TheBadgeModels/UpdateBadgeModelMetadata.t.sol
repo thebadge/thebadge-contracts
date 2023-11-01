@@ -40,9 +40,8 @@ contract UpdateBadgeModelMetadata is Config {
                 100,
                 1000,
                 true,
-                "v1.0.0",
-                false,
                 1,
+                false,
                 false,
                 "metadata"
             )
@@ -212,9 +211,8 @@ contract UpdateBadgeModelMetadata is Config {
                 100,
                 1000,
                 true,
-                "v1.0.0",
-                false,
                 1,
+                false,
                 false,
                 "metadata"
             )
@@ -237,20 +235,7 @@ contract UpdateBadgeModelMetadata is Config {
         // add badge model
         vm.prank(address(badgeModels));
         badgeStore.addBadgeModel(
-            TheBadgeStore.BadgeModel(
-                u1,
-                "ControllerName",
-                false,
-                0.2e18,
-                100,
-                1000,
-                true,
-                "v1.0.0",
-                false,
-                1,
-                false,
-                "metadata"
-            )
+            TheBadgeStore.BadgeModel(u1, "ControllerName", false, 0.2e18, 100, 1000, true, 1, false, false, "metadata")
         );
 
         // register user
@@ -276,20 +261,7 @@ contract UpdateBadgeModelMetadata is Config {
         // add badge model
         vm.prank(address(badgeModels));
         badgeStore.addBadgeModel(
-            TheBadgeStore.BadgeModel(
-                u1,
-                "ControllerName",
-                false,
-                0.2e18,
-                100,
-                1000,
-                true,
-                "v1.0.0",
-                false,
-                1,
-                false,
-                "metadata"
-            )
+            TheBadgeStore.BadgeModel(u1, "ControllerName", false, 0.2e18, 100, 1000, true, 1, false, false, "metadata")
         );
 
         // register user

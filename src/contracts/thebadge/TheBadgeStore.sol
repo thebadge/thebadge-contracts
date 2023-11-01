@@ -99,9 +99,8 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         uint256 validFor;
         uint256 mintProtocolFee; // amount that the protocol will charge for this
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
-        string version; // TODO REMOVE The version of the badgeModel, used in case of updates.
+        uint256 version; // The version of the badgeModel, used in case of updates.
         bool suspended; // If true, the badge has been suspended from the administrator of TB contract and users won't be able to interact with anymore
-        uint256 versionV2; // The version of the badgeModel, used in case of updates.
         bool deprecated; // If true, the badge cannot be minted anymore as there is a newer version for this badge, old badges are still valid to maintain backwards compatibility
         string metadata; // The ips hash metadata of the badgeModel
     }
