@@ -2,10 +2,12 @@ pragma solidity ^0.8.20;
 
 import "../../src/contracts/libraries/LibTheBadge.sol";
 import "../../src/contracts/libraries/LibTheBadgeUsers.sol";
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { IAccessControl } from "@openzeppelin/contracts/access/IAccessControl.sol";
 import { Config } from "./Config.sol";
 
 contract UpdateUser is Config {
+    bytes32 adminRole = 0x00;
+
     function testUpdateUser() public {
         string memory metadata = "ipfs://creatorMetadata.json";
         vm.prank(u1);
@@ -32,16 +34,9 @@ contract UpdateUser is Config {
 
         string memory newMetadata = "ipfs://creatorMetadata.json";
 
-        // TODO Fix to match the revert message
-        //        vm.expectRevert(
-        //            abi.encodePacked(
-        //                "AccessControl: account ",
-        //                StringsUpgradeable.toHexString(u1),
-        //                " is missing role ",
-        //                StringsUpgradeable.toHexString(uint256(0x00), 32)
-        //            )
-        //        );
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, u1, adminRole)
+        );
 
         vm.prank(u1);
         badgeUsers.updateUser(u1, newMetadata);
