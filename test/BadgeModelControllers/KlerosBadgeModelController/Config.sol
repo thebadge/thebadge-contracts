@@ -53,7 +53,6 @@ contract Config is Test {
         klerosBadgeModelControllerStoreInstance.initialize(admin, _arbitrator, _tcrFactory);
 
         // Instantiates the KlerosBadgeModelController
-        // TODO: this _badgeContractAddress should be also a instance of TheBadge.sol contract and should be initialized the same way the rest of the contracts showed here
         address _badgeContractAddress = vm.addr(5);
 
         address klerosBadgeModelInstanceImp = address(new KlerosBadgeModelController());

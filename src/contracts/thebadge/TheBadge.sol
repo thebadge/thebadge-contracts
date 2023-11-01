@@ -195,7 +195,6 @@ contract TheBadge is
      * @param badgeId the id of the badge
      * @param data containing information related to the recipient address
      */
-    // TODO add isClaimable
     function claim(uint256 badgeId, bytes calldata data) public {
         uint256 badgeModelId = getBadgeModelIdFromBadgeId(badgeId);
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
