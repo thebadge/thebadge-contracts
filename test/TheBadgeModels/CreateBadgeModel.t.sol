@@ -54,7 +54,11 @@ contract CreateBadgeModel is Config {
             args.validFor,
             1000,
             true,
-            "v1.0.0"
+            "v1.0.0",
+            false,
+            1,
+            false,
+            "metadata"
         );
 
         // check badgeStore.addBadgeModel is being called with expected args

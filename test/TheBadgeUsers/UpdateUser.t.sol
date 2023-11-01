@@ -7,6 +7,8 @@ import { Config } from "./Config.sol";
 
 contract UpdateUser is Config {
     bytes32 adminRole = 0x00;
+    bytes32 userManagerRole = keccak256("USER_MANAGER_ROLE");
+
 
     function testUpdateUser() public {
         string memory metadata = "ipfs://creatorMetadata.json";
@@ -27,7 +29,7 @@ contract UpdateUser is Config {
         assertEq(_metadata, newMetadata);
     }
 
-    function testRevertsUpdateUserWhenNotAdminRole() public {
+    function testRevertsUpdateUserWhenNotUserManagerRole() public {
         string memory metadata = "ipfs://creatorMetadata.json";
         vm.prank(u1);
         badgeUsers.registerUser(metadata, false);
@@ -35,7 +37,7 @@ contract UpdateUser is Config {
         string memory newMetadata = "ipfs://creatorMetadata.json";
 
         vm.expectRevert(
-            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, u1, adminRole)
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, u1, userManagerRole)
         );
 
         vm.prank(u1);
