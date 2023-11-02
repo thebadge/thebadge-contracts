@@ -124,7 +124,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
             revert LibTheBadgeModels.TheBadge__addBadgeModelController_emptyName();
         }
 
-        if (controllerAddress == address(0)) {
+        if (_badgeModelController.initialized == false) {
             revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
         }
 
@@ -237,10 +237,6 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     ) public onlyBadgeModelOwnerCreator(badgeModelId, _msgSender()) {
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
 
-        if (_badgeModel.creator == address(0)) {
-            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
-        }
-
         if (_badgeModel.suspended == true) {
             revert LibTheBadgeUsers.TheBadge__users__onlyCreator_creatorIsSuspended();
         }
@@ -264,10 +260,6 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         bytes calldata data
     ) public onlyBadgeModelOwnerCreator(badgeModelId, _msgSender()) {
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
-
-        if (_badgeModel.creator == address(0)) {
-            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
-        }
 
         if (_badgeModel.suspended == true) {
             revert LibTheBadgeUsers.TheBadge__users__onlyCreator_creatorIsSuspended();
