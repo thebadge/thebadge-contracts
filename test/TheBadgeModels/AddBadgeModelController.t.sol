@@ -62,7 +62,7 @@ contract AddBadgeModelController is Config {
         string memory controllerName = "controllerName";
         address controllerAddress = address(0);
 
-        vm.expectRevert(LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound.selector);
+        vm.expectRevert(LibTheBadgeModels.TheBadge__addBadgeModelController_notFound.selector);
 
         vm.prank(admin);
         badgeModels.addBadgeModelController(controllerName, controllerAddress);

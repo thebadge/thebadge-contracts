@@ -124,8 +124,8 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
             revert LibTheBadgeModels.TheBadge__addBadgeModelController_emptyName();
         }
 
-        if (_badgeModelController.initialized == false) {
-            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
+        if (controllerAddress == address(0)) {
+            revert LibTheBadgeModels.TheBadge__addBadgeModelController_notFound();
         }
 
         if (_badgeModelController.controller != address(0)) {
