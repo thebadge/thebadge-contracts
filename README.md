@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://thebadge.xyz">
-    <img alt="TheBadge" src="public/favicon/favicon.svg" width="128">
+    <img alt="TheBadge" src="https://thebadge.xyz/favicon.ico" width="128">
   </a>
 </p>
 
@@ -23,27 +23,6 @@ For questions or request information reach out via [Discord](https://discord.gg/
 yarn
 ```
 
-### Testing
-
-To run the tests:
-
-```bash
-yarn build
-yarn test
-```
-
-Optionally, if you want to run the ERC-4337 compatibility test, it uses a live bundler and node, so it contains some pre-requisites:
-
-1. Define the environment variables:
-
-```
-ERC4337_TEST_BUNDLER_URL=
-ERC4337_TEST_NODE_URL=
-ERC4337_TEST_SINGLETON_ADDRESS=
-ERC4337_TEST_SAFE_FACTORY_ADDRESS=
-MNEMONIC=
-```
-
 2. Pre-fund the executor account derived from the mnemonic with some Native Token to cover the deployment of an ERC4337 module and the pre-fund of the Safe for the test operation.
 
 ### Deployments
@@ -59,8 +38,13 @@ A collection of the different contract deployments and their addresses can be fo
 ```
 WALLET_PRIVATE_KEY=
 GOERLI_URL=https://goerli.infura.io/v3/
+SEPOLIA_URL=https://sepolia.infura.io/v3/
 GNOSIS_URL=https://rpc.gnosischain.com/
 ETHERSCAN_API_KEY=
+ALCHEMY_ENDPOINT_URL=https://eth-goerli.alchemyapi.io/v2/<apiKey>
+TENDERLY_PROJECT=""
+TENDERLY_USERNAME=""
+REPORT_GAS=true
 ```
 
 #### Install Rust & Cargo
@@ -91,18 +75,28 @@ For troubleshooting check the [fountry installation](https://book.getfoundry.sh/
 yarn deploy:goerli
 ```
 
-### Verify contract
+### Upgrade
 
-This command will use the deployment artifacts to compile the contracts and compare them to the onchain code
-
-```bash
-yarn hardhat --network <network> local-verify
+```
+yarn upgrade:goerli
 ```
 
-This command will upload the contract source to Etherescan
+### Verify contract
+
+This command will use the deployment artifacts to compile the contracts and compare them to the onchain code.
+It will also verify the contracts on tenderly.
+
+```
+yarn verify:goerli
+```
+
+### Testing
+
+To run the tests:
 
 ```bash
-yarn hardhat --network <network> etherscan-verify
+yarn build
+yarn test
 ```
 
 ## Deployments
@@ -114,10 +108,6 @@ yarn hardhat --network <network> etherscan-verify
 - You can check our badges architecture [here](./ERC1155-721%20Architecture.md)
 
 - If you want to learn more give a look to our [docs](https://docs.thebadge.xyz/)
-
-## Architecture
-
-  <img alt="decorative-image-3" loading="lazy" decoding="async" data-nimg="1" style="color:transparent" src="./assets/images/SC-Architecture.png">
 
 ## Security and Liability
 
