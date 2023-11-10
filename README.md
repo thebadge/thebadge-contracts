@@ -105,7 +105,7 @@ yarn test
 
 ## Documentation
 
-- You can check our badges architecture [here](./ERC1155-721%20Architecture.md)
+- You can check our badges architecture [here](./ERC1155%20Architecture.md)
 
 - If you want to learn more give a look to our [docs](https://docs.thebadge.xyz/)
 
