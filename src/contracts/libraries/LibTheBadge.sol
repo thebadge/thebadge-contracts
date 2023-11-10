@@ -35,6 +35,8 @@ library LibTheBadge {
 
     error TheBadge__mint_protocolFeesPaymentFailed();
     error TheBadge__mint_creatorFeesPaymentFailed();
+    error TheBadge__mintInBatch_badgeModelsArrayEmpty();
+    error TheBadge__mintInBatch_invalidParamsLength();
     error TheBadge__calculateFee_protocolFeesInvalidValues();
 
     error TheBadge__theBadgeUsers_method_execution_failed();

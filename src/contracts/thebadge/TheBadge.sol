@@ -58,12 +58,12 @@ contract TheBadge is
      * Modifiers
      * =========================
      */
-    modifier onlyBadgeModelMintable(uint256 badgeModelId) {
+
+    function validateBadgeModelMintable(uint256 badgeModelId) internal view {
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             _badgeModel.controllerName
         );
-        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
 
         if (_badgeModel.creator == address(0)) {
             revert LibTheBadge.TheBadge__requestBadge_badgeModelNotFound();
@@ -88,6 +88,22 @@ contract TheBadge is
         TheBadgeStore.User memory user = _badgeStore.getUser(_badgeModel.creator);
         if (user.suspended == true) {
             revert LibTheBadge.TheBadge__requestBadge_badgeModelIsSuspended();
+        }
+    }
+
+    modifier onlyBadgeModelMintable(uint256 badgeModelId) {
+        validateBadgeModelMintable(badgeModelId);
+        _;
+    }
+
+    modifier onlyBadgeModelMintableBatch(uint256[] memory badgeModelIds) {
+        if (badgeModelIds.length == 0) {
+            revert LibTheBadge.TheBadge__mintInBatch_badgeModelsArrayEmpty();
+        }
+
+        for (uint256 i = 0; i < badgeModelIds.length; i++) {
+            uint256 badgeModelId = badgeModelIds[i];
+            validateBadgeModelMintable(badgeModelId);
         }
 
         _;
@@ -128,6 +144,44 @@ contract TheBadge is
         string memory tokenURI,
         bytes memory data
     ) external payable onlyBadgeModelMintable(badgeModelId) nonReentrant {
+        mintLogic(badgeModelId, account, tokenURI, data);
+    }
+
+    function mintInBatch(
+        uint256[] memory badgeModelIds,
+        address[] memory recipients,
+        string[] memory tokenURIs,
+        bytes[] memory data
+    ) external payable onlyBadgeModelMintableBatch(badgeModelIds) nonReentrant {
+        if (
+            badgeModelIds.length != recipients.length ||
+            (badgeModelIds.length != tokenURIs.length && badgeModelIds.length != data.length)
+        ) {
+            revert LibTheBadge.TheBadge__mintInBatch_invalidParamsLength();
+        }
+
+        uint256 totalValue = 0;
+
+        for (uint256 i = 0; i < badgeModelIds.length; i++) {
+            uint256 badgeModelId = badgeModelIds[i];
+            address recipient = recipients[i];
+            string memory tokenURI = tokenURIs[i];
+            bytes memory userData = data[i];
+
+            // Call the existing mint function
+            mintLogic(badgeModelId, recipient, tokenURI, userData);
+
+            // Update the total value
+            totalValue += msg.value;
+        }
+
+        // Refund any excess value sent with the batch minting
+        if (totalValue > msg.value) {
+            payable(msg.sender).transfer(totalValue - msg.value);
+        }
+    }
+
+    function mintLogic(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data) internal {
         // Re-declaring variables reduces the stack tree and avoid compilation errors
         uint256 _badgeModelId = badgeModelId;
         address _account = account;
