@@ -80,6 +80,7 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         address tcrList;
         address governor;
         address admin;
+        bool initialized;
     }
 
     /**
@@ -253,9 +254,15 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         emit ContractUpdated(_contractName, _newContractAddress);
     }
 
-    function addBadgeModel(ThirdPartyBadgeModel memory badgeModel) external onlyPermittedContract {
-        thirdPartyBadgeModels[badgeModelIdsCounter] = badgeModel;
+    function addBadgeModel(
+        uint256 _badgeModelId,
+        ThirdPartyBadgeModel memory badgeModel
+    ) external onlyPermittedContract {
+        if (thirdPartyBadgeModels[_badgeModelId].initialized == true) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__createBadgeModel_badgeModelAlreadyCreated();
+        }
 
+        thirdPartyBadgeModels[_badgeModelId] = badgeModel;
         badgeModelIdsCounter++;
     }
 

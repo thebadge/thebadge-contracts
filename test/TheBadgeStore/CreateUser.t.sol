@@ -49,7 +49,7 @@ contract CreateUser is Config {
         badgeStore.addPermittedContract("TheBadgeUsers", badgeUsersAddress);
 
         string memory metadata = "ipfs://metadata.json";
-        TheBadgeStore.User memory user = TheBadgeStore.User(metadata, false, false, false, false);
+        TheBadgeStore.User memory user = TheBadgeStore.User(metadata, false, false, false, true);
 
         vm.prank(badgeUsersAddress);
         badgeStore.createUser(u1, user);

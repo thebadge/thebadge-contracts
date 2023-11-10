@@ -1,12 +1,12 @@
 {
   "name": "hardhat-project",
   "license": "BUSL-1.1",
-  "version": "2.0.1",
+  "version": "2.2.0",
   "scripts": {
     "forge": "forge",
-    "build": "forge build",
+    "build": "forge build --via-ir",
     "clean": "forge clean",
-    "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 9883736",
+    "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 9883736 --via-ir",
     "test:all": "yarn forge test -vv --fork-url $(grep ALCHEMY_ENDPOINT_URL .env | cut -d '=' -f2) --fork-block-number 9883736",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json \"src/**/*.sol\"",

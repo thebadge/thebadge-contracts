@@ -22,6 +22,10 @@ contract CreateBadgeModel is Config {
         vm.prank(user1);
         badgeUsersInstance.submitUserVerification("thirdParty", "ipfs://evidenceMetadata.json");
 
+        // Verify the user to be a third party user
+        vm.prank(admin);
+        badgeUsersInstance.executeUserVerification(user1, "thirdParty", true);
+
         // Create a badge model
         TheBadgeStore.CreateBadgeModel memory badgeModel = TheBadgeStore.CreateBadgeModel({
             metadata: "ipfs://badgeModelMetadata.json",
@@ -59,7 +63,9 @@ contract CreateBadgeModel is Config {
             uint256 _mintProtocolFee,
             bool initialized,
             ,
-            bool _suspended
+            bool _suspended,
+            ,
+
         ) = badgeStoreInstance.badgeModels(newBadgeModelCount - 1); // Assuming the last badge model was created
 
         // Perform assertions
@@ -87,6 +93,10 @@ contract CreateBadgeModel is Config {
         // Register the user as third party one
         vm.prank(user1);
         badgeUsersInstance.submitUserVerification("thirdParty", "ipfs://evidenceMetadata.json");
+
+        // Verify the user to be a third party user
+        vm.prank(admin);
+        badgeUsersInstance.executeUserVerification(user1, "thirdParty", true);
 
         // Create a badge model
         TheBadgeStore.CreateBadgeModel memory badgeModel = TheBadgeStore.CreateBadgeModel({
@@ -122,7 +132,8 @@ contract CreateBadgeModel is Config {
             uint256 badgeModelId,
             address tcrList,
             address tcrGovernor,
-            address tcrAdmin
+            address tcrAdmin,
+            bool initialized
         ) = tpBadgeModelControllerStoreInstance.thirdPartyBadgeModels(newBadgeModelCount - 1); // Assuming the last badge model was created
 
         // Perform assertions over thirdPartyBadgeModel
@@ -141,6 +152,7 @@ contract CreateBadgeModel is Config {
             address(tpBadgeModelControllerInstance),
             "The tcrAdmin should match the address of the tpBadgeModelController"
         );
+        assertEq(true, initialized);
 
         // Perform assertions over TCRList
         ILightGeneralizedTCR tcrListInstance = ILightGeneralizedTCR(tcrList);

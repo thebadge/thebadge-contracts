@@ -13,7 +13,7 @@ contract UpdateUser is Config {
         vm.prank(admin);
         badgeStore.addPermittedContract("TheBadgeUsers", badgeUsersAddress);
 
-        TheBadgeStore.User memory user = TheBadgeStore.User("ipfs://metadata.json", false, false, false, false);
+        TheBadgeStore.User memory user = TheBadgeStore.User("ipfs://metadata.json", false, false, false, true);
 
         vm.prank(badgeUsersAddress);
         badgeStore.createUser(u1, user);

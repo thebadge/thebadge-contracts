@@ -77,6 +77,10 @@ contract TheBadge is
             revert LibTheBadge.TheBadge__requestBadge_isSuspended();
         }
 
+        if (_badgeModel.deprecated) {
+            revert LibTheBadge.TheBadge__requestBadge_isDeprecated();
+        }
+
         if (_badgeModelController.paused) {
             revert LibTheBadge.TheBadge__requestBadge_controllerIsPaused();
         }
@@ -355,6 +359,12 @@ contract TheBadge is
         }
 
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badge.badgeModelId);
+
+        // The badgeModel has been suspended for breaking the TYC
+        if (_badgeModel.suspended == true) {
+            return 0;
+        }
+
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             _badgeModel.controllerName
         );
@@ -413,6 +423,28 @@ contract TheBadge is
         }
 
         return _badge.dueDate <= block.timestamp ? true : false;
+    }
+
+    /**
+     * @notice Returns true if the badge is ready to be claimed to its destination address, otherwise returns false
+     * @param badgeId the badgeId
+     */
+    function isClaimable(uint256 badgeId) external view returns (bool) {
+        TheBadgeStore.Badge memory badge = _badgeStore.getBadge(badgeId);
+
+        if (badge.initialized == false) {
+            revert LibTheBadge.TheBadge__requestBadge_badgeNotClaimable();
+        }
+
+        uint256 badgeModelId = getBadgeModelIdFromBadgeId(badgeId);
+        TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            _badgeModel.controllerName
+        );
+
+        IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
+
+        return controller.isClaimable(badgeId);
     }
 
     /**

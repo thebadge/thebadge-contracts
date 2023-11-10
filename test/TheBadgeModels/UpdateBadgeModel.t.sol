@@ -23,7 +23,7 @@ contract UpdateBadgeModel is Config {
 
         vm.startPrank(address(badgeModels));
         badgeStore.addBadgeModel(
-            TheBadgeStore.BadgeModel(u1, "ControllerName", false, 0.2e18, 100, 1000, true, "v1.0.0")
+            TheBadgeStore.BadgeModel(u1, "ControllerName", false, 0.2e18, 100, 1000, true, 1, false, false, "metadata")
         );
 
         badgeUsers.makeUserCreator(u1);
@@ -74,7 +74,7 @@ contract UpdateBadgeModel is Config {
         vm.prank(u2);
         badgeUsers.suspendUser(u1, true);
 
-        vm.expectRevert(LibTheBadgeUsers.TheBadge__onlyCreator_creatorIsSuspended.selector);
+        vm.expectRevert(LibTheBadgeUsers.TheBadge__users__onlyCreator_creatorIsSuspended.selector);
 
         vm.prank(u1);
         badgeModels.updateBadgeModel(0, 0.1e18, true);
@@ -104,7 +104,7 @@ contract UpdateBadgeModel is Config {
         // add badge model
         vm.prank(address(badgeModels));
         badgeStore.addBadgeModel(
-            TheBadgeStore.BadgeModel(u1, "ControllerName", false, 0.2e18, 100, 1000, true, "v1.0.0")
+            TheBadgeStore.BadgeModel(u1, "ControllerName", false, 0.2e18, 100, 1000, true, 1, false, false, "metadata")
         );
 
         // register user

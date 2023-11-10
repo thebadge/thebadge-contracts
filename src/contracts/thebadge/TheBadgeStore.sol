@@ -99,8 +99,10 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         uint256 validFor;
         uint256 mintProtocolFee; // amount that the protocol will charge for this
         bool initialized; // When the struct is created its true, if the struct was never initialized, its false, used in validations
-        string version; // The version of the badgeModel, used in case of updates.
+        uint256 version; // The version of the badgeModel, used in case of updates.
         bool suspended; // If true, the badge has been suspended from the administrator of TB contract and users won't be able to interact with anymore
+        bool deprecated; // If true, the badge cannot be minted anymore as there is a newer version for this badge, old badges are still valid to maintain backwards compatibility
+        string metadata; // The ips hash metadata of the badgeModel
     }
 
     struct Badge {
@@ -183,17 +185,16 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * =========================
      */
     function createUser(address userAddress, User calldata newUser) external onlyPermittedContract {
-        User storage user = registeredUsers[userAddress];
-        if (bytes(user.metadata).length != 0) {
+        User storage _user = registeredUsers[userAddress];
+        if (_user.initialized == true) {
             revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
         }
         registeredUsers[userAddress] = newUser;
     }
 
-    // todo refactor with modifier to check that the user actually exists
     function updateUser(address userAddress, User calldata updatedUser) external onlyPermittedContract {
         User storage _user = registeredUsers[userAddress];
-        if (bytes(_user.metadata).length == 0) {
+        if (_user.initialized == false) {
             revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
         }
         registeredUsers[userAddress] = updatedUser;
@@ -240,6 +241,17 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         _badgeModel.mintProtocolFee = badgeModel.mintProtocolFee;
         _badgeModel.mintCreatorFee = badgeModel.mintCreatorFee;
         _badgeModel.paused = badgeModel.paused;
+        _badgeModel.deprecated = badgeModel.deprecated;
+    }
+
+    function updateBadgeModelMetadata(uint256 badgeModelId, string memory metadata) external onlyPermittedContract {
+        BadgeModel storage _badgeModel = badgeModels[badgeModelId];
+
+        if (_badgeModel.initialized == false) {
+            revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
+        }
+
+        _badgeModel.metadata = metadata;
     }
 
     function suspendBadgeModel(uint256 badgeModelId, bool suspended) external onlyPermittedContract {
@@ -250,6 +262,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         }
 
         _badgeModel.suspended = suspended;
+        _badgeModel.metadata = "ipfs://"; // TODO this can be hardcoded to a disabled ipfs hash
     }
 
     function addBadge(uint256 badgeId, Badge calldata badge) external onlyPermittedContract {

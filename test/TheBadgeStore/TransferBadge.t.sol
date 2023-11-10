@@ -47,7 +47,7 @@ contract TransferBadge is Config {
 
         // The second badge should not exists anymore on the user1
         vm.expectRevert();
-        uint256 _badgeId2From = badgeStore.userMintedBadgesByBadgeModel(badgeModelId, u1, 1);
+        badgeStore.userMintedBadgesByBadgeModel(badgeModelId, u1, 1);
 
         // The second badge should be now on the user2
         uint256 _badgeIdTo = badgeStore.userMintedBadgesByBadgeModel(badgeModelId, u2, 0);

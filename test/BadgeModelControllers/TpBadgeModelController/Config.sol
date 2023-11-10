@@ -48,11 +48,9 @@ contract Config is Test {
         address tpBadgeModelControllerStoreInstanceImp = address(new TpBadgeModelControllerStore());
         address tpBadgeModelControllerStoreProxy = Clones.clone(tpBadgeModelControllerStoreInstanceImp);
         tpBadgeModelControllerStoreInstance = TpBadgeModelControllerStore(payable(tpBadgeModelControllerStoreProxy));
-        // todo review
         tpBadgeModelControllerStoreInstance.initialize(admin, feeCollector, _arbitrator, _tcrFactory);
 
         // Instantiates the TpBadgeModelController
-        // TODO: this _badgeContractAddress should be also a instance of TheBadge.sol contract and should be initialized the same way the rest of the contracts showed here
         address _badgeContractAddress = vm.addr(5);
 
         address tpBadgeModelControllerInstanceImp = address(new TpBadgeModelController());

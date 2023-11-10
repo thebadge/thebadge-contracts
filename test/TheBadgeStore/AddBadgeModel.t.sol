@@ -21,8 +21,9 @@ contract AddBadgeModel is Config {
             uint256 validFor = 100;
             uint256 mintProtocolFee = 0.2 ether;
             bool initialized = true;
-            string memory version = "v1";
+            uint256 version = 1;
             bool suspended = false;
+            bool deprecated = false;
 
             TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
                 creator,
@@ -33,7 +34,9 @@ contract AddBadgeModel is Config {
                 mintProtocolFee,
                 initialized,
                 version,
-                suspended
+                suspended,
+                deprecated,
+                "ipfs://"
             );
 
             vm.prank(badgeUsersAddress);
@@ -48,8 +51,10 @@ contract AddBadgeModel is Config {
             uint256 _validFor,
             uint256 _mintProtocolFee,
             bool _initialized,
-            string memory _version,
-            bool _suspended
+            uint256 _version,
+            bool _suspended,
+            bool _deprecated,
+            string memory _metadata
         ) = badgeStore.badgeModels(0);
 
         assertEq(_creator, creator);
@@ -59,8 +64,10 @@ contract AddBadgeModel is Config {
         assertEq(_validFor, 100);
         assertEq(_mintProtocolFee, 0.2 ether);
         assertEq(_initialized, true);
-        assertEq(_version, "v1");
+        assertEq(_version, 1);
         assertEq(_suspended, false);
+        assertEq(_deprecated, false);
+        assertEq(_metadata, "ipfs://");
 
         uint256 counter = badgeStore.getCurrentBadgeModelsIdCounter();
 
@@ -78,8 +85,9 @@ contract AddBadgeModel is Config {
         uint256 validFor = 100;
         uint256 mintProtocolFee = 0.2 ether;
         bool initialized = true;
-        string memory version = "v1";
+        uint256 version = 1;
         bool suspended = false;
+        bool deprecated = false;
 
         TheBadgeStore.BadgeModel memory badgeModel = TheBadgeStore.BadgeModel(
             creator,
@@ -90,7 +98,9 @@ contract AddBadgeModel is Config {
             mintProtocolFee,
             initialized,
             version,
-            suspended
+            suspended,
+            deprecated,
+            "ipfs://"
         );
 
         vm.prank(badgeUsersAddress);

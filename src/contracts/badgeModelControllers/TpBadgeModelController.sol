@@ -89,10 +89,9 @@ contract TpBadgeModelController is
         if (_thirdPartyUser.initialized == false) {
             revert LibTpBadgeModelController.ThirdPartyModelController__user__userNotFound();
         }
-        if (_thirdPartyUser.verificationStatus == LibTpBadgeModelController.VerificationStatus.VerificationRejected) {
+        if (_thirdPartyUser.verificationStatus != LibTpBadgeModelController.VerificationStatus.Verified) {
             revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationRejected();
         }
-        // TODO Maybe also add onlyVerifiedUser?
         _;
     }
 
@@ -187,8 +186,8 @@ contract TpBadgeModelController is
         }
 
         TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _newBadgeModel = TpBadgeModelControllerStore
-            .ThirdPartyBadgeModel(_callee, _badgeModelId, tcrListAddress, _governor, _admin);
-        tpBadgeModelControllerStore.addBadgeModel(_newBadgeModel);
+            .ThirdPartyBadgeModel(_callee, _badgeModelId, tcrListAddress, _governor, _admin, true);
+        tpBadgeModelControllerStore.addBadgeModel(_badgeModelId, _newBadgeModel);
         tpBadgeModelControllerStore.addAdministratorsToBadgeModel(_badgeModelId, args.administrators);
 
         emit NewThirdPartyBadgeModel(_badgeModelId, tcrListAddress);
@@ -348,7 +347,7 @@ contract TpBadgeModelController is
     }
 
     /**
-     * @notice Returns true if the badge is ready to be claimed to the destination address, otherwise returns false
+     * @notice Returns true if the badge is ready to be claimed to its destination address, otherwise returns false
      * @param badgeId the badgeId
      */
     function isClaimable(uint256 badgeId) external view returns (bool) {
@@ -410,6 +409,20 @@ contract TpBadgeModelController is
         if (_tpUser.verificationStatus == LibTpBadgeModelController.VerificationStatus.Verified) {
             return true;
         }
+        return false;
+    }
+
+    /**
+     * @notice If if this badgeModel can be upgraded or not
+     */
+    function isBadgeModelMetadataUpgradeable() external pure returns (bool) {
+        return true;
+    }
+
+    /**
+     * @notice If if this badgeModel can be updated or not
+     */
+    function isBadgeModelMetadataUpdatable() external pure returns (bool) {
         return false;
     }
 

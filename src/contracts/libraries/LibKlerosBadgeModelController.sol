@@ -41,5 +41,5 @@ library LibKlerosBadgeModelController {
     error KlerosBadgeModelController__store_InvalidContractAddress();
     error KlerosBadgeModelController__store_ContractNameAlreadyExists();
 
-    error TheBadge__method_not_supported();
+    error KlerosBadgeModelController__method_not_supported();
 }
