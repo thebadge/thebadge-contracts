@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://thebadge.xyz">
-    <img alt="TheBadge" src="https://thebadge.xyz/favicon.ico" width="128">
+    <img alt="TheBadge" src="https://www.thebadge.xyz/the_badge.png">
   </a>
 </p>
 
