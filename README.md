@@ -1,8 +1,8 @@
-<p align="center">
+<div style="text-align: center;">
   <a href="https://thebadge.xyz">
     <img alt="TheBadge" src="https://www.thebadge.xyz/the_badge.png">
   </a>
-</p>
+</div>
 
 <h1 align="center">TheBadge DApp Smart-contracts</h1>
 
