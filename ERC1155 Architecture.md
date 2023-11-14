@@ -1,8 +1,8 @@
-<p align="center">
+<div style="text-align: center;">
   <a href="https://thebadge.xyz">
-    <img alt="TheBadge" src="https://thebadge.xyz/favicon.ico" width="128">
+    <img alt="TheBadge" src="https://www.thebadge.xyz/the_badge_github_logo.png">
   </a>
-</p>
+</div>
 
 <h1 align="center">TheBadge DApp Smart-contracts</h1>
 
@@ -17,7 +17,7 @@ For questions or request information reach out via [Discord](https://discord.gg/
 
 ## Introduction
 
-TheBadge is a novel decentralized platform that leverages the ERC1155 token standard to represent unique badges. These badges, referred to as SBT (Soul-bonded tokens), hold distinct on-chain information for each user. Unlike traditional tokens, SBTs cannot be transferred or traded, as they embody exclusive user-specific data.
+TheBadge is a novel decentralized platform that leverages the ERC1155 token standard to represent unique badges. These badges, referred to as SBT NFTS (Soul-bonded tokens), hold distinct on-chain information for each user. Unlike traditional tokens, SBTs cannot be transferred or traded, as they embody exclusive user-specific data.
 
 TheBadge's architecture is divided into two key components: "Badge Models" and "Badges." Badge Models are defined by badge creators and serve as templates for generating actual badges that end-users will possess. A Badge Model specifies not only the visual design of the badge but also governs how the information within it should be displayed and validated.
 
