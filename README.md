@@ -1,8 +1,8 @@
-<p align="center">
+<div style="text-align: center;">
   <a href="https://thebadge.xyz">
-    <img alt="TheBadge" src="https://www.thebadge.xyz/the_badge.png">
+    <img alt="TheBadge" src="https://www.thebadge.xyz/the_badge_github_logo.png">
   </a>
-</p>
+</div>
 
 <h1 align="center">TheBadge DApp Smart-contracts</h1>
 
@@ -11,6 +11,7 @@
   <a href="https://github.com/thebadge/thebadge-contracts/issues"><img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat" alt="contributions welcome"></a>
   <a href="https://twitter.com/intent/user?screen_name=thebadgexyz"><img src="https://img.shields.io/twitter/follow/thebadgexyz?style=social" alt="Follow us on Twitter"></a>
   <a href="https://github.com/thebadge/thebadge-contracts/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-BSL1.1-blue.svg" alt="BSL 1.1 licensed"></a>
+  <a href="https://github.com/thebadge/thebadge-contracts/releases"><img src="https://img.shields.io/github/v/release/thebadge/thebadge-contracts?label=Latest%20Release" alt="Latest release"></a>
 </p>
 
 For questions or request information reach out via [Discord](https://discord.gg/tVP75NqVuC).
