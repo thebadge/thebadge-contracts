@@ -25,9 +25,6 @@ For questions or request information reach out via [Discord](https://discord.gg/
 ```bash
 yarn
 ```
-
-2. Pre-fund the executor account derived from the mnemonic with some Native Token to cover the deployment of an ERC4337 module and the pre-fund of the Safe for the test operation.
-
 ### Deployments
 
 A collection of the different contract deployments and their addresses can be found in the [TheBadge deployments](./deployments.md) file.
