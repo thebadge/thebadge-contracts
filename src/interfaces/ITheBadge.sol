@@ -7,6 +7,13 @@ interface ITheBadge is IERC1155 {
     // Write methods
     function mint(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data) external payable;
 
+    function mintInBatch(
+        uint256[] memory badgeModelIds,
+        address[] memory recipients,
+        string[] memory tokenURIs,
+        bytes[] memory data
+    ) external payable;
+
     function claim(uint256 badgeId, bytes calldata data) external;
 
     function challenge(uint256 badgeId, bytes calldata data) external payable;
