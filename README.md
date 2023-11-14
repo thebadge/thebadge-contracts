@@ -25,6 +25,7 @@ For questions or request information reach out via [Discord](https://discord.gg/
 ```bash
 yarn
 ```
+
 ### Deployments
 
 A collection of the different contract deployments and their addresses can be found in the [TheBadge deployments](./deployments.md) file.
