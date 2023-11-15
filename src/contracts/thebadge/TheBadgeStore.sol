@@ -303,6 +303,16 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         userMintedBadgesByBadgeModel[badge.badgeModelId][destination].push(badgeId);
     }
 
+    function updateBadgeDueDate(uint256 badgeId, uint256 dueDate) external onlyPermittedContract {
+        Badge storage badge = badges[badgeId];
+
+        if (badge.initialized == false) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidBadgeID();
+        }
+
+        badge.dueDate = dueDate;
+    }
+
     /*
      * @notice Updates the value of the protocol: _mintBadgeDefaultFee
      * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
