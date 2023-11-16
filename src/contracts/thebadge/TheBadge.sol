@@ -232,7 +232,7 @@ contract TheBadge is
         _mint(_mintingAccount, badgeId, 1, "0x");
 
         // Stores the badge
-        uint256 dueDate = _badgeModel.validFor == 0 ? 0 : block.timestamp + _badgeModel.validFor;
+        uint256 dueDate = calculateBadgeDueDate(_badgeModel.validFor, 0, false, controller.isAutomaticClaimable());
         TheBadgeStore.Badge memory badge = TheBadgeStore.Badge(_badgeModelId, _mintingAccount, dueDate, true);
         _badgeStore.addBadge(badgeId, badge);
         emit BadgeRequested(
@@ -271,7 +271,13 @@ contract TheBadge is
             tempStoredBadgeAddress = address(_badgeModelController.controller);
         }
         address claimAddress = controller.claim(badgeId, data, _msgSender());
-
+        uint256 dueDate = calculateBadgeDueDate(
+            _badgeModel.validFor,
+            badge.dueDate,
+            true,
+            controller.isAutomaticClaimable()
+        );
+        _badgeStore.updateBadgeDueDate(badgeId, dueDate);
         _badgeStore.transferBadge(badgeId, tempStoredBadgeAddress, claimAddress);
         emit BadgeTransferred(badgeId, tempStoredBadgeAddress, claimAddress);
     }
@@ -382,6 +388,35 @@ contract TheBadge is
             _badgeModelId,
             "0x"
         );
+    }
+
+    function calculateBadgeDueDate(
+        uint256 validForConfig,
+        uint256 currentDueDate,
+        bool isClaimEvent,
+        bool isAutomaticClaimable
+    ) internal view returns (uint256) {
+        // Is the badge does not expire, the expiration is not defined.
+        if (validForConfig == 0) {
+            return 0;
+        }
+
+        // If the badge can be automatically claimed after mint and it's the CLAIM event
+        // The dueDate was already defined before the CLAIM, no extra calculations are needed
+        if (isClaimEvent && isAutomaticClaimable) {
+            return currentDueDate;
+        }
+
+        // If its not the claim event but its automatically claimable
+        // Or it's the claim event and it's not automatically claimable
+        // The dueDate should be defined now
+        if (isClaimEvent || isAutomaticClaimable) {
+            return block.timestamp + validForConfig;
+        }
+
+        // If the badge can't be automatically claimed before CLAIM, and it's not the CLAIM event
+        // The dueDate should be left empty until the CLAIM event occurs
+        return 0;
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {

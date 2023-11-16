@@ -564,6 +564,14 @@ contract KlerosBadgeModelController is
     }
 
     /**
+     * @notice It's true if this badgeModel can be automatically claimed after the mint event has occurred
+     * In this model, the badges need to pass a review period, therefore are not automatically claimable
+     */
+    function isAutomaticClaimable() external pure returns (bool) {
+        return false;
+    }
+
+    /**
      * @notice Internal function that returns the TCR contract instance for a given klerosBadgeModel
      * @param badgeId the klerosBadgeId
      */
