@@ -4,7 +4,7 @@
   "version": "2.2.2",
   "scripts": {
     "forge": "forge",
-    "build": "forge build --via-ir",
+    "build": "forge build",
     "clean": "forge clean",
     "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 9883736 --via-ir",
     "test:all": "yarn forge test -vv --fork-url $(grep ALCHEMY_ENDPOINT_URL .env | cut -d '=' -f2) --fork-block-number 9883736",

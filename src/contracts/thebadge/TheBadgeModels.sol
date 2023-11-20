@@ -12,12 +12,14 @@ import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "./TheBadgeUsersStore.sol";
 import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { TheBadgeUsers } from "./TheBadgeUsers.sol";
 
 contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     TheBadgeStore public _badgeStore;
+    TheBadgeUsersStore public _badgeUsersStore;
     TheBadgeUsers public _theBadgeUsers;
 
     /**
@@ -43,7 +45,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
      * =========================
      */
     modifier onlyRegisteredUser(address _user) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+        TheBadgeUsersStore.User memory user = _badgeUsersStore.getUser(_user);
         if (bytes(user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
@@ -70,7 +72,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     }
 
     modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId, address _user) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+        TheBadgeUsersStore.User memory user = _badgeUsersStore.getUser(_user);
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
 
         if (bytes(user.metadata).length == 0) {
@@ -97,12 +99,18 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(address admin, address badgeStore, address badgeUsers) public initializer {
+    function initialize(
+        address admin,
+        address badgeStore,
+        address badgeUsersStore,
+        address badgeUsers
+    ) public initializer {
         __Ownable_init(admin);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);
 
         _badgeStore = TheBadgeStore(payable(badgeStore));
+        _badgeUsersStore = TheBadgeUsersStore(payable(badgeUsersStore));
         _theBadgeUsers = TheBadgeUsers(payable(badgeUsers));
         emit Initialize(admin);
     }
@@ -208,7 +216,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         );
 
         emit BadgeModelCreated(currentBadgeModelId);
-        TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
+        TheBadgeUsersStore.User memory user = _badgeUsersStore.getUser(_msgSender());
         if (user.isCreator == false) {
             _theBadgeUsers.makeUserCreator(_msgSender());
         }
@@ -358,7 +366,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
             return true;
         }
 
-        TheBadgeStore.User memory creator = _badgeStore.getUser(_badgeModel.creator);
+        TheBadgeUsersStore.User memory creator = _badgeUsersStore.getUser(_badgeModel.creator);
         if (creator.suspended == true) {
             return true;
         }

@@ -15,6 +15,8 @@ interface ITheBadgeUsers {
 
     function executeUserVerification(address _user, string memory controllerName, bool verify) external;
 
+    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) external;
+
     function getVerificationFee(string memory controllerName) external view returns (uint256);
 
     function isUserVerified(address _user, string memory controllerName) external view returns (bool);
