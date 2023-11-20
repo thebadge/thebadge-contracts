@@ -39,7 +39,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     uint256 internal badgeModelIdsCounter;
     uint256 internal badgeIdsCounter;
-
     uint256 public createBadgeModelProtocolFee;
     uint256 public mintBadgeProtocolDefaultFeeInBps;
     address public feeCollector;

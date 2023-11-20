@@ -60,10 +60,28 @@ contract TheBadgeUsersStore is TheBadgeRoles, OwnableUpgradeable {
         bool initialized;
     }
 
+    /**
+     * @param user address of the user requested the verification
+     * @param userMetadata ipfs hash of the metadata of the user
+     * @param verificationEvidence ipfs hash of the metadata of the metadata uploaded as evidence to be verified
+     * @param verificationStatus current status of the verification
+     * @param verificationController address of the contract where it has been verified (thirdParty or community)
+     * @param initialized When the struct is created its true, if the struct was never initialized, its false, used in validations
+     */
+    struct UserVerification {
+        address user;
+        string userMetadata;
+        string verificationEvidence;
+        LibTheBadgeUsers.VerificationStatus verificationStatus;
+        address verificationController;
+        bool initialized;
+    }
+
     // Mapping to store contract addresses by name
     mapping(address => bool) public allowedContractAddresses;
     mapping(string => address) public allowedContractAddressesByContractName;
     mapping(address => User) public registeredUsers;
+    mapping(address => mapping(address => UserVerification)) public verifiedUsersByControllerAddress;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
@@ -84,6 +102,13 @@ contract TheBadgeUsersStore is TheBadgeRoles, OwnableUpgradeable {
      */
     function getUser(address userAddress) external view returns (User memory) {
         return registeredUsers[userAddress];
+    }
+
+    function getUserVerifyStatus(
+        address controllerAddress,
+        address userAddress
+    ) external view returns (UserVerification memory) {
+        return verifiedUsersByControllerAddress[controllerAddress][userAddress];
     }
 
     /**
@@ -173,6 +198,45 @@ contract TheBadgeUsersStore is TheBadgeRoles, OwnableUpgradeable {
         allowedContractAddresses[_newContractAddress] = true;
 
         emit ContractUpdated(_contractName, _newContractAddress);
+    }
+
+    /**
+     * @notice Update a UserVerification details.
+     * @param controllerAddress The address of the controller where the verification starts
+     * @param userAddress the userAddress
+     * @param user the new verification status of the user
+     */
+    function createUserVerificationStatus(
+        address controllerAddress,
+        address userAddress,
+        UserVerification memory user
+    ) external onlyPermittedContract {
+        UserVerification memory _user = verifiedUsersByControllerAddress[controllerAddress][userAddress];
+
+        if (_user.initialized == true) {
+            revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
+        }
+
+        verifiedUsersByControllerAddress[controllerAddress][userAddress] = user;
+    }
+
+    /**
+     * @notice Update a UserVerification details.
+     * @param controllerAddress The address of the controller where the verification starts
+     * @param userAddress the userAddress
+     * @param _verificationStatus the new verification status of the user
+     */
+    function updateUserVerificationStatus(
+        address controllerAddress,
+        address userAddress,
+        LibTheBadgeUsers.VerificationStatus _verificationStatus
+    ) external onlyPermittedContract {
+        UserVerification memory _user = verifiedUsersByControllerAddress[controllerAddress][userAddress];
+        if (_user.initialized == false) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
+        }
+        _user.verificationStatus = _verificationStatus;
+        verifiedUsersByControllerAddress[controllerAddress][userAddress] = _user;
     }
 
     /**

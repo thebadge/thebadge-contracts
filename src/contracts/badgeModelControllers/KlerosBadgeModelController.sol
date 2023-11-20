@@ -9,11 +9,13 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
+import { TheBadgeUsersStore } from "../thebadge/TheBadgeUsersStore.sol";
 import { KlerosBadgeModelControllerStore } from "./KlerosBadgeModelControllerStore.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { TheBadge } from "../thebadge/TheBadge.sol";
 import { LibKlerosBadgeModelController } from "../libraries/LibKlerosBadgeModelController.sol";
+import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
 import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -29,6 +31,7 @@ contract KlerosBadgeModelController is
 {
     using CappedMath for uint256;
     KlerosBadgeModelControllerStore public klerosBadgeModelControllerStore;
+    TheBadgeUsersStore public theBadgeUsersStore;
     TheBadge public theBadge;
     TheBadgeModels public theBadgeModels;
     TheBadgeUsers public theBadgeUsers;
@@ -61,14 +64,15 @@ contract KlerosBadgeModelController is
     }
 
     modifier onlyUserOnVerification(address _user) {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
+        TheBadgeUsersStore.UserVerification memory _verificationUser = theBadgeUsersStore.getUserVerifyStatus(
+            address(this),
             _user
         );
-        if (_klerosUser.initialized == false) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userNotFound();
+        if (_verificationUser.initialized == false) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
-        if (_klerosUser.verificationStatus != LibKlerosBadgeModelController.VerificationStatus.VerificationSubmitted) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userVerificationNotStarted();
+        if (_verificationUser.verificationStatus != LibTheBadgeUsers.VerificationStatus.VerificationSubmitted) {
+            revert LibTheBadgeUsers.TheBadge__verifyUser__userVerificationNotStarted();
         }
         _;
     }
@@ -102,7 +106,8 @@ contract KlerosBadgeModelController is
         address _theBadge,
         address _theBadgeModels,
         address _theBadgeUsers,
-        address _klerosBadgeModelControllerStore
+        address _klerosBadgeModelControllerStore,
+        address _theBadgeUsersStore
     ) public initializer {
         __Ownable_init(admin);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -112,6 +117,7 @@ contract KlerosBadgeModelController is
         theBadgeModels = TheBadgeModels(payable(_theBadgeModels));
         theBadgeUsers = TheBadgeUsers(payable(_theBadgeUsers));
         klerosBadgeModelControllerStore = KlerosBadgeModelControllerStore(payable(_klerosBadgeModelControllerStore));
+        theBadgeUsersStore = TheBadgeUsersStore(payable(_theBadgeUsersStore));
         address _tcrFactory = klerosBadgeModelControllerStore.getTCRFactory();
         emit Initialize(admin, _tcrFactory);
     }
@@ -352,20 +358,23 @@ contract KlerosBadgeModelController is
         string memory userMetadata,
         string memory evidenceUri
     ) public onlyTheBadgeUsers {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
+        TheBadgeUsersStore.UserVerification memory _userVerification = theBadgeUsersStore.getUserVerifyStatus(
+            address(this),
             _user
         );
 
-        if (_klerosUser.initialized) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userVerificationAlreadyStarted();
+        if (_userVerification.initialized) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
 
-        _klerosUser.initialized = true;
-        _klerosUser.verificationStatus = LibKlerosBadgeModelController.VerificationStatus.VerificationSubmitted;
-        _klerosUser.userMetadata = userMetadata;
-        _klerosUser.verificationEvidence = evidenceUri;
+        _userVerification.user = _user;
+        _userVerification.userMetadata = userMetadata;
+        _userVerification.verificationEvidence = evidenceUri;
+        _userVerification.verificationStatus = LibTheBadgeUsers.VerificationStatus.VerificationSubmitted;
+        _userVerification.verificationController = address(this);
+        _userVerification.initialized = true;
 
-        klerosBadgeModelControllerStore.registerKlerosUser(_user, _klerosUser);
+        theBadgeUsersStore.createUserVerificationStatus(address(this), _user, _userVerification);
     }
 
     /**
@@ -377,17 +386,19 @@ contract KlerosBadgeModelController is
         address _user,
         bool verify
     ) public onlyTheBadgeUsers onlyUserOnVerification(_user) {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
+        TheBadgeUsersStore.UserVerification memory _userVerification = theBadgeUsersStore.getUserVerifyStatus(
+            address(this),
             _user
         );
-        if (!_klerosUser.initialized) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userNotFound();
+
+        if (!_userVerification.initialized) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
 
-        LibKlerosBadgeModelController.VerificationStatus _verificationStatus = verify
-            ? LibKlerosBadgeModelController.VerificationStatus.Verified
-            : LibKlerosBadgeModelController.VerificationStatus.VerificationRejected;
-        klerosBadgeModelControllerStore.updateKlerosUserVerificationStatus(_user, _verificationStatus);
+        LibTheBadgeUsers.VerificationStatus _verificationStatus = verify
+            ? LibTheBadgeUsers.VerificationStatus.Verified
+            : LibTheBadgeUsers.VerificationStatus.VerificationRejected;
+        theBadgeUsersStore.updateUserVerificationStatus(address(this), _user, _verificationStatus);
     }
 
     /**
@@ -537,13 +548,14 @@ contract KlerosBadgeModelController is
      * @param _user the userAddress
      */
     function isUserVerified(address _user) public view returns (bool) {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
+        TheBadgeUsersStore.UserVerification memory _userVerification = theBadgeUsersStore.getUserVerifyStatus(
+            address(this),
             _user
         );
-        if (_klerosUser.initialized == false) {
+        if (_userVerification.initialized == false) {
             return false;
         }
-        if (_klerosUser.verificationStatus == LibKlerosBadgeModelController.VerificationStatus.Verified) {
+        if (_userVerification.verificationStatus == LibTheBadgeUsers.VerificationStatus.Verified) {
             return true;
         }
         return false;

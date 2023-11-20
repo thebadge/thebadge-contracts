@@ -17,6 +17,8 @@ import { CappedMath } from "../../utils/CappedMath.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { TpBadgeModelControllerStore } from "./TpBadgeModelControllerStore.sol";
 import { LibTpBadgeModelController } from "../libraries/LibTpBadgeModelController.sol";
+import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
+import { TheBadgeUsersStore } from "../thebadge/TheBadgeUsersStore.sol";
 
 contract TpBadgeModelController is
     Initializable,
@@ -27,6 +29,7 @@ contract TpBadgeModelController is
 {
     using CappedMath for uint256;
     TpBadgeModelControllerStore public tpBadgeModelControllerStore;
+    TheBadgeUsersStore public theBadgeUsersStore;
     TheBadge public theBadge;
     TheBadgeModels public theBadgeModels;
     TheBadgeUsers public theBadgeUsers;
@@ -74,23 +77,29 @@ contract TpBadgeModelController is
     }
 
     modifier onlyUserOnVerification(address _user) {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _thirdPartyUser = tpBadgeModelControllerStore.getUser(_user);
-        if (_thirdPartyUser.initialized == false) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userNotFound();
+        TheBadgeUsersStore.UserVerification memory _verificationUser = theBadgeUsersStore.getUserVerifyStatus(
+            address(this),
+            _user
+        );
+        if (_verificationUser.initialized == false) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
-        if (_thirdPartyUser.verificationStatus != LibTpBadgeModelController.VerificationStatus.VerificationSubmitted) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationNotStarted();
+        if (_verificationUser.verificationStatus != LibTheBadgeUsers.VerificationStatus.VerificationSubmitted) {
+            revert LibTheBadgeUsers.TheBadge__verifyUser__userVerificationNotStarted();
         }
         _;
     }
 
     modifier onlyThirdPartyUser(address callee) {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _thirdPartyUser = tpBadgeModelControllerStore.getUser(callee);
-        if (_thirdPartyUser.initialized == false) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userNotFound();
+        TheBadgeUsersStore.UserVerification memory _verificationUser = theBadgeUsersStore.getUserVerifyStatus(
+            address(this),
+            callee
+        );
+        if (_verificationUser.initialized == false) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
-        if (_thirdPartyUser.verificationStatus != LibTpBadgeModelController.VerificationStatus.Verified) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationRejected();
+        if (_verificationUser.verificationStatus != LibTheBadgeUsers.VerificationStatus.Verified) {
+            revert LibTheBadgeUsers.TheBadge__verifyUser__userVerificationRejected();
         }
         _;
     }
@@ -117,7 +126,8 @@ contract TpBadgeModelController is
         address _theBadge,
         address _theBadgeModels,
         address _theBadgeUsers,
-        address _tpBadgeModelStore
+        address _tpBadgeModelStore,
+        address _theBadgeUsersStore
     ) public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);
@@ -126,6 +136,7 @@ contract TpBadgeModelController is
         theBadgeModels = TheBadgeModels(payable(_theBadgeModels));
         theBadgeUsers = TheBadgeUsers(payable(_theBadgeUsers));
         tpBadgeModelControllerStore = TpBadgeModelControllerStore(payable(_tpBadgeModelStore));
+        theBadgeUsersStore = TheBadgeUsersStore(payable(_theBadgeUsersStore));
         emit Initialize(admin);
     }
 
@@ -289,26 +300,38 @@ contract TpBadgeModelController is
     }
 
     // Write methods
+    /**
+     * @notice Creates a request to verify an user in third party
+     * @param _user address of the user
+     * @param userMetadata IPFS uri with the metadata of the user to verify
+     * @param evidenceUri IPFS uri with the evidence required for the verification
+     */
     function submitUserVerification(
         address _user,
         string memory userMetadata,
         string memory evidenceUri
     ) public onlyTheBadgeUsers {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _tpUser = tpBadgeModelControllerStore.getUser(_user);
+        TheBadgeUsersStore.UserVerification memory _userVerification = theBadgeUsersStore.getUserVerifyStatus(
+            address(this),
+            _user
+        );
 
-        if (_tpUser.initialized) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationAlreadyStarted();
+        if (_userVerification.initialized) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
 
-        _tpUser.initialized = true;
-        _tpUser.verificationStatus = LibTpBadgeModelController.VerificationStatus.VerificationSubmitted;
-        _tpUser.userMetadata = userMetadata;
-        _tpUser.verificationEvidence = evidenceUri;
-        tpBadgeModelControllerStore.registerTpUser(_user, _tpUser);
+        _userVerification.user = _user;
+        _userVerification.userMetadata = userMetadata;
+        _userVerification.verificationEvidence = evidenceUri;
+        _userVerification.verificationStatus = LibTheBadgeUsers.VerificationStatus.VerificationSubmitted;
+        _userVerification.verificationController = address(this);
+        _userVerification.initialized = true;
+
+        theBadgeUsersStore.createUserVerificationStatus(address(this), _user, _userVerification);
     }
 
     /**
-     * @notice Executes the request to verify an user
+     * @notice Executes the request to verify an user in kleros
      * @param _user address of the user
      * @param verify true if the user should be verified, otherwise false
      */
@@ -316,11 +339,19 @@ contract TpBadgeModelController is
         address _user,
         bool verify
     ) public onlyTheBadgeUsers onlyUserOnVerification(_user) {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _tpUser = tpBadgeModelControllerStore.getUser(_user);
-        _tpUser.verificationStatus = verify
-            ? LibTpBadgeModelController.VerificationStatus.Verified
-            : LibTpBadgeModelController.VerificationStatus.VerificationRejected;
-        tpBadgeModelControllerStore.updateUser(_user, _tpUser);
+        TheBadgeUsersStore.UserVerification memory _userVerification = theBadgeUsersStore.getUserVerifyStatus(
+            address(this),
+            _user
+        );
+
+        if (!_userVerification.initialized) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
+        }
+
+        LibTheBadgeUsers.VerificationStatus _verificationStatus = verify
+            ? LibTheBadgeUsers.VerificationStatus.Verified
+            : LibTheBadgeUsers.VerificationStatus.VerificationRejected;
+        theBadgeUsersStore.updateUserVerificationStatus(address(this), _user, _verificationStatus);
     }
 
     /*
@@ -401,12 +432,15 @@ contract TpBadgeModelController is
      * @notice returns true if the given userAddress exists and has been verified, otherwise returns false.
      * @param _user the userAddress
      */
-    function isUserVerified(address _user) external view returns (bool) {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _tpUser = tpBadgeModelControllerStore.getUser(_user);
-        if (_tpUser.initialized == false) {
+    function isUserVerified(address _user) public view returns (bool) {
+        TheBadgeUsersStore.UserVerification memory _userVerification = theBadgeUsersStore.getUserVerifyStatus(
+            address(this),
+            _user
+        );
+        if (_userVerification.initialized == false) {
             return false;
         }
-        if (_tpUser.verificationStatus == LibTpBadgeModelController.VerificationStatus.Verified) {
+        if (_userVerification.verificationStatus == LibTheBadgeUsers.VerificationStatus.Verified) {
             return true;
         }
         return false;
