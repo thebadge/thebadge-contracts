@@ -19,6 +19,13 @@ export const contracts = {
       [Chains.gnosis]: "",
     },
   },
+  TheBadgeUsersStore: {
+    address: {
+      [Chains.goerli]: "",
+      [Chains.sepolia]: "",
+      [Chains.gnosis]: "",
+    },
+  },
   TheBadgeUsers: {
     address: {
       [Chains.goerli]: "0x90d790998f8E19A10AAb8c504c7408c1E61F040a",

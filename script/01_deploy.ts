@@ -55,9 +55,20 @@ const deployMainContracts = async (
   const theBadgeStoreAddress = theBadgeStore.address;
   console.log(`TheBadgeStore deployed with address: ${theBadgeStoreAddress}`);
 
+  console.log("Deploying TheBadgeUsersStore...");
+  const TheBadgeUsersStore = await ethers.getContractFactory("TheBadgeUsersStore");
+  const theBadgeUsersStore = await upgrades.deployProxy(TheBadgeUsersStore, [contractsAdmin]);
+  await theBadgeUsersStore.deployed();
+  const theBadgeUsersStoreAddress = theBadgeUsersStore.address;
+  console.log(`TheBadgeUsersStore deployed with address: ${theBadgeUsersStoreAddress}`);
+
   console.log("Deploying TheBadgeUsers...");
   const TheBadgeUsers = await ethers.getContractFactory("TheBadgeUsers");
-  const theBadgeUsers = await upgrades.deployProxy(TheBadgeUsers, [contractsAdmin, theBadgeStoreAddress]);
+  const theBadgeUsers = await upgrades.deployProxy(TheBadgeUsers, [
+    contractsAdmin,
+    theBadgeStoreAddress,
+    theBadgeUsersStoreAddress,
+  ]);
   await theBadgeUsers.deployed();
   const theBadgeUsersAddress = theBadgeUsers.address;
   console.log(`TheBadgeUsers deployed with address: ${theBadgeUsersAddress}`);
@@ -67,6 +78,7 @@ const deployMainContracts = async (
   const theBadgeModels = await upgrades.deployProxy(TheBadgeModels, [
     contractsAdmin,
     theBadgeStoreAddress,
+    theBadgeUsersStoreAddress,
     theBadgeUsersAddress,
   ]);
   await theBadgeModels.deployed();
@@ -75,7 +87,11 @@ const deployMainContracts = async (
 
   console.log("Deploying TheBadge...");
   const TheBadge = await ethers.getContractFactory("TheBadge");
-  const theBadge = await upgrades.deployProxy(TheBadge, [contractsAdmin, theBadgeStoreAddress]);
+  const theBadge = await upgrades.deployProxy(TheBadge, [
+    contractsAdmin,
+    theBadgeStoreAddress,
+    theBadgeUsersStoreAddress,
+  ]);
   await theBadge.deployed();
   const theBadgeAddress = theBadge.address;
   console.log(`TheBadge deployed with address: ${theBadgeAddress}`);
@@ -86,6 +102,7 @@ const deployMainContracts = async (
 
   deployedAddresses.push(["TheBadge", theBadgeAddress]);
   deployedAddresses.push(["TheBadgeStore", theBadgeStoreAddress]);
+  deployedAddresses.push(["TheBadgeUsersStore", theBadgeUsersStoreAddress]);
   deployedAddresses.push(["TheBadgeUsers", theBadgeUsersAddress]);
   deployedAddresses.push(["TheBadgeModels", theBadgeModelsAddress]);
 
@@ -95,6 +112,9 @@ const deployMainContracts = async (
   await theBadgeStore.addPermittedContract("TheBadgeModels", theBadgeModelsAddress);
   console.log("Allowing TheBadgeUsers to access TheBadgeStore...");
   await theBadgeStore.addPermittedContract("TheBadgeUsers", theBadgeUsersAddress);
+
+  console.log("Allowing TheBadgeUsers to access TheBadgeUsersStore...");
+  await theBadgeUsersStore.addPermittedContract("TheBadgeUsers", theBadgeUsersAddress);
 
   return {
     mainContracts: deployedAddresses,
