@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 import { Test } from "forge-std/Test.sol";
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "../../src/contracts/thebadge/TheBadgeUsersStore.sol";
 import { TheBadgeUsers } from "../../src/contracts/thebadge/TheBadgeUsers.sol";
 import { TheBadgeModels } from "../../src/contracts/thebadge/TheBadgeModels.sol";
 import { KlerosBadgeModelControllerStore } from "../../src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
@@ -23,6 +24,7 @@ contract Config is Test {
     string public tpControllerName = "thirdParty";
 
     TheBadgeStore badgeStore;
+    TheBadgeUsersStore badgeUsersStore;
     TheBadgeUsers badgeUsers;
     TheBadgeModels badgeModels;
     KlerosBadgeModelController klerosBadgeModelControllerInstance;
@@ -39,17 +41,26 @@ contract Config is Test {
         badgeStore = TheBadgeStore(payable(badgeStoreProxy));
         badgeStore.initialize(admin, feeCollector);
 
+        address badgeUsersStoreProxy = Clones.clone(address(new TheBadgeUsersStore()));
+        badgeUsersStore = TheBadgeUsersStore(payable(badgeUsersStoreProxy));
+        badgeUsersStore.initialize(admin);
+
         address badgeUsersProxy = Clones.clone(address(new TheBadgeUsers()));
         badgeUsers = TheBadgeUsers(payable(badgeUsersProxy));
-        badgeUsers.initialize(admin, badgeStoreProxy);
+        badgeUsers.initialize(admin, badgeStoreProxy, badgeUsersStoreProxy);
 
         address badgeModelsProxy = Clones.clone(address(new TheBadgeModels()));
         badgeModels = TheBadgeModels(payable(badgeModelsProxy));
-        badgeModels.initialize(admin, badgeStoreProxy, badgeUsersProxy);
+        badgeModels.initialize(admin, badgeStoreProxy, badgeUsersStoreProxy, badgeUsersProxy);
 
         vm.startPrank(admin);
         badgeStore.addPermittedContract("TheBadgeModels", badgeModelsProxy);
         badgeStore.addPermittedContract("TheBadgeUsers", badgeUsersProxy);
+        vm.stopPrank();
+
+        vm.startPrank(admin);
+        badgeUsersStore.addPermittedContract("TheBadgeModels", badgeModelsProxy);
+        badgeUsersStore.addPermittedContract("TheBadgeUsers", badgeUsersProxy);
         vm.stopPrank();
 
         // Instantiates the KlerosBadgeModelControllerStore

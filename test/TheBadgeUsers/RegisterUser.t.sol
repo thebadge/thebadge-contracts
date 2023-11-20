@@ -14,8 +14,13 @@ contract RegisterUser is Config {
         emit UserRegistered(u1, metadata);
         badgeUsers.registerUser(metadata, false);
 
-        (string memory _metadata, bool _isCompany, bool _isCreator, bool _suspended, bool _initialized) = badgeStore
-            .registeredUsers(u1);
+        (
+            string memory _metadata,
+            bool _isCompany,
+            bool _isCreator,
+            bool _suspended,
+            bool _initialized
+        ) = badgeUsersStore.registeredUsers(u1);
 
         assertEq(_metadata, metadata);
         assertEq(_isCompany, false);
@@ -36,7 +41,7 @@ contract RegisterUser is Config {
 
     function testRevertsRegisterUserWhenProtocolFeeAndWrongValue() public {
         vm.prank(address(badgeUsers));
-        badgeStore.updateRegisterCreatorProtocolFee(0.2 ether);
+        badgeUsersStore.updateRegisterCreatorProtocolFee(0.2 ether);
 
         string memory metadata = "ipfs://creatorMetadata.json";
         vm.prank(u1);
@@ -46,7 +51,7 @@ contract RegisterUser is Config {
 
     function testRegisterUserWhenProtocolFee() public {
         vm.prank(address(badgeUsers));
-        badgeStore.updateRegisterCreatorProtocolFee(0.2 ether);
+        badgeUsersStore.updateRegisterCreatorProtocolFee(0.2 ether);
 
         string memory metadata = "ipfs://creatorMetadata.json";
         vm.prank(u1);

@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 import { Test } from "forge-std/Test.sol";
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "../../src/contracts/thebadge/TheBadgeUsersStore.sol";
 import { TheBadgeUsers } from "../../src/contracts/thebadge/TheBadgeUsers.sol";
 import "../../src/contracts/libraries/LibTheBadgeUsers.sol";
 import "../../src/contracts/libraries/LibTheBadge.sol";
@@ -16,6 +17,7 @@ contract Config is Test {
 
     TheBadgeUsers badgeUsers;
     TheBadgeStore badgeStore;
+    TheBadgeUsersStore badgeUsersStore;
 
     event UserRegistered(address indexed user, string metadata);
     event PaymentMade(
@@ -37,11 +39,18 @@ contract Config is Test {
         badgeStore = TheBadgeStore(payable(badgeStoreProxy));
         badgeStore.initialize(admin, feeCollector);
 
+        address badgeUsersStoreProxy = Clones.clone(address(new TheBadgeUsersStore()));
+        badgeUsersStore = TheBadgeUsersStore(payable(badgeUsersStoreProxy));
+        badgeUsersStore.initialize(admin);
+
         address badgeUsersProxy = Clones.clone(address(new TheBadgeUsers()));
         badgeUsers = TheBadgeUsers(payable(badgeUsersProxy));
-        badgeUsers.initialize(admin, badgeStoreProxy);
+        badgeUsers.initialize(admin, badgeStoreProxy, badgeUsersStoreProxy);
 
         vm.prank(admin);
         badgeStore.addPermittedContract("TheBadgeUsers", badgeUsersProxy);
+
+        vm.prank(admin);
+        badgeUsersStore.addPermittedContract("TheBadgeUsers", badgeUsersProxy);
     }
 }

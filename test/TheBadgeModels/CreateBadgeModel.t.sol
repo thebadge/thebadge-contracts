@@ -1,6 +1,7 @@
 pragma solidity ^0.8.20;
 
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "../../src/contracts/thebadge/TheBadgeUsersStore.sol";
 import { IBadgeModelController } from "../../src/interfaces/IBadgeModelController.sol";
 import { LibTheBadgeUsers } from "../../src/contracts/libraries/LibTheBadgeUsers.sol";
 import { LibTheBadgeModels } from "../../src/contracts/libraries/LibTheBadgeModels.sol";
@@ -76,7 +77,7 @@ contract CreateBadgeModel is Config {
         assertEq(feeCollector.balance, fee);
 
         // check user becomes creator
-        TheBadgeStore.User memory _user = badgeStore.getUser(u1);
+        TheBadgeUsersStore.User memory _user = badgeUsersStore.getUser(u1);
         assertEq(_user.isCreator, true);
     }
 

@@ -9,14 +9,14 @@ contract UpdateRegisterCreatorProtocolFee is Config {
         address badgeUsersAddress = vm.addr(10);
 
         vm.prank(admin);
-        badgeStore.addPermittedContract("TheBadgeUsers", badgeUsersAddress);
+        badgeUsersStore.addPermittedContract("TheBadgeUsers", badgeUsersAddress);
 
         uint256 fee = 1 ether;
 
         vm.prank(badgeUsersAddress);
-        badgeStore.updateRegisterCreatorProtocolFee(fee);
+        badgeUsersStore.updateRegisterCreatorProtocolFee(fee);
 
-        assertEq(badgeStore.registerUserProtocolFee(), fee);
+        assertEq(badgeUsersStore.registerUserProtocolFee(), fee);
     }
 
     function testRevertsWhenNotPermittedContract() public {
@@ -26,6 +26,6 @@ contract UpdateRegisterCreatorProtocolFee is Config {
 
         vm.prank(badgeUsersAddress);
         vm.expectRevert(LibTheBadgeStore.TheBadge__Store_OperationNotPermitted.selector);
-        badgeStore.updateRegisterCreatorProtocolFee(fee);
+        badgeUsersStore.updateRegisterCreatorProtocolFee(fee);
     }
 }

@@ -23,7 +23,7 @@ contract UpdateUser is Config {
 
         badgeUsers.updateUser(u1, newMetadata);
 
-        (string memory _metadata, , , , ) = badgeStore.registeredUsers(u1);
+        (string memory _metadata, , , , ) = badgeUsersStore.registeredUsers(u1);
 
         assertEq(_metadata, newMetadata);
     }
