@@ -76,7 +76,8 @@ contract Config is Test {
             _badgeContractAddress,
             address(badgeModelsInstance),
             address(badgeUsersInstance),
-            address(klerosBadgeModelControllerStoreInstance)
+            address(klerosBadgeModelControllerStoreInstance),
+            address(badgeUsersStoreInstance)
         );
 
         // Adds the permissions to TheBadgeModels and TheBadgeUsers to access the store...
@@ -84,10 +85,6 @@ contract Config is Test {
         badgeStoreInstance.addPermittedContract("TheBadgeUsers", address(badgeUsersInstance));
         vm.prank(admin);
         badgeStoreInstance.addPermittedContract("TheBadgeModels", address(badgeModelsInstance));
-
-        // Adds the permissions to TheBadgeUsers to access the users store...
-        vm.prank(admin);
-        badgeUsersStoreInstance.addPermittedContract("TheBadgeUsers", address(badgeUsersInstance));
 
         // Adds KlerosBadgeModelController to the the list of controllers on the store...
         TheBadgeStore.BadgeModelController memory klerosBadgeModelController = TheBadgeStore.BadgeModelController({
@@ -102,7 +99,7 @@ contract Config is Test {
         // Finally adds the permission to KlerosBadgeModelController to access the KlerosBadgeModelControllerStore...
         vm.prank(admin);
         klerosBadgeModelControllerStoreInstance.addPermittedContract(
-            "KlerosBadgeModelController",
+            klerosControllerName,
             address(klerosBadgeModelControllerInstance)
         );
 
@@ -111,5 +108,12 @@ contract Config is Test {
         bytes32 managerRole = keccak256("USER_MANAGER_ROLE");
         vm.prank(admin);
         badgeUsersInstance.grantRole(managerRole, address(badgeModelsInstance));
+
+        // Adds the permissions to TheBadgeUsers to access the users store...
+        vm.startPrank(admin);
+        badgeUsersStoreInstance.addPermittedContract("TheBadgeUsers", address(badgeUsersInstance));
+        badgeUsersStoreInstance.addPermittedContract("TheBadgeModels", address(badgeModelsInstance));
+        badgeUsersStoreInstance.addPermittedContract(klerosControllerName, address(klerosBadgeModelControllerInstance));
+        vm.stopPrank();
     }
 }

@@ -13,7 +13,7 @@ contract Config is Test {
     TheBadgeModels public badgeModelsInstance;
     TheBadgeUsers public badgeUsersInstance;
     TheBadgeStore public badgeStoreInstance;
-    TheBadgeUsersStore public badgeUsersStoreInstance;
+    TheBadgeUsersStore public badgeUsersStore;
     TpBadgeModelController public tpBadgeModelControllerInstance;
     TpBadgeModelControllerStore public tpBadgeModelControllerStoreInstance;
     address public admin = vm.addr(1);
@@ -35,16 +35,15 @@ contract Config is Test {
         badgeStoreInstance.initialize(admin, feeCollector); //
 
         // Instantiates the store
-        address theBadgeUsersStoreImp = address(new TheBadgeUsersStore());
-        address theBadgeUsersStoreProxy = Clones.clone(theBadgeUsersStoreImp);
-        badgeUsersStoreInstance = TheBadgeUsersStore(payable(theBadgeUsersStoreProxy));
-        badgeUsersStoreInstance.initialize(admin); //
+        address badgeUsersStoreProxy = Clones.clone(address(new TheBadgeUsersStore()));
+        badgeUsersStore = TheBadgeUsersStore(payable(badgeUsersStoreProxy));
+        badgeUsersStore.initialize(admin);
 
         // Instantiates the TheBadgeUsers
         address theBadgeUsersImp = address(new TheBadgeUsers());
         address theBadgeUsersProxy = Clones.clone(theBadgeUsersImp);
         badgeUsersInstance = TheBadgeUsers(payable(theBadgeUsersProxy));
-        badgeUsersInstance.initialize(admin, address(badgeStoreInstance), address(badgeUsersStoreInstance));
+        badgeUsersInstance.initialize(admin, address(badgeStoreInstance), address(badgeUsersStore));
 
         // Instantiates the TheBadgeModels
         address badgeModelsInstanceImp = address(new TheBadgeModels());
@@ -53,7 +52,7 @@ contract Config is Test {
         badgeModelsInstance.initialize(
             admin,
             address(badgeStoreInstance),
-            address(badgeUsersStoreInstance),
+            address(badgeUsersStore),
             address(badgeUsersInstance)
         );
 
@@ -74,7 +73,8 @@ contract Config is Test {
             _badgeContractAddress,
             address(badgeModelsInstance),
             address(badgeUsersInstance),
-            address(tpBadgeModelControllerStoreInstance)
+            address(tpBadgeModelControllerStoreInstance),
+            address(badgeUsersStore)
         );
 
         // Adds the permissions to TheBadgeModels and TheBadgeUsers to access the store...
@@ -82,10 +82,6 @@ contract Config is Test {
         badgeStoreInstance.addPermittedContract("TheBadgeUsers", address(badgeUsersInstance));
         vm.prank(admin);
         badgeStoreInstance.addPermittedContract("TheBadgeModels", address(badgeModelsInstance));
-
-        // Adds the permissions to TheBadgeUsers to access the users store...
-        vm.prank(admin);
-        badgeUsersStoreInstance.addPermittedContract("TheBadgeUsers", address(badgeUsersInstance));
 
         // Adds TpBadgeModelController to the the list of controllers on the store...
         TheBadgeStore.BadgeModelController memory tpBadgeModelController = TheBadgeStore.BadgeModelController({
@@ -100,7 +96,7 @@ contract Config is Test {
         // Finally adds the permission to TpBadgeModelController to access the TpBadgeModelControllerStore...
         vm.prank(admin);
         tpBadgeModelControllerStoreInstance.addPermittedContract(
-            "tpBadgeModelController",
+            tpControllerName,
             address(tpBadgeModelControllerInstance)
         );
 
@@ -109,5 +105,12 @@ contract Config is Test {
         bytes32 managerRole = keccak256("USER_MANAGER_ROLE");
         vm.prank(admin);
         badgeUsersInstance.grantRole(managerRole, address(badgeModelsInstance));
+
+        // Adds the permissions to TheBadgeUsers to access the users store...
+        vm.startPrank(admin);
+        badgeUsersStore.addPermittedContract("TheBadgeUsers", address(badgeUsersInstance));
+        badgeUsersStore.addPermittedContract("TheBadgeModels", address(badgeModelsInstance));
+        badgeUsersStore.addPermittedContract(tpControllerName, address(tpBadgeModelControllerInstance));
+        vm.stopPrank();
     }
 }

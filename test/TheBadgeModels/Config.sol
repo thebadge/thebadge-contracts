@@ -58,11 +58,6 @@ contract Config is Test {
         badgeStore.addPermittedContract("TheBadgeUsers", badgeUsersProxy);
         vm.stopPrank();
 
-        vm.startPrank(admin);
-        badgeUsersStore.addPermittedContract("TheBadgeModels", badgeModelsProxy);
-        badgeUsersStore.addPermittedContract("TheBadgeUsers", badgeUsersProxy);
-        vm.stopPrank();
-
         // Instantiates the KlerosBadgeModelControllerStore
         address klerosBadgeModelControllerStoreInstanceImp = address(new KlerosBadgeModelControllerStore());
         address klerosBadgeModelControllerStoreProxy = Clones.clone(klerosBadgeModelControllerStoreInstanceImp);
@@ -80,7 +75,8 @@ contract Config is Test {
             _badgeContractAddress,
             address(badgeModels),
             address(badgeUsers),
-            address(klerosBadgeModelControllerStoreInstance)
+            address(klerosBadgeModelControllerStoreInstance),
+            address(badgeUsersStore)
         );
 
         // Finally adds the permission to klerosBadgeModelControllerInstance to access the klerosBadgeModelControllerStoreInstance...
@@ -105,7 +101,8 @@ contract Config is Test {
             _badgeContractAddress,
             address(badgeModels),
             address(badgeUsers),
-            address(tpBadgeModelControllerStoreInstance)
+            address(tpBadgeModelControllerStoreInstance),
+            address(badgeUsersStore)
         );
 
         // Finally adds the permission to TpBadgeModelController to access the TpBadgeModelControllerStore...
@@ -132,5 +129,13 @@ contract Config is Test {
         });
         vm.prank(address(badgeModels));
         badgeStore.addBadgeModelController(tpControllerName, tpBadgeModelController);
+
+        // Finally adds the permission to TpBadgeModelController to access the badgeUsersStore...
+        vm.startPrank(admin);
+        badgeUsersStore.addPermittedContract("TheBadgeUsers", address(badgeUsers));
+        badgeUsersStore.addPermittedContract("TheBadgeModels", address(badgeModels));
+        badgeUsersStore.addPermittedContract(klerosControllerName, address(klerosBadgeModelControllerInstance));
+        badgeUsersStore.addPermittedContract(tpControllerName, address(tpBadgeModelControllerInstance));
+        vm.stopPrank();
     }
 }
