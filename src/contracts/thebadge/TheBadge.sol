@@ -52,7 +52,7 @@ contract TheBadge is
         address controller,
         uint256 controllerBadgeId
     );
-    event BadgeTransferred(uint256 indexed badgeId, address indexed origin, address indexed destination);
+    event BadgeClaimed(uint256 indexed badgeId, address indexed origin, address indexed destination);
     event ProtocolSettingsUpdated();
 
     /**
@@ -282,7 +282,7 @@ contract TheBadge is
         );
         _badgeStore.updateBadgeDueDate(badgeId, dueDate);
         _badgeStore.transferBadge(badgeId, tempStoredBadgeAddress, claimAddress);
-        emit BadgeTransferred(badgeId, tempStoredBadgeAddress, claimAddress);
+        emit BadgeClaimed(badgeId, tempStoredBadgeAddress, claimAddress);
     }
 
     /**
