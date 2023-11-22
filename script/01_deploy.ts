@@ -164,7 +164,6 @@ const deployControllers = async (
     contractsAdmin,
     theBadge.address,
     theBadgeModels.address,
-    theBadgeUsers.address,
     klerosBadgeModelControllerStore.address,
   ]);
   await klerosBadgeModelController.deployed();
@@ -197,8 +196,8 @@ const deployControllers = async (
     contractsAdmin,
     theBadge.address,
     theBadgeModels.address,
-    theBadgeUsers.address,
     tpBadgeModelControllerStore.address,
+    theBadgeUsers.address,
   ]);
   await tpBadgeModelController.deployed();
   console.log(`ThirdPartyModelController deployed with address: ${tpBadgeModelController.address}`);

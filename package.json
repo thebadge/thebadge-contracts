@@ -18,7 +18,10 @@
     "verify:goerli": "hardhat run --network goerli ./script/03_verify.ts",
     "deploy:sepolia": "hardhat run --network sepolia ./script/01_deploy.ts",
     "upgrade:sepolia": "hardhat run --network sepolia ./script/02_upgrade.ts",
-    "verify:sepolia": "hardhat run --network sepolia ./script/03_verify.ts"
+    "verify:sepolia": "hardhat run --network sepolia ./script/03_verify.ts",
+    "deploy:gnosis": "hardhat run --network gnosis ./script/01_deploy.ts",
+    "upgrade:gnosis": "hardhat run --network gnosis ./script/02_upgrade.ts",
+    "verify:gnosis": "hardhat run --network gnosis ./script/03_verify.ts"
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",

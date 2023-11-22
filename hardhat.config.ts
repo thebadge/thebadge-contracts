@@ -50,10 +50,12 @@ const config: HardhatUserConfig = {
       chainId: 11155111,
       // gasPrice: 5000000000,
     },
-    // gnosis: {
-    //   url: process.env.GNOSIS_URL || "",
-    //   accounts: accounts,
-    // },
+    gnosis: {
+      url: process.env.GNOSIS_URL || "",
+      accounts: accounts,
+      timeout: 100000000,
+      chainId: 100,
+    },
   },
   etherscan: {
     // Your API key for Etherscan
