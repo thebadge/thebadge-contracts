@@ -97,15 +97,15 @@ const deployMainContracts = async (
   const theBadgeAddress = theBadge.address;
   console.log(`TheBadge deployed with address: ${theBadgeAddress}`);
 
-  console.log("Grant userManager role to TheBadgeModels on TheBadgeUsers...");
-  const managerRole = keccak256(utils.toUtf8Bytes("USER_MANAGER_ROLE"));
-  await theBadgeUsers.grantRole(managerRole, theBadgeModels.address);
-
   deployedAddresses.push(["TheBadge", theBadgeAddress]);
   deployedAddresses.push(["TheBadgeStore", theBadgeStoreAddress]);
   deployedAddresses.push(["TheBadgeUsersStore", theBadgeUsersStoreAddress]);
   deployedAddresses.push(["TheBadgeUsers", theBadgeUsersAddress]);
   deployedAddresses.push(["TheBadgeModels", theBadgeModelsAddress]);
+
+  console.log("Grant userManager role to TheBadgeModels on TheBadgeUsers...");
+  const managerRole = keccak256(utils.toUtf8Bytes("USER_MANAGER_ROLE"));
+  await theBadgeUsers.grantRole(managerRole, theBadgeModels.address);
 
   console.log("Allowing TheBadge to access TheBadgeStore...");
   await theBadgeStore.addPermittedContract("TheBadge", theBadgeAddress);
@@ -146,6 +146,7 @@ const deployControllers = async (
   const klerosArbitror = contracts.KlerosArbitror.address[chainId as Chains];
   // The admin that is allowed to upgrade the contracts
   const contractsAdmin = deployer.address;
+  const relayerAddress = process.env.RELAYER_ADDRESS || contractsAdmin;
 
   console.log("Deploying KlerosBadgeModelControllerStore...");
   const KlerosBadgeModelControllerStore = await ethers.getContractFactory("KlerosBadgeModelControllerStore");
@@ -168,16 +169,6 @@ const deployControllers = async (
   ]);
   await klerosBadgeModelController.deployed();
   console.log(`KlerosBadgeModelController deployed with address: ${klerosBadgeModelController.address}`);
-
-  console.log("Allowing KlerosBadgeModelController to access KlerosBadgeModelControllerStore...");
-  await klerosBadgeModelControllerStore.addPermittedContract(
-    "KlerosBadgeModelController",
-    klerosBadgeModelController.address,
-  );
-
-  console.log("Adding KlerosBadgeModelController to TheBadge...");
-  theBadgeModels.connect(deployer);
-  await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address);
 
   console.log("Deploying ThirdPartyModelControllerStore...");
   const TpBadgeModelControllerStore = await ethers.getContractFactory("TpBadgeModelControllerStore");
@@ -202,12 +193,22 @@ const deployControllers = async (
   await tpBadgeModelController.deployed();
   console.log(`ThirdPartyModelController deployed with address: ${tpBadgeModelController.address}`);
 
+  console.log(`Grant claimer role to the relayer address: ${relayerAddress} on ThirdPartyModelControllerStore...`);
+  const claimerRole = keccak256(utils.toUtf8Bytes("CLAIMER_ROLE"));
+  await tpBadgeModelController.grantRole(claimerRole, relayerAddress);
+
+  console.log("Adding KlerosBadgeModelController to TheBadge...");
+  theBadgeModels.connect(deployer);
+  await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address);
+
+  console.log("Allowing KlerosBadgeModelController to access KlerosBadgeModelControllerStore...");
+  await klerosBadgeModelControllerStore.addPermittedContract(
+    "KlerosBadgeModelController",
+    klerosBadgeModelController.address,
+  );
+
   console.log("Allowing ThirdPartyModelController to access TpBadgeModelControllerSTore...");
   await tpBadgeModelControllerStore.addPermittedContract("TpBadgeModelController", tpBadgeModelController.address);
-
-  console.log(`Grant claimer role to the relayer address: ${contractsAdmin} on ThirdPartyModelControllerStore...`);
-  const claimerRole = keccak256(utils.toUtf8Bytes("CLAIMER_ROLE"));
-  await tpBadgeModelController.grantRole(claimerRole, contractsAdmin);
 
   console.log("Adding ThirdPartyModelController to TheBadge...");
   theBadgeModels.connect(deployer);
