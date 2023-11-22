@@ -108,6 +108,10 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
         return _badgeUsersStore.getUserVerifyStatus(controllerAddress, userAddress);
     }
 
+    function getRegisterFee() public view returns (uint256) {
+        return _badgeUsersStore.registerUserProtocolFee();
+    }
+
     function getVerificationFee(
         string memory controllerName
     ) public view existingBadgeModelController(controllerName) returns (uint256) {
@@ -235,6 +239,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
 
         user.suspended = suspended;
         _badgeUsersStore.updateUser(_userAddress, user);
+        emit UpdatedUser(_userAddress, user.metadata, suspended, user.isCreator, false);
     }
 
     /**
@@ -312,7 +317,11 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
         _userVerification.verificationController = _badgeModelController.controller;
         _userVerification.initialized = true;
 
-        _badgeUsersStore.createUserVerificationStatus(_badgeModelController.controller, _msgSender(), _userVerification);
+        _badgeUsersStore.createUserVerificationStatus(
+            _badgeModelController.controller,
+            _msgSender(),
+            _userVerification
+        );
         emit UserVerificationRequested(_msgSender(), evidenceUri, controllerName);
     }
 
