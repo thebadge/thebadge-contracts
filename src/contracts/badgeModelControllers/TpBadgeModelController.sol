@@ -11,7 +11,6 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadge } from "../thebadge/TheBadge.sol";
 import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
-import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
 import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
@@ -19,6 +18,7 @@ import { TpBadgeModelControllerStore } from "./TpBadgeModelControllerStore.sol";
 import { LibTpBadgeModelController } from "../libraries/LibTpBadgeModelController.sol";
 import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { TheBadgeUsersStore } from "../thebadge/TheBadgeUsersStore.sol";
+import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
 
 contract TpBadgeModelController is
     Initializable,
@@ -29,10 +29,9 @@ contract TpBadgeModelController is
 {
     using CappedMath for uint256;
     TpBadgeModelControllerStore public tpBadgeModelControllerStore;
-    TheBadgeUsersStore public theBadgeUsersStore;
+    TheBadgeUsers public theBadgeUsers;
     TheBadge public theBadge;
     TheBadgeModels public theBadgeModels;
-    TheBadgeUsers public theBadgeUsers;
 
     /**
      * =========================
@@ -69,29 +68,8 @@ contract TpBadgeModelController is
         _;
     }
 
-    modifier onlyTheBadgeUsers() {
-        if (address(theBadgeUsers) != msg.sender) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__onlyTheBadge_senderNotTheBadgeUsers();
-        }
-        _;
-    }
-
-    modifier onlyUserOnVerification(address _user) {
-        TheBadgeUsersStore.UserVerification memory _verificationUser = theBadgeUsersStore.getUserVerifyStatus(
-            address(this),
-            _user
-        );
-        if (_verificationUser.initialized == false) {
-            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
-        }
-        if (_verificationUser.verificationStatus != LibTheBadgeUsers.VerificationStatus.VerificationSubmitted) {
-            revert LibTheBadgeUsers.TheBadge__verifyUser__userVerificationNotStarted();
-        }
-        _;
-    }
-
     modifier onlyThirdPartyUser(address callee) {
-        TheBadgeUsersStore.UserVerification memory _verificationUser = theBadgeUsersStore.getUserVerifyStatus(
+        TheBadgeUsersStore.UserVerification memory _verificationUser = theBadgeUsers.getUserVerifyStatus(
             address(this),
             callee
         );
@@ -125,18 +103,16 @@ contract TpBadgeModelController is
         address admin,
         address _theBadge,
         address _theBadgeModels,
-        address _theBadgeUsers,
         address _tpBadgeModelStore,
-        address _theBadgeUsersStore
+        address _theBadgeUsers
     ) public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);
         _grantRole(UPGRADER_ROLE, admin);
         theBadge = TheBadge(payable(_theBadge));
         theBadgeModels = TheBadgeModels(payable(_theBadgeModels));
-        theBadgeUsers = TheBadgeUsers(payable(_theBadgeUsers));
         tpBadgeModelControllerStore = TpBadgeModelControllerStore(payable(_tpBadgeModelStore));
-        theBadgeUsersStore = TheBadgeUsersStore(payable(_theBadgeUsersStore));
+        theBadgeUsers = TheBadgeUsers(payable(_theBadgeUsers));
         emit Initialize(admin);
     }
 
@@ -300,59 +276,6 @@ contract TpBadgeModelController is
     }
 
     // Write methods
-    /**
-     * @notice Creates a request to verify an user in third party
-     * @param _user address of the user
-     * @param userMetadata IPFS uri with the metadata of the user to verify
-     * @param evidenceUri IPFS uri with the evidence required for the verification
-     */
-    function submitUserVerification(
-        address _user,
-        string memory userMetadata,
-        string memory evidenceUri
-    ) public onlyTheBadgeUsers {
-        TheBadgeUsersStore.UserVerification memory _userVerification = theBadgeUsersStore.getUserVerifyStatus(
-            address(this),
-            _user
-        );
-
-        if (_userVerification.initialized) {
-            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
-        }
-
-        _userVerification.user = _user;
-        _userVerification.userMetadata = userMetadata;
-        _userVerification.verificationEvidence = evidenceUri;
-        _userVerification.verificationStatus = LibTheBadgeUsers.VerificationStatus.VerificationSubmitted;
-        _userVerification.verificationController = address(this);
-        _userVerification.initialized = true;
-
-        theBadgeUsersStore.createUserVerificationStatus(address(this), _user, _userVerification);
-    }
-
-    /**
-     * @notice Executes the request to verify an user in kleros
-     * @param _user address of the user
-     * @param verify true if the user should be verified, otherwise false
-     */
-    function executeUserVerification(
-        address _user,
-        bool verify
-    ) public onlyTheBadgeUsers onlyUserOnVerification(_user) {
-        TheBadgeUsersStore.UserVerification memory _userVerification = theBadgeUsersStore.getUserVerifyStatus(
-            address(this),
-            _user
-        );
-
-        if (!_userVerification.initialized) {
-            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
-        }
-
-        LibTheBadgeUsers.VerificationStatus _verificationStatus = verify
-            ? LibTheBadgeUsers.VerificationStatus.Verified
-            : LibTheBadgeUsers.VerificationStatus.VerificationRejected;
-        theBadgeUsersStore.updateUserVerificationStatus(address(this), _user, _verificationStatus);
-    }
 
     /*
      * @notice Updates the value of the protocol: _verifyUserProtocolFee
@@ -426,24 +349,6 @@ contract TpBadgeModelController is
      */
     function getVerifyUserProtocolFee() external view returns (uint256) {
         return tpBadgeModelControllerStore.verifyUserProtocolFee();
-    }
-
-    /**
-     * @notice returns true if the given userAddress exists and has been verified, otherwise returns false.
-     * @param _user the userAddress
-     */
-    function isUserVerified(address _user) public view returns (bool) {
-        TheBadgeUsersStore.UserVerification memory _userVerification = theBadgeUsersStore.getUserVerifyStatus(
-            address(this),
-            _user
-        );
-        if (_userVerification.initialized == false) {
-            return false;
-        }
-        if (_userVerification.verificationStatus == LibTheBadgeUsers.VerificationStatus.Verified) {
-            return true;
-        }
-        return false;
     }
 
     /**

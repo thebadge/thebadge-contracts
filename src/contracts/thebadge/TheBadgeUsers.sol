@@ -91,6 +91,59 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
     }
 
     /**
+     * =========================
+     * Getters
+     * =========================
+     */
+    function getUser(address userAddress) external view returns (TheBadgeUsersStore.User memory) {
+        TheBadgeUsersStore.User memory user = _badgeUsersStore.getUser(userAddress);
+
+        return user;
+    }
+
+    function getUserVerifyStatus(
+        address controllerAddress,
+        address userAddress
+    ) external view returns (TheBadgeUsersStore.UserVerification memory) {
+        return _badgeUsersStore.getUserVerifyStatus(controllerAddress, userAddress);
+    }
+
+    function getVerificationFee(
+        string memory controllerName
+    ) public view existingBadgeModelController(controllerName) returns (uint256) {
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
+        return IBadgeModelController(_badgeModelController.controller).getVerifyUserProtocolFee();
+    }
+
+    function isUserVerified(
+        address _user,
+        string memory controllerName
+    ) public view existingBadgeModelController(controllerName) returns (bool) {
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
+        TheBadgeUsersStore.UserVerification memory verifyStatus = _badgeUsersStore.getUserVerifyStatus(
+            _badgeModelController.controller,
+            _user
+        );
+        if (
+            verifyStatus.initialized == true &&
+            verifyStatus.verificationStatus == LibTheBadgeUsers.VerificationStatus.Verified
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * =========================
+     * Setters
+     * =========================
+     */
+
+    /**
      * @notice Register a new user
      * @param _metadata IPFS url with the metadata of the user
      */
@@ -243,11 +296,23 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
             );
         }
 
-        IBadgeModelController(_badgeModelController.controller).submitUserVerification(
-            _msgSender(),
-            user.metadata,
-            evidenceUri
+        TheBadgeUsersStore.UserVerification memory _userVerification = _badgeUsersStore.getUserVerifyStatus(
+            _badgeModelController.controller,
+            _msgSender()
         );
+
+        if (_userVerification.initialized == true) {
+            revert LibTheBadgeUsers.TheBadge__verifyUser__userVerificationAlreadyStarted();
+        }
+
+        _userVerification.user = _msgSender();
+        _userVerification.userMetadata = user.metadata;
+        _userVerification.verificationEvidence = evidenceUri;
+        _userVerification.verificationStatus = LibTheBadgeUsers.VerificationStatus.VerificationSubmitted;
+        _userVerification.verificationController = _badgeModelController.controller;
+        _userVerification.initialized = true;
+
+        _badgeUsersStore.createUserVerificationStatus(_badgeModelController.controller, _msgSender(), _userVerification);
         emit UserVerificationRequested(_msgSender(), evidenceUri, controllerName);
     }
 
@@ -265,7 +330,21 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             controllerName
         );
-        IBadgeModelController(_badgeModelController.controller).executeUserVerification(_user, verify);
+
+        TheBadgeUsersStore.UserVerification memory _userVerification = _badgeUsersStore.getUserVerifyStatus(
+            _badgeModelController.controller,
+            _user
+        );
+
+        if (_userVerification.initialized == false) {
+            revert LibTheBadgeUsers.TheBadge__verifyUser__userVerificationNotStarted();
+        }
+
+        LibTheBadgeUsers.VerificationStatus _verificationStatus = verify
+            ? LibTheBadgeUsers.VerificationStatus.Verified
+            : LibTheBadgeUsers.VerificationStatus.VerificationRejected;
+
+        _badgeUsersStore.updateUserVerificationStatus(_badgeModelController.controller, _user, _verificationStatus);
         emit UserVerificationExecuted(_user, controllerName, verify);
     }
 
@@ -276,25 +355,6 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
     function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _badgeUsersStore.updateRegisterCreatorProtocolFee(_registerCreatorValue);
         emit ProtocolSettingsUpdated();
-    }
-
-    function getVerificationFee(
-        string memory controllerName
-    ) public view existingBadgeModelController(controllerName) returns (uint256) {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
-            controllerName
-        );
-        return IBadgeModelController(_badgeModelController.controller).getVerifyUserProtocolFee();
-    }
-
-    function isUserVerified(
-        address _user,
-        string memory controllerName
-    ) public view existingBadgeModelController(controllerName) returns (bool) {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
-            controllerName
-        );
-        return IBadgeModelController(_badgeModelController.controller).isUserVerified(_user);
     }
 
     /**
