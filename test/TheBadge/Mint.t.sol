@@ -7,9 +7,7 @@ import { IBadgeModelController } from "../../src/interfaces/IBadgeModelControlle
 
 contract Mint is Config {
     function testWorks() public {
-        address fakeContract = vm.addr(10);
         vm.startPrank(admin);
-        badgeStore.addPermittedContract("FakeContract", fakeContract);
         badgeStore.addPermittedContract("TheBadge", address(badge));
         vm.stopPrank();
         
@@ -25,7 +23,7 @@ contract Mint is Config {
 
         uint256 mintCreatorFee = 0.1e18;
 
-        vm.startPrank(fakeContract);
+        vm.startPrank(address(badge));
         badgeStore.addBadgeModelController(controllerName, _badgeModelController);
         badgeStore.addBadgeModel(
             TheBadgeStore.BadgeModel(
