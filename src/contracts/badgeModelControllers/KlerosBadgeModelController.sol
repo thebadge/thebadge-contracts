@@ -15,7 +15,6 @@ import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { TheBadge } from "../thebadge/TheBadge.sol";
 import { LibKlerosBadgeModelController } from "../libraries/LibKlerosBadgeModelController.sol";
 import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
-import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
@@ -31,7 +30,6 @@ contract KlerosBadgeModelController is
     KlerosBadgeModelControllerStore public klerosBadgeModelControllerStore;
     TheBadge public theBadge;
     TheBadgeModels public theBadgeModels;
-    TheBadgeUsers public theBadgeUsers;
 
     /**
      * =========================
@@ -49,26 +47,6 @@ contract KlerosBadgeModelController is
     modifier onlyTheBadgeModels() {
         if (address(theBadgeModels) != msg.sender) {
             revert LibKlerosBadgeModelController.KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeModels();
-        }
-        _;
-    }
-
-    modifier onlyTheBadgeUsers() {
-        if (address(theBadgeUsers) != msg.sender) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__onlyTheBadge_senderNotTheBadgeUsers();
-        }
-        _;
-    }
-
-    modifier onlyUserOnVerification(address _user) {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
-            _user
-        );
-        if (_klerosUser.initialized == false) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userNotFound();
-        }
-        if (_klerosUser.verificationStatus != LibKlerosBadgeModelController.VerificationStatus.VerificationSubmitted) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userVerificationNotStarted();
         }
         _;
     }
@@ -101,7 +79,6 @@ contract KlerosBadgeModelController is
         address admin,
         address _theBadge,
         address _theBadgeModels,
-        address _theBadgeUsers,
         address _klerosBadgeModelControllerStore
     ) public initializer {
         __Ownable_init(admin);
@@ -110,7 +87,6 @@ contract KlerosBadgeModelController is
         _grantRole(UPGRADER_ROLE, admin);
         theBadge = TheBadge(payable(_theBadge));
         theBadgeModels = TheBadgeModels(payable(_theBadgeModels));
-        theBadgeUsers = TheBadgeUsers(payable(_theBadgeUsers));
         klerosBadgeModelControllerStore = KlerosBadgeModelControllerStore(payable(_klerosBadgeModelControllerStore));
         address _tcrFactory = klerosBadgeModelControllerStore.getTCRFactory();
         emit Initialize(admin, _tcrFactory);
@@ -342,55 +318,6 @@ contract KlerosBadgeModelController is
     }
 
     /**
-     * @notice Creates a request to verify an user in kleros
-     * @param _user address of the user
-     * @param userMetadata IPFS uri with the metadata of the user to verify
-     * @param evidenceUri IPFS uri with the evidence required for the verification
-     */
-    function submitUserVerification(
-        address _user,
-        string memory userMetadata,
-        string memory evidenceUri
-    ) public onlyTheBadgeUsers {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
-            _user
-        );
-
-        if (_klerosUser.initialized) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userVerificationAlreadyStarted();
-        }
-
-        _klerosUser.initialized = true;
-        _klerosUser.verificationStatus = LibKlerosBadgeModelController.VerificationStatus.VerificationSubmitted;
-        _klerosUser.userMetadata = userMetadata;
-        _klerosUser.verificationEvidence = evidenceUri;
-
-        klerosBadgeModelControllerStore.registerKlerosUser(_user, _klerosUser);
-    }
-
-    /**
-     * @notice Executes the request to verify an user in kleros
-     * @param _user address of the user
-     * @param verify true if the user should be verified, otherwise false
-     */
-    function executeUserVerification(
-        address _user,
-        bool verify
-    ) public onlyTheBadgeUsers onlyUserOnVerification(_user) {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
-            _user
-        );
-        if (!_klerosUser.initialized) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userNotFound();
-        }
-
-        LibKlerosBadgeModelController.VerificationStatus _verificationStatus = verify
-            ? LibKlerosBadgeModelController.VerificationStatus.Verified
-            : LibKlerosBadgeModelController.VerificationStatus.VerificationRejected;
-        klerosBadgeModelControllerStore.updateKlerosUserVerificationStatus(_user, _verificationStatus);
-    }
-
-    /**
      * @notice Returns the cost for minting a badge for a kleros controller, its the result of doing klerosBaseDeposit + klerosArbitrationCost
      * @param badgeModelId the badgeModelId
      */
@@ -530,23 +457,6 @@ contract KlerosBadgeModelController is
      */
     function getVerifyUserProtocolFee() public view returns (uint256) {
         return klerosBadgeModelControllerStore.getVerifyUserProtocolFee();
-    }
-
-    /**
-     * @notice returns true if the given userAddress exists and has been verified, otherwise returns false.
-     * @param _user the userAddress
-     */
-    function isUserVerified(address _user) public view returns (bool) {
-        KlerosBadgeModelControllerStore.KlerosUser memory _klerosUser = klerosBadgeModelControllerStore.getKlerosUser(
-            _user
-        );
-        if (_klerosUser.initialized == false) {
-            return false;
-        }
-        if (_klerosUser.verificationStatus == LibKlerosBadgeModelController.VerificationStatus.Verified) {
-            return true;
-        }
-        return false;
     }
 
     /**

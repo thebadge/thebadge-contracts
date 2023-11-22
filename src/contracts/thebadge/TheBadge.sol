@@ -11,6 +11,8 @@ import { ITheBadge } from "../../interfaces/ITheBadge.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
+import { TheBadgeUsers } from "./TheBadgeUsers.sol";
+import { TheBadgeUsersStore } from "./TheBadgeUsersStore.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
@@ -26,6 +28,7 @@ contract TheBadge is
     ReentrancyGuardUpgradeable
 {
     TheBadgeStore public _badgeStore;
+    TheBadgeUsers public _badgeUsers;
     string public name;
     string public symbol;
 
@@ -50,7 +53,7 @@ contract TheBadge is
         address controller,
         uint256 controllerBadgeId
     );
-    event BadgeTransferred(uint256 indexed badgeId, address indexed origin, address indexed destination);
+    event BadgeClaimed(uint256 indexed badgeId, address indexed origin, address indexed destination);
     event ProtocolSettingsUpdated();
 
     /**
@@ -85,7 +88,7 @@ contract TheBadge is
             revert LibTheBadge.TheBadge__requestBadge_controllerIsPaused();
         }
 
-        TheBadgeStore.User memory user = _badgeStore.getUser(_badgeModel.creator);
+        TheBadgeUsersStore.User memory user = _badgeUsers.getUser(_badgeModel.creator);
         if (user.suspended == true) {
             revert LibTheBadge.TheBadge__requestBadge_badgeModelIsSuspended();
         }
@@ -115,7 +118,7 @@ contract TheBadge is
         _disableInitializers();
     }
 
-    function initialize(address admin, address badgeStore) public initializer {
+    function initialize(address admin, address badgeStore, address badgeUsers) public initializer {
         __ERC1155_init("");
         __AccessControl_init();
         __Pausable_init();
@@ -126,6 +129,7 @@ contract TheBadge is
         _grantRole(UPGRADER_ROLE, admin);
         _grantRole(VERIFIER_ROLE, admin);
         _badgeStore = TheBadgeStore(payable(badgeStore));
+        _badgeUsers = TheBadgeUsers(payable(badgeUsers));
         name = "TheBadge";
         symbol = "BGD";
         emit Initialize(admin);
@@ -279,7 +283,7 @@ contract TheBadge is
         );
         _badgeStore.updateBadgeDueDate(badgeId, dueDate);
         _badgeStore.transferBadge(badgeId, tempStoredBadgeAddress, claimAddress);
-        emit BadgeTransferred(badgeId, tempStoredBadgeAddress, claimAddress);
+        emit BadgeClaimed(badgeId, tempStoredBadgeAddress, claimAddress);
     }
 
     /**
@@ -345,15 +349,6 @@ contract TheBadge is
      */
     function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _badgeStore.updateCreateBadgeModelProtocolFee(_createBadgeModelValue);
-        emit ProtocolSettingsUpdated();
-    }
-
-    /*
-     * @notice Updates the value of the protocol: _registerCreatorValue
-     * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
-     */
-    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _badgeStore.updateRegisterCreatorProtocolFee(_registerCreatorValue);
         emit ProtocolSettingsUpdated();
     }
 

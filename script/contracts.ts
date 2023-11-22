@@ -7,58 +7,65 @@ export enum Chains {
 export const contracts = {
   TheBadge: {
     address: {
-      [Chains.goerli]: "0x344DEeF65b47454E2CdCe24FFCFa12f32180253B",
-      [Chains.sepolia]: "0x8D6E4aa214e3eD2E895E0B6938eED63dda4c8C73",
-      [Chains.gnosis]: "",
+      [Chains.goerli]: "0x4e14816A80D7c4FeEeb56C225e821c6374F4AB56",
+      [Chains.sepolia]: "0x4e14816A80D7c4FeEeb56C225e821c6374F4AB56",
+      [Chains.gnosis]: "0x5f90580636AE29a9E4CD2AFFCE6d73501cD594F2",
     },
   },
   TheBadgeStore: {
     address: {
-      [Chains.goerli]: "0x49F7e71dbad648faB6A273F15e363161744a1191",
-      [Chains.sepolia]: "0x8de751B764334240E54B4177300Fa8De4301deBC",
-      [Chains.gnosis]: "",
+      [Chains.goerli]: "0x158A8379071d280e811dC7b670c22a0b46dC582D",
+      [Chains.sepolia]: "0x158A8379071d280e811dC7b670c22a0b46dC582D",
+      [Chains.gnosis]: "0xaDe4Dcc3613dc0b77593adb3D694F2F6f71E4125",
+    },
+  },
+  TheBadgeUsersStore: {
+    address: {
+      [Chains.goerli]: "0x905a49Ead7540FF8a563EB02F66B5c13c5e8eC71",
+      [Chains.sepolia]: "0x905a49Ead7540FF8a563EB02F66B5c13c5e8eC71",
+      [Chains.gnosis]: "0x9316b09049c432E9F69e7d2f613036d936332Ad1",
     },
   },
   TheBadgeUsers: {
     address: {
-      [Chains.goerli]: "0x90d790998f8E19A10AAb8c504c7408c1E61F040a",
-      [Chains.sepolia]: "0xa86D1858D751A2f71231456fC136c4837aD76009",
-      [Chains.gnosis]: "",
+      [Chains.goerli]: "0xbAaA5510144470eBE7260B743CA5516596A0250E",
+      [Chains.sepolia]: "0xbAaA5510144470eBE7260B743CA5516596A0250E",
+      [Chains.gnosis]: "0x8C0DcD187127b88665fE8FD4F39Cb18758946C0f",
     },
   },
   TheBadgeModels: {
     address: {
-      [Chains.goerli]: "0x156dA5dCA074AC3eFafa779bF24ECd0e02Fa8f18",
-      [Chains.sepolia]: "0xced067Ee9Fa889156697Ea2B8fA79ced10119a3A",
-      [Chains.gnosis]: "",
+      [Chains.goerli]: "0xDb5c2bcfD8cc522B8DD634DC507E135383049566",
+      [Chains.sepolia]: "0xDb5c2bcfD8cc522B8DD634DC507E135383049566",
+      [Chains.gnosis]: "0x277D01AACE02C9e6Fa617Ea61Ece24BEDa46453c",
     },
   },
   KlerosBadgeModelController: {
     address: {
-      [Chains.goerli]: "0x6bA29ccEA8862BfAafC539C8504b1cD41031D86E",
-      [Chains.sepolia]: "0x51132014dB4Abcd1b0EAA2ebf2914716282B51E3",
-      [Chains.gnosis]: "",
+      [Chains.goerli]: "0x2C68a077fc4b4e694958A978b409e4127D68f811",
+      [Chains.sepolia]: "0x2C68a077fc4b4e694958A978b409e4127D68f811",
+      [Chains.gnosis]: "0x51e6775fFcDc4E7bd819663E9CabD2bE723C4fBf",
     },
   },
   KlerosBadgeModelControllerStore: {
     address: {
-      [Chains.goerli]: "0x6ae1c8968beA6F70E293daefCDD68EE7bde7e282",
-      [Chains.sepolia]: "0xB219910cB49a0B1D60f73749Fa3483E1D56A694a",
-      [Chains.gnosis]: "",
+      [Chains.goerli]: "0x5F7BF602cF2cc5f631C639293CA0bC733eCD31A6",
+      [Chains.sepolia]: "0x5F7BF602cF2cc5f631C639293CA0bC733eCD31A6",
+      [Chains.gnosis]: "0x86a3C11F2531cb064A4862d371DCB53793E26437",
     },
   },
   TpBadgeModelController: {
     address: {
-      [Chains.goerli]: "0xE8Cc148Ee607BA4A880f8E106a7fBb1BAe1B2C3D",
-      [Chains.sepolia]: "0x5B4d21352d0915e35874fAb36531b24c96C63400",
-      [Chains.gnosis]: "",
+      [Chains.goerli]: "0xB085F625E976c913b82Bf291d32Dc0E55566D3Af",
+      [Chains.sepolia]: "0xB085F625E976c913b82Bf291d32Dc0E55566D3Af",
+      [Chains.gnosis]: "0xDd3472bD0B1382e90238D19b5916C71a657eF223",
     },
   },
   TpBadgeModelControllerStore: {
     address: {
-      [Chains.goerli]: "0x3720a442E70E32C71013F07effc4033fA6249f65",
-      [Chains.sepolia]: "0x66B5B57c61B606C91ffBb438b946c7b68F7aCA69",
-      [Chains.gnosis]: "",
+      [Chains.goerli]: "0x9521e582c3d52cF6a8Dd5adc350f66cB0814c281",
+      [Chains.sepolia]: "0x9521e582c3d52cF6a8Dd5adc350f66cB0814c281",
+      [Chains.gnosis]: "0x59168cE4F00531D8d86aB1eeBBB670DB537dA8AB",
     },
   },
   LightGTCRFactory: {

@@ -18,7 +18,7 @@ contract MakeUserCreator is Config {
         emit UpdatedUser(u1, metadata, false, true, false);
         badgeUsers.makeUserCreator(u1);
 
-        (, , bool _isCreator, , ) = badgeStore.registeredUsers(u1);
+        (, , bool _isCreator, , ) = badgeUsersStore.registeredUsers(u1);
 
         assertEq(_isCreator, true);
     }

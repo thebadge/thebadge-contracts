@@ -2,12 +2,6 @@
 pragma solidity ^0.8.20;
 
 library LibKlerosBadgeModelController {
-    enum VerificationStatus {
-        VerificationSubmitted, // The user submitted a request to verify himself
-        Verified, // The verification was granted to the user
-        VerificationRejected // The verification was rejected after qhe submission
-    }
-
     /**
      * =========================
      * Errors
@@ -28,11 +22,6 @@ library LibKlerosBadgeModelController {
     error KlerosBadgeModelController__badge__klerosBadgeNotFound();
     error KlerosBadgeModelController__badgeModel__NotFound();
     error KlerosBadgeModelController__badge__tcrKlerosBadgeNotFound();
-
-    error KlerosBadgeModelController__user__userVerificationAlreadyStarted();
-    error KlerosBadgeModelController__user__userVerificationNotStarted();
-    error KlerosBadgeModelController__user__userVerificationRejected();
-    error KlerosBadgeModelController__user__userNotFound();
 
     error KlerosBadgeModelController__badge__depositReturnFailed();
 

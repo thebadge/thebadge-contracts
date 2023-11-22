@@ -9,7 +9,6 @@ import { Config } from "./Config.sol";
 import "forge-std/console.sol";
 
 contract CreateBadgeModel is Config {
-    string private controllerName = "thirdParty";
     uint256 private mintCreatorFee = 100;
     uint256 private validFor = 365 days;
 
@@ -20,16 +19,16 @@ contract CreateBadgeModel is Config {
 
         // Register the user as third party one
         vm.prank(user1);
-        badgeUsersInstance.submitUserVerification("thirdParty", "ipfs://evidenceMetadata.json");
+        badgeUsersInstance.submitUserVerification(tpControllerName, "ipfs://evidenceMetadata.json");
 
         // Verify the user to be a third party user
         vm.prank(admin);
-        badgeUsersInstance.executeUserVerification(user1, "thirdParty", true);
+        badgeUsersInstance.executeUserVerification(user1, tpControllerName, true);
 
         // Create a badge model
         TheBadgeStore.CreateBadgeModel memory badgeModel = TheBadgeStore.CreateBadgeModel({
             metadata: "ipfs://badgeModelMetadata.json",
-            controllerName: controllerName,
+            controllerName: tpControllerName,
             mintCreatorFee: mintCreatorFee, // Adjust fee as needed
             validFor: validFor // Adjust validity period as needed
         });
@@ -77,7 +76,7 @@ contract CreateBadgeModel is Config {
             "Mint protocol fee should match"
         );
         assertTrue(initialized, "Badge model should be initialized");
-        assertEq(controllerName, _controllerName, "Controller name should match");
+        assertEq(tpControllerName, _controllerName, "Controller name should match");
         assertEq(mintCreatorFee, _mintCreatorFee, "Mint creator fee should match");
         assertEq(validFor, _validFor, "Valid for should match");
         assertEq(_suspended, false);
@@ -92,16 +91,16 @@ contract CreateBadgeModel is Config {
 
         // Register the user as third party one
         vm.prank(user1);
-        badgeUsersInstance.submitUserVerification("thirdParty", "ipfs://evidenceMetadata.json");
+        badgeUsersInstance.submitUserVerification(tpControllerName, "ipfs://evidenceMetadata.json");
 
         // Verify the user to be a third party user
         vm.prank(admin);
-        badgeUsersInstance.executeUserVerification(user1, "thirdParty", true);
+        badgeUsersInstance.executeUserVerification(user1, tpControllerName, true);
 
         // Create a badge model
         TheBadgeStore.CreateBadgeModel memory badgeModel = TheBadgeStore.CreateBadgeModel({
             metadata: "ipfs://badgeModelMetadata.json",
-            controllerName: controllerName,
+            controllerName: tpControllerName,
             mintCreatorFee: mintCreatorFee, // Adjust fee as needed
             validFor: validFor // Adjust validity period as needed
         });

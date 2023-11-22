@@ -2,6 +2,12 @@
 pragma solidity ^0.8.20;
 
 library LibTheBadgeUsers {
+    enum VerificationStatus {
+        VerificationSubmitted, // The user submitted a request to verify himself
+        Verified, // The verification was granted to the user
+        VerificationRejected // The verification was rejected after qhe submission
+    }
+
     /**
      * =========================
      * Errors
@@ -19,4 +25,7 @@ library LibTheBadgeUsers {
 
     error TheBadge__verifyUser_wrongValue();
     error TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
+    error TheBadge__verifyUser__userVerificationAlreadyStarted();
+    error TheBadge__verifyUser__userVerificationNotStarted();
+    error TheBadge__verifyUser__userVerificationRejected();
 }

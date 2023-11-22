@@ -12,6 +12,7 @@ import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "./TheBadgeUsersStore.sol";
 import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { TheBadgeUsers } from "./TheBadgeUsers.sol";
@@ -43,7 +44,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
      * =========================
      */
     modifier onlyRegisteredUser(address _user) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+        TheBadgeUsersStore.User memory user = _theBadgeUsers.getUser(_user);
         if (bytes(user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
@@ -70,7 +71,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     }
 
     modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId, address _user) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+        TheBadgeUsersStore.User memory user = _theBadgeUsers.getUser(_user);
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
 
         if (bytes(user.metadata).length == 0) {
@@ -208,7 +209,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         );
 
         emit BadgeModelCreated(currentBadgeModelId);
-        TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
+        TheBadgeUsersStore.User memory user = _theBadgeUsers.getUser(_msgSender());
         if (user.isCreator == false) {
             _theBadgeUsers.makeUserCreator(_msgSender());
         }
@@ -358,7 +359,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
             return true;
         }
 
-        TheBadgeStore.User memory creator = _badgeStore.getUser(_badgeModel.creator);
+        TheBadgeUsersStore.User memory creator = _theBadgeUsers.getUser(_badgeModel.creator);
         if (creator.suspended == true) {
             return true;
         }

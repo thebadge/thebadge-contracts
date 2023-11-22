@@ -1,10 +1,13 @@
 pragma solidity ^0.8.20;
 
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
-import "../../src/contracts/libraries/LibTheBadge.sol";
-import "../../src/contracts/libraries/LibTheBadgeUsers.sol";
+import { TheBadgeUsersStore } from "../../src/contracts/thebadge/TheBadgeUsersStore.sol";
+import { TheBadgeUsers } from "../../src/contracts/thebadge/TheBadgeUsers.sol";
+import { LibTheBadge } from "../../src/contracts/libraries/LibTheBadge.sol";
+import { LibTheBadgeUsers } from "../../src/contracts/libraries/LibTheBadgeUsers.sol";
 import { IAccessControl } from "@openzeppelin/contracts/access/IAccessControl.sol";
 import { IBadgeModelController } from "../../src/interfaces/IBadgeModelController.sol";
+import { ITheBadgeUsers } from "../../src/interfaces/ITheBadgeUsers.sol";
 import { Config } from "./Config.sol";
 
 contract ExecuteUserVerification is Config {
@@ -24,9 +27,8 @@ contract ExecuteUserVerification is Config {
 
         string memory controllerName = "KlerosBadgeModelController";
 
-        address controller = vm.addr(5);
         TheBadgeStore.BadgeModelController memory badgeModelController = TheBadgeStore.BadgeModelController(
-            controller,
+            address(klerosBadgeModelControllerInstance),
             false,
             true
         );
@@ -40,15 +42,19 @@ contract ExecuteUserVerification is Config {
 
         // mock function executeUserVerification
         vm.mockCall(
-            controller,
-            abi.encodeWithSelector(IBadgeModelController.executeUserVerification.selector),
+            address(klerosBadgeModelControllerInstance),
+            abi.encodeWithSelector(TheBadgeUsersStore.updateUserVerificationStatus.selector),
             abi.encode(true)
         );
 
+        // Submits the testRevertsWhenVerificationNotStarted(
+        vm.prank(u1);
+        badgeUsers.submitUserVerification{ value: 0 }(controllerName, metadata);
+
         // check executeUserVerification has been called with expected params
         vm.expectCall(
-            controller,
-            abi.encodeWithSelector(IBadgeModelController.executeUserVerification.selector, u1, true)
+            address(badgeUsers),
+            abi.encodeWithSelector(ITheBadgeUsers.executeUserVerification.selector, u1, controllerName, true)
         );
 
         vm.expectEmit(true, false, false, true);
@@ -84,9 +90,8 @@ contract ExecuteUserVerification is Config {
 
         string memory controllerName = "KlerosBadgeModelController";
 
-        address controller = vm.addr(5);
         TheBadgeStore.BadgeModelController memory badgeModelController = TheBadgeStore.BadgeModelController(
-            controller,
+            address(klerosBadgeModelControllerInstance),
             false,
             true
         );
@@ -99,6 +104,51 @@ contract ExecuteUserVerification is Config {
         );
 
         vm.expectRevert(LibTheBadgeUsers.TheBadge__onlyUser_userNotFound.selector);
+
+        vm.prank(u2);
+        badgeUsers.executeUserVerification(u1, controllerName, true);
+    }
+
+    function testRevertsWhenVerificationNotStarted() public {
+        // grant role
+        vm.prank(admin);
+        badgeUsers.grantRole(verifierRole, u2);
+
+        // register user
+        string memory metadata = "ipfs://creatorMetadata.json";
+        vm.prank(u1);
+        badgeUsers.registerUser(metadata, false);
+
+        string memory controllerName = "KlerosBadgeModelController";
+
+        TheBadgeStore.BadgeModelController memory badgeModelController = TheBadgeStore.BadgeModelController(
+            address(klerosBadgeModelControllerInstance),
+            false,
+            true
+        );
+
+        // mock function getBadgeModelController
+        vm.mockCall(
+            address(badgeStore),
+            abi.encodeWithSelector(TheBadgeStore.getBadgeModelController.selector),
+            abi.encode(badgeModelController)
+        );
+
+        // mock function executeUserVerification
+        vm.mockCall(
+            address(klerosBadgeModelControllerInstance),
+            abi.encodeWithSelector(TheBadgeUsersStore.updateUserVerificationStatus.selector),
+            abi.encode(true)
+        );
+
+        // check executeUserVerification has been called with expected params
+        vm.expectCall(
+            address(badgeUsers),
+            abi.encodeWithSelector(ITheBadgeUsers.executeUserVerification.selector, u1, controllerName, true)
+        );
+
+        vm.expectRevert(LibTheBadgeUsers.TheBadge__verifyUser__userVerificationNotStarted.selector);
+        emit UserVerificationExecuted(u1, controllerName, true);
 
         vm.prank(u2);
         badgeUsers.executeUserVerification(u1, controllerName, true);

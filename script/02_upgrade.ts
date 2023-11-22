@@ -47,6 +47,14 @@ const upgradeMainContracts = async (hre: HardhatRuntimeEnvironment): Promise<str
   console.log(`TheBadgeStore Upgraded with address: ${theBadgeStore.address}`);
   deployedAddresses.push(["TheBadgeStore", theBadgeStore.address]);
 
+  console.log("Upgrading TheBadgeUsersStore...");
+  const TheBadgeUsersStore = await ethers.getContractFactory("TheBadgeUsersStore");
+  const theBadgeUsersStoreDeployment = contracts.TheBadgeUsersStore.address[chainId as Chains];
+  const theBadgeUsersStore = await upgrades.upgradeProxy(theBadgeUsersStoreDeployment, TheBadgeUsersStore);
+  await theBadgeUsersStore.deployed();
+  console.log(`TheBadgeUsersStore Upgraded with address: ${theBadgeUsersStore.address}`);
+  deployedAddresses.push(["TheBadgeUsersStore", theBadgeUsersStore.address]);
+
   console.log("Upgrading TheBadgeUsers...");
   const TheBadgeUsers = await ethers.getContractFactory("TheBadgeUsers");
   const theBadgeUsersDeployment = contracts.TheBadgeUsers.address[chainId as Chains];

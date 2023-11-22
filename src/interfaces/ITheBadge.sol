@@ -26,8 +26,6 @@ interface ITheBadge is IERC1155 {
 
     function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) external;
 
-    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) external;
-
     function pause() external;
 
     function unpause() external;
