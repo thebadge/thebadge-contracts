@@ -55,9 +55,20 @@ const config: HardhatUserConfig = {
       accounts: accounts,
       timeout: 100000000,
       chainId: 100,
+      //gasPrice: 5000000000,
     },
   },
   etherscan: {
+    customChains: [
+      {
+        network: "gnosis",
+        chainId: 100,
+        urls: {
+          apiURL: "https://api.gnosisscan.io/api",
+          browserURL: "https://gnosisscan.io/",
+        },
+      },
+    ],
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
     apiKey: {
