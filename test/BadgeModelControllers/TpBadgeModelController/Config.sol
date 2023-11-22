@@ -49,12 +49,7 @@ contract Config is Test {
         address badgeModelsInstanceImp = address(new TheBadgeModels());
         address theBadgeModelsProxy = Clones.clone(badgeModelsInstanceImp);
         badgeModelsInstance = TheBadgeModels(payable(theBadgeModelsProxy));
-        badgeModelsInstance.initialize(
-            admin,
-            address(badgeStoreInstance),
-            address(badgeUsersStore),
-            address(badgeUsersInstance)
-        );
+        badgeModelsInstance.initialize(admin, address(badgeStoreInstance), address(badgeUsersInstance));
 
         // Instantiates the TpBadgeModelControllerStore
         address tpBadgeModelControllerStoreInstanceImp = address(new TpBadgeModelControllerStore());
@@ -72,9 +67,8 @@ contract Config is Test {
             admin,
             _badgeContractAddress,
             address(badgeModelsInstance),
-            address(badgeUsersInstance),
             address(tpBadgeModelControllerStoreInstance),
-            address(badgeUsersStore)
+            address(badgeUsersInstance)
         );
 
         // Adds the permissions to TheBadgeModels and TheBadgeUsers to access the store...

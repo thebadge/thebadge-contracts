@@ -51,7 +51,7 @@ contract Config is Test {
 
         address badgeModelsProxy = Clones.clone(address(new TheBadgeModels()));
         badgeModels = TheBadgeModels(payable(badgeModelsProxy));
-        badgeModels.initialize(admin, badgeStoreProxy, badgeUsersStoreProxy, badgeUsersProxy);
+        badgeModels.initialize(admin, badgeStoreProxy, badgeUsersProxy);
 
         vm.startPrank(admin);
         badgeStore.addPermittedContract("TheBadgeModels", badgeModelsProxy);
@@ -74,9 +74,7 @@ contract Config is Test {
             admin,
             _badgeContractAddress,
             address(badgeModels),
-            address(badgeUsers),
-            address(klerosBadgeModelControllerStoreInstance),
-            address(badgeUsersStore)
+            address(klerosBadgeModelControllerStoreInstance)
         );
 
         // Finally adds the permission to klerosBadgeModelControllerInstance to access the klerosBadgeModelControllerStoreInstance...
@@ -100,9 +98,8 @@ contract Config is Test {
             admin,
             _badgeContractAddress,
             address(badgeModels),
-            address(badgeUsers),
             address(tpBadgeModelControllerStoreInstance),
-            address(badgeUsersStore)
+            address(badgeUsers)
         );
 
         // Finally adds the permission to TpBadgeModelController to access the TpBadgeModelControllerStore...

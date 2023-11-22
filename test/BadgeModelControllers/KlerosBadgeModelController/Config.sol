@@ -53,7 +53,6 @@ contract Config is Test {
         badgeModelsInstance.initialize(
             admin,
             address(badgeStoreInstance),
-            address(badgeUsersStoreInstance),
             address(badgeUsersInstance)
         );
 
@@ -75,9 +74,7 @@ contract Config is Test {
             admin,
             _badgeContractAddress,
             address(badgeModelsInstance),
-            address(badgeUsersInstance),
-            address(klerosBadgeModelControllerStoreInstance),
-            address(badgeUsersStoreInstance)
+            address(klerosBadgeModelControllerStoreInstance)
         );
 
         // Adds the permissions to TheBadgeModels and TheBadgeUsers to access the store...

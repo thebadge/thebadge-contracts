@@ -5,6 +5,10 @@ import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
 import { TheBadgeUsersStore } from "../../src/contracts/thebadge/TheBadgeUsersStore.sol";
 import { TheBadgeUsers } from "../../src/contracts/thebadge/TheBadgeUsers.sol";
+import { TheBadgeModels } from "../../src/contracts/thebadge/TheBadgeModels.sol";
+import { KlerosBadgeModelController } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
+import { KlerosBadgeModelControllerStore } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
+
 import "../../src/contracts/libraries/LibTheBadgeUsers.sol";
 import "../../src/contracts/libraries/LibTheBadge.sol";
 import { IBadgeModelController } from "../../src/interfaces/IBadgeModelController.sol";
@@ -15,9 +19,18 @@ contract Config is Test {
     address u1 = vm.addr(3);
     address u2 = vm.addr(4);
 
+    TheBadgeModels public badgeModelsInstance;
+    TheBadgeUsers public badgeUsersInstance;
+    TheBadgeStore public badgeStoreInstance;
     TheBadgeUsers badgeUsers;
     TheBadgeStore badgeStore;
     TheBadgeUsersStore badgeUsersStore;
+    KlerosBadgeModelController public klerosBadgeModelControllerInstance;
+    KlerosBadgeModelControllerStore public klerosBadgeModelControllerStoreInstance;
+    // TCR Factory address in goerli
+    address public _tcrFactory = 0x55A3d9Bd99F286F1817CAFAAB124ddDDFCb0F314;
+    // Kleros arbitrator address in goerli
+    address public _arbitrator = 0x1128eD55ab2d796fa92D2F8E1f336d745354a77A;
 
     event UserRegistered(address indexed user, string metadata);
     event PaymentMade(
@@ -52,5 +65,36 @@ contract Config is Test {
 
         vm.prank(admin);
         badgeUsersStore.addPermittedContract("TheBadgeUsers", badgeUsersProxy);
+
+        // Instantiates the TheBadgeModels
+        address badgeModelsInstanceImp = address(new TheBadgeModels());
+        address theBadgeModelsProxy = Clones.clone(badgeModelsInstanceImp);
+        badgeModelsInstance = TheBadgeModels(payable(theBadgeModelsProxy));
+        badgeModelsInstance.initialize(
+            admin,
+            address(badgeStoreInstance),
+            address(badgeUsersInstance)
+        );
+
+        // Instantiates the KlerosBadgeModelControllerStore
+        address klerosBadgeModelControllerStoreInstanceImp = address(new KlerosBadgeModelControllerStore());
+        address klerosBadgeModelControllerStoreProxy = Clones.clone(klerosBadgeModelControllerStoreInstanceImp);
+        klerosBadgeModelControllerStoreInstance = KlerosBadgeModelControllerStore(
+            payable(klerosBadgeModelControllerStoreProxy)
+        );
+        klerosBadgeModelControllerStoreInstance.initialize(admin, _arbitrator, _tcrFactory);
+
+        // Instantiates the KlerosBadgeModelController
+        address _badgeContractAddress = vm.addr(5);
+
+        address klerosBadgeModelInstanceImp = address(new KlerosBadgeModelController());
+        address klerosBadgeModelControllerProxy = Clones.clone(klerosBadgeModelInstanceImp);
+        klerosBadgeModelControllerInstance = KlerosBadgeModelController(payable(klerosBadgeModelControllerProxy));
+        klerosBadgeModelControllerInstance.initialize(
+            admin,
+            _badgeContractAddress,
+            address(badgeModelsInstance),
+            address(klerosBadgeModelControllerStoreInstance)
+        );
     }
 }
