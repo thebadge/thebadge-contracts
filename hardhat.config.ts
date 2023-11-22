@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
       accounts: accounts,
       timeout: 100000000,
       chainId: 5,
-      gasPrice: 5000000000,
+      //gasPrice: 5000000000,
     },
     sepolia: {
       url: process.env.SEPOLIA_URL || "",
@@ -63,7 +63,7 @@ const config: HardhatUserConfig = {
     apiKey: {
       goerli: process.env.ETHERSCAN_API_KEY || "",
       sepolia: process.env.ETHERSCAN_API_KEY || "",
-      gnosis: process.env.ETHERSCAN_API_KEY || "",
+      gnosis: process.env.GNOSISSCAN_API_KEY || "",
     },
   },
   tenderly: {
