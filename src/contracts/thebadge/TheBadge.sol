@@ -11,6 +11,7 @@ import { ITheBadge } from "../../interfaces/ITheBadge.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
+import { TheBadgeUsers } from "./TheBadgeUsers.sol";
 import { TheBadgeUsersStore } from "./TheBadgeUsersStore.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
@@ -27,7 +28,7 @@ contract TheBadge is
     ReentrancyGuardUpgradeable
 {
     TheBadgeStore public _badgeStore;
-    TheBadgeUsersStore public _badgeUsersStore;
+    TheBadgeUsers public _badgeUsers;
     string public name;
     string public symbol;
 
@@ -87,7 +88,7 @@ contract TheBadge is
             revert LibTheBadge.TheBadge__requestBadge_controllerIsPaused();
         }
 
-        TheBadgeUsersStore.User memory user = _badgeUsersStore.getUser(_badgeModel.creator);
+        TheBadgeUsersStore.User memory user = _badgeUsers.getUser(_badgeModel.creator);
         if (user.suspended == true) {
             revert LibTheBadge.TheBadge__requestBadge_badgeModelIsSuspended();
         }
@@ -117,7 +118,7 @@ contract TheBadge is
         _disableInitializers();
     }
 
-    function initialize(address admin, address badgeStore, address badgeUsersStore) public initializer {
+    function initialize(address admin, address badgeStore, address badgeUsers) public initializer {
         __ERC1155_init("");
         __AccessControl_init();
         __Pausable_init();
@@ -128,7 +129,7 @@ contract TheBadge is
         _grantRole(UPGRADER_ROLE, admin);
         _grantRole(VERIFIER_ROLE, admin);
         _badgeStore = TheBadgeStore(payable(badgeStore));
-        _badgeUsersStore = TheBadgeUsersStore(payable(badgeUsersStore));
+        _badgeUsers = TheBadgeUsers(payable(badgeUsers));
         name = "TheBadge";
         symbol = "BGD";
         emit Initialize(admin);

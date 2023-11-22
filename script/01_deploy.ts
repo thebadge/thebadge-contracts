@@ -20,10 +20,15 @@ async function main(hre: HardhatRuntimeEnvironment) {
 
   // Deploys the four main contracts: TheBadgeStore, TheBadgeUsers, TheBadgeModels, TheBadge (in that order)
   console.log("Deploying Main contracts...");
-  const { mainContracts, theBadge, theBadgeUsers, theBadgeModels } = await deployMainContracts(hre);
+  const { mainContracts, theBadge, theBadgeUsers, theBadgeModels, theBadgeUsersStore } = await deployMainContracts(hre);
 
   // Deploys all the controllers
-  const controllersAddresses = await deployControllers(hre, { theBadge, theBadgeModels, theBadgeUsers });
+  const controllersAddresses = await deployControllers(hre, {
+    theBadge,
+    theBadgeModels,
+    theBadgeUsers,
+    theBadgeUsersStore,
+  });
 
   console.log("///////// Deployment finished /////////");
   for (const mainContractsAddresses of mainContracts) {
@@ -42,6 +47,7 @@ const deployMainContracts = async (
   theBadge: any;
   theBadgeModels: any;
   theBadgeUsers: any;
+  theBadgeUsersStore: any;
 }> => {
   const { ethers } = hre;
   const [deployer] = await ethers.getSigners();
@@ -78,7 +84,6 @@ const deployMainContracts = async (
   const theBadgeModels = await upgrades.deployProxy(TheBadgeModels, [
     contractsAdmin,
     theBadgeStoreAddress,
-    theBadgeUsersStoreAddress,
     theBadgeUsersAddress,
   ]);
   await theBadgeModels.deployed();
@@ -87,11 +92,7 @@ const deployMainContracts = async (
 
   console.log("Deploying TheBadge...");
   const TheBadge = await ethers.getContractFactory("TheBadge");
-  const theBadge = await upgrades.deployProxy(TheBadge, [
-    contractsAdmin,
-    theBadgeStoreAddress,
-    theBadgeUsersStoreAddress,
-  ]);
+  const theBadge = await upgrades.deployProxy(TheBadge, [contractsAdmin, theBadgeStoreAddress, theBadgeUsersAddress]);
   await theBadge.deployed();
   const theBadgeAddress = theBadge.address;
   console.log(`TheBadge deployed with address: ${theBadgeAddress}`);
@@ -121,6 +122,7 @@ const deployMainContracts = async (
     theBadge,
     theBadgeModels,
     theBadgeUsers,
+    theBadgeUsersStore,
   };
 };
 
@@ -134,6 +136,7 @@ const deployControllers = async (
     theBadge: Contract;
     theBadgeModels: Contract;
     theBadgeUsers: Contract;
+    theBadgeUsersStore: Contract;
   },
 ): Promise<string[][]> => {
   const { ethers, network } = hre;
@@ -200,7 +203,7 @@ const deployControllers = async (
   await tpBadgeModelController.deployed();
   console.log(`ThirdPartyModelController deployed with address: ${tpBadgeModelController.address}`);
 
-  console.log("Allowing ThirdPartyModelController to access ThirdPartyModelControllerStore...");
+  console.log("Allowing ThirdPartyModelController to access TpBadgeModelControllerSTore...");
   await tpBadgeModelControllerStore.addPermittedContract("TpBadgeModelController", tpBadgeModelController.address);
 
   console.log(`Grant claimer role to the relayer address: ${contractsAdmin} on ThirdPartyModelControllerStore...`);
