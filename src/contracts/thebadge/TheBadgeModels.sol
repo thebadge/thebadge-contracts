@@ -98,11 +98,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(
-        address admin,
-        address badgeStore,
-        address badgeUsers
-    ) public initializer {
+    function initialize(address admin, address badgeStore, address badgeUsers) public initializer {
         __Ownable_init(admin);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);

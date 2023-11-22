@@ -50,11 +50,7 @@ contract Config is Test {
         address badgeModelsInstanceImp = address(new TheBadgeModels());
         address theBadgeModelsProxy = Clones.clone(badgeModelsInstanceImp);
         badgeModelsInstance = TheBadgeModels(payable(theBadgeModelsProxy));
-        badgeModelsInstance.initialize(
-            admin,
-            address(badgeStoreInstance),
-            address(badgeUsersInstance)
-        );
+        badgeModelsInstance.initialize(admin, address(badgeStoreInstance), address(badgeUsersInstance));
 
         // Instantiates the KlerosBadgeModelControllerStore
         address klerosBadgeModelControllerStoreInstanceImp = address(new KlerosBadgeModelControllerStore());
