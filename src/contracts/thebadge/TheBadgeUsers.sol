@@ -263,6 +263,26 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
     }
 
     /**
+     * @notice Creates a request to Verify an user on behalf of the user
+     * @param controllerName the controller to verify the user
+     * @param evidenceUri IPFS uri with the evidence required for the verification
+     */
+    function submitUserVerification(
+        address userToVerify,
+        string memory controllerName,
+        string memory evidenceUri
+    )
+        public
+        payable
+        onlyRole(VERIFIER_ROLE)
+        onlyRegisteredUser(userToVerify)
+        existingBadgeModelController(controllerName)
+        nonReentrant
+    {
+        submitUserVerificationLogic(userToVerify, controllerName, evidenceUri);
+    }
+
+    /**
      * @notice Creates a request to Verify an user in an specific badgeModelController
      * @param evidenceUri IPFS uri with the evidence required for the verification
      */
@@ -270,59 +290,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
         string memory controllerName,
         string memory evidenceUri
     ) public payable onlyRegisteredUser(_msgSender()) existingBadgeModelController(controllerName) nonReentrant {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
-            controllerName
-        );
-        TheBadgeUsersStore.User memory user = _badgeUsersStore.getUser(_msgSender());
-        string memory _controllerName = controllerName;
-        address feeCollector = _badgeStore.feeCollector();
-
-        // The verification fee differs in each controller
-        uint256 verifyCreatorProtocolFee = IBadgeModelController(_badgeModelController.controller)
-            .getVerifyUserProtocolFee();
-
-        if (msg.value != verifyCreatorProtocolFee) {
-            revert LibTheBadgeUsers.TheBadge__verifyUser_wrongValue();
-        }
-
-        if (msg.value > 0) {
-            // Transfers the verification fee to the collector
-            (bool verifyCreatorProtocolFeeSent, ) = payable(feeCollector).call{ value: msg.value }("");
-            if (verifyCreatorProtocolFeeSent == false) {
-                revert LibTheBadgeUsers.TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
-            }
-            emit PaymentMade(
-                feeCollector,
-                _msgSender(),
-                msg.value,
-                LibTheBadge.PaymentType.UserVerificationFee,
-                0,
-                _controllerName
-            );
-        }
-
-        TheBadgeUsersStore.UserVerification memory _userVerification = _badgeUsersStore.getUserVerifyStatus(
-            _badgeModelController.controller,
-            _msgSender()
-        );
-
-        if (_userVerification.initialized == true) {
-            revert LibTheBadgeUsers.TheBadge__verifyUser__userVerificationAlreadyStarted();
-        }
-
-        _userVerification.user = _msgSender();
-        _userVerification.userMetadata = user.metadata;
-        _userVerification.verificationEvidence = evidenceUri;
-        _userVerification.verificationStatus = LibTheBadgeUsers.VerificationStatus.VerificationSubmitted;
-        _userVerification.verificationController = _badgeModelController.controller;
-        _userVerification.initialized = true;
-
-        _badgeUsersStore.createUserVerificationStatus(
-            _badgeModelController.controller,
-            _msgSender(),
-            _userVerification
-        );
-        emit UserVerificationRequested(_msgSender(), evidenceUri, controllerName);
+        submitUserVerificationLogic(_msgSender(), controllerName, evidenceUri);
     }
 
     /**
@@ -364,6 +332,66 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
     function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _badgeUsersStore.updateRegisterCreatorProtocolFee(_registerCreatorValue);
         emit ProtocolSettingsUpdated();
+    }
+
+    function submitUserVerificationLogic(
+        address userToVerify,
+        string memory controllerName,
+        string memory evidenceUri
+    ) internal {
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
+        TheBadgeUsersStore.User memory user = _badgeUsersStore.getUser(userToVerify);
+        string memory _controllerName = controllerName;
+        address feeCollector = _badgeStore.feeCollector();
+
+        // The verification fee differs in each controller
+        uint256 verifyCreatorProtocolFee = IBadgeModelController(_badgeModelController.controller)
+            .getVerifyUserProtocolFee();
+
+        if (msg.value != verifyCreatorProtocolFee) {
+            revert LibTheBadgeUsers.TheBadge__verifyUser_wrongValue();
+        }
+
+        if (msg.value > 0) {
+            // Transfers the verification fee to the collector
+            (bool verifyCreatorProtocolFeeSent, ) = payable(feeCollector).call{ value: msg.value }("");
+            if (verifyCreatorProtocolFeeSent == false) {
+                revert LibTheBadgeUsers.TheBadge__verifyUser_verificationProtocolFeesPaymentFailed();
+            }
+            emit PaymentMade(
+                feeCollector,
+                userToVerify,
+                msg.value,
+                LibTheBadge.PaymentType.UserVerificationFee,
+                0,
+                _controllerName
+            );
+        }
+
+        TheBadgeUsersStore.UserVerification memory _userVerification = _badgeUsersStore.getUserVerifyStatus(
+            _badgeModelController.controller,
+            userToVerify
+        );
+
+        if (_userVerification.initialized == true) {
+            revert LibTheBadgeUsers.TheBadge__verifyUser__userVerificationAlreadyStarted();
+        }
+
+        _userVerification.user = userToVerify;
+        _userVerification.userMetadata = user.metadata;
+        _userVerification.verificationEvidence = evidenceUri;
+        _userVerification.verificationStatus = LibTheBadgeUsers.VerificationStatus.VerificationSubmitted;
+        _userVerification.verificationController = _badgeModelController.controller;
+        _userVerification.initialized = true;
+
+        _badgeUsersStore.createUserVerificationStatus(
+            _badgeModelController.controller,
+            userToVerify,
+            _userVerification
+        );
+        emit UserVerificationRequested(userToVerify, evidenceUri, controllerName);
     }
 
     /**
