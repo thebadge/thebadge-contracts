@@ -108,7 +108,7 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
         return _badgeUsersStore.getUserVerifyStatus(controllerAddress, userAddress);
     }
 
-    function getRegisterFee() public view returns (uint256) {
+    function getRegisterFee() external view returns (uint256) {
         return _badgeUsersStore.registerUserProtocolFee();
     }
 
