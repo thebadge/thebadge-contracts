@@ -229,7 +229,8 @@ contract TpBadgeModelController is
             tcrItemID,
             _badgeModelId,
             _badgeId,
-            true
+            true,
+            args.badgeDataUri
         );
         tpBadgeModelControllerStore.addBadge(_badgeId, _newBadge);
         emit ThirdPartyBadgeMinted(_badgeId, tcrItemID);

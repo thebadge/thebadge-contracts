@@ -98,6 +98,7 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         uint256 badgeModelId;
         uint256 badgeId;
         bool initialized;
+        string badgeDataUri;
     }
 
     /**
