@@ -54,9 +54,11 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     /**
      * @param owner address of the creator of the model (the third party address)
      * @param administrators the list of addresses that are allowed to maintain the badgeModel apart from the owner
+     * @param requirementsIPFSHash ipfs hash of the configuration attributes for the certificate
      */
     struct CreateBadgeModel {
         address[] administrators;
+        string requirementsIPFSHash;
     }
 
     struct MintParams {
@@ -73,6 +75,7 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      * @param tcrList The TCR List created for a particular badge model
      * @param governor An address with permission to updates parameters of the list. Use Kleros governor for full decentralization.
      * @param admin The address with permission to add/remove items directly.
+     * @param requirementsIPFSHash ipfs hash of the configuration attributes for the certificate
      */
     struct ThirdPartyBadgeModel {
         address owner;
@@ -81,6 +84,7 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         address governor;
         address admin;
         bool initialized;
+        string requirementsIPFSHash;
     }
 
     /**
@@ -94,6 +98,7 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         uint256 badgeModelId;
         uint256 badgeId;
         bool initialized;
+        string badgeDataUri;
     }
 
     /**

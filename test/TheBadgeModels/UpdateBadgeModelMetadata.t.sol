@@ -86,12 +86,11 @@ contract UpdateBadgeModelMetadata is Config {
 
         // Create an array with a single element containing the address
         TpBadgeModelControllerStore.CreateBadgeModel memory badgeModelData = TpBadgeModelControllerStore
-            .CreateBadgeModel(new address[](0));
+            .CreateBadgeModel(new address[](0), "ipfs://requirementsIPFSHash.json");
 
         // Encode the struct into bytes
         bytes memory dataTp = abi.encode(badgeModelData);
 
-        // bytes memory dataTp = TpBadgeModelControllerStore.CreateBadgeModel({ administrators: administratorsTest });
         TheBadgeStore.CreateBadgeModel memory args = TheBadgeStore.CreateBadgeModel({
             metadata: "metadata",
             controllerName: tpControllerName,

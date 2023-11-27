@@ -36,7 +36,10 @@ contract CreateBadgeModel is Config {
         address[] memory administrators = new address[](1);
         administrators[0] = user1;
         TpBadgeModelControllerStore.CreateBadgeModel memory tpBadgeModel = TpBadgeModelControllerStore
-            .CreateBadgeModel({ administrators: administrators });
+            .CreateBadgeModel({
+                administrators: administrators,
+                requirementsIPFSHash: "ipfs://requirementsIPFSHash.json"
+            });
 
         bytes memory data = abi.encode(tpBadgeModel);
 
@@ -108,7 +111,10 @@ contract CreateBadgeModel is Config {
         address[] memory administrators = new address[](1);
         administrators[0] = user1;
         TpBadgeModelControllerStore.CreateBadgeModel memory tpBadgeModel = TpBadgeModelControllerStore
-            .CreateBadgeModel({ administrators: administrators });
+            .CreateBadgeModel({
+                administrators: administrators,
+                requirementsIPFSHash: "ipfs://requirementsIPFSHash.json"
+            });
 
         bytes memory data = abi.encode(tpBadgeModel);
 
@@ -132,7 +138,8 @@ contract CreateBadgeModel is Config {
             address tcrList,
             address tcrGovernor,
             address tcrAdmin,
-            bool initialized
+            bool initialized,
+            string memory requirementsIPFSHash
         ) = tpBadgeModelControllerStoreInstance.thirdPartyBadgeModels(newBadgeModelCount - 1); // Assuming the last badge model was created
 
         // Perform assertions over thirdPartyBadgeModel
@@ -165,6 +172,7 @@ contract CreateBadgeModel is Config {
             address(tcrListInstance.relayerContract()),
             "The tcrList should be created with the correct admin"
         );
+        assertEq(requirementsIPFSHash, "ipfs://requirementsIPFSHash.json");
         // TODO: Assert creation event if needed
     }
 }
