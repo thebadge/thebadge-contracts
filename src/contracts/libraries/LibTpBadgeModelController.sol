@@ -24,6 +24,7 @@ library LibTpBadgeModelController {
     error ThirdPartyModelController__onlyTheBadge_senderNotTheBadgeUsers();
 
     error ThirdPartyModelController__mintBadge_wrongValue();
+    error ThirdPartyModelController__mintBadge_itemExists();
 
     error ThirdPartyModelController__claimBadge_notAllowed();
     error ThirdPartyModelController__claimBadge_invalidRecipient();
