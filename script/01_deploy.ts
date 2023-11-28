@@ -126,27 +126,29 @@ const deployMainContracts = async (
   };
 };
 
-const deployControllers = async (
+const deployKlerosControllers = async (
   hre: HardhatRuntimeEnvironment,
   {
     theBadge,
     theBadgeModels,
-    theBadgeUsers,
   }: {
     theBadge: Contract;
     theBadgeModels: Contract;
-    theBadgeUsers: Contract;
-    theBadgeUsersStore: Contract;
   },
 ): Promise<string[][]> => {
   const { ethers, network } = hre;
   const [deployer] = await ethers.getSigners();
   const chainId = network.config.chainId;
+
+  if (chainId === Chains.polygon) {
+    console.warn("Deploy kleros on Polygon is not allowed, ignoring kleros deployment...");
+    return [];
+  }
   const lightGTCRFactory = contracts.LightGTCRFactory.address[chainId as Chains];
   const klerosArbitror = contracts.KlerosArbitror.address[chainId as Chains];
+
   // The admin that is allowed to upgrade the contracts
   const contractsAdmin = deployer.address;
-  const relayerAddress = process.env.RELAYER_ADDRESS || contractsAdmin;
 
   console.log("Deploying KlerosBadgeModelControllerStore...");
   const KlerosBadgeModelControllerStore = await ethers.getContractFactory("KlerosBadgeModelControllerStore");
@@ -169,6 +171,45 @@ const deployControllers = async (
   ]);
   await klerosBadgeModelController.deployed();
   console.log(`KlerosBadgeModelController deployed with address: ${klerosBadgeModelController.address}`);
+
+  console.log("Adding KlerosBadgeModelController to TheBadge...");
+  theBadgeModels.connect(deployer);
+  await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address);
+
+  console.log("Allowing KlerosBadgeModelController to access KlerosBadgeModelControllerStore...");
+  await klerosBadgeModelControllerStore.addPermittedContract(
+    "KlerosBadgeModelController",
+    klerosBadgeModelController.address,
+  );
+
+  return [
+    ["klerosBadgeModelController", klerosBadgeModelController.address],
+    ["klerosBadgeModelControllerStore", klerosBadgeModelControllerStore.address],
+  ];
+};
+
+const deployThirdPartyControllers = async (
+  hre: HardhatRuntimeEnvironment,
+  {
+    theBadge,
+    theBadgeModels,
+    theBadgeUsers,
+  }: {
+    theBadge: Contract;
+    theBadgeModels: Contract;
+    theBadgeUsers: Contract;
+  },
+): Promise<string[][]> => {
+  const { ethers, network } = hre;
+  const [deployer] = await ethers.getSigners();
+  const chainId = network.config.chainId;
+
+  // The admin that is allowed to upgrade the contracts
+  const contractsAdmin = deployer.address;
+  const relayerAddress = process.env.RELAYER_ADDRESS || contractsAdmin;
+
+  const lightGTCRFactory = contracts.LightGTCRFactory.address[chainId as Chains];
+  const klerosArbitror = contracts.KlerosArbitror.address[chainId as Chains];
 
   console.log("Deploying ThirdPartyModelControllerStore...");
   const TpBadgeModelControllerStore = await ethers.getContractFactory("TpBadgeModelControllerStore");
@@ -197,16 +238,6 @@ const deployControllers = async (
   const claimerRole = keccak256(utils.toUtf8Bytes("CLAIMER_ROLE"));
   await tpBadgeModelController.grantRole(claimerRole, relayerAddress);
 
-  console.log("Adding KlerosBadgeModelController to TheBadge...");
-  theBadgeModels.connect(deployer);
-  await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address);
-
-  console.log("Allowing KlerosBadgeModelController to access KlerosBadgeModelControllerStore...");
-  await klerosBadgeModelControllerStore.addPermittedContract(
-    "KlerosBadgeModelController",
-    klerosBadgeModelController.address,
-  );
-
   console.log("Allowing ThirdPartyModelController to access TpBadgeModelControllerSTore...");
   await tpBadgeModelControllerStore.addPermittedContract("TpBadgeModelController", tpBadgeModelController.address);
 
@@ -215,11 +246,32 @@ const deployControllers = async (
   await theBadgeModels.addBadgeModelController("thirdParty", tpBadgeModelController.address);
 
   return [
-    ["klerosBadgeModelController", klerosBadgeModelController.address],
-    ["klerosBadgeModelControllerStore", klerosBadgeModelControllerStore.address],
     ["ThirdPartyModelController", tpBadgeModelController.address],
     ["TpBadgeModelControllerStore", tpBadgeModelControllerStore.address],
   ];
+};
+
+const deployControllers = async (
+  hre: HardhatRuntimeEnvironment,
+  {
+    theBadge,
+    theBadgeModels,
+    theBadgeUsers,
+  }: {
+    theBadge: Contract;
+    theBadgeModels: Contract;
+    theBadgeUsers: Contract;
+    theBadgeUsersStore: Contract;
+  },
+): Promise<string[][]> => {
+  const { network } = hre;
+
+  console.log("network", network.config.chainId);
+  const klerosControllers = await deployKlerosControllers(hre, { theBadge, theBadgeModels });
+
+  const thirdPartyControllers = await deployThirdPartyControllers(hre, { theBadge, theBadgeModels, theBadgeUsers });
+
+  return [...klerosControllers, ...thirdPartyControllers];
 };
 
 // We recommend this pattern to be able to use async/await everywhere
