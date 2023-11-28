@@ -57,6 +57,13 @@ const config: HardhatUserConfig = {
       chainId: 100,
       //gasPrice: 5000000000,
     },
+    polygon: {
+      url: process.env.POLYGON_URL || "",
+      accounts: accounts,
+      timeout: 100000000,
+      chainId: 137,
+      //gasPrice: 5000000000,
+    },
   },
   etherscan: {
     customChains: [
@@ -75,6 +82,7 @@ const config: HardhatUserConfig = {
       goerli: process.env.ETHERSCAN_API_KEY || "",
       sepolia: process.env.ETHERSCAN_API_KEY || "",
       gnosis: process.env.GNOSISSCAN_API_KEY || "",
+      polygon: process.env.ETHERSCAN_POLYGON_API_KEY || "",
     },
   },
   tenderly: {
