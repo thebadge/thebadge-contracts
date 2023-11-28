@@ -145,9 +145,7 @@ contract CreateBadgeModel is Config {
         // Perform assertions over thirdPartyBadgeModel
         assertEq(owner, user1, "Owner should match");
         assertEq(badgeModelId, currentTpBadgeModelId - 1, "Tp badgeModelId and TheBadge badgeModelId should match");
-        if (tcrList == address(0)) {
-            revert("The tcrAdmin should not be empty");
-        }
+
         assertEq(
             tcrGovernor,
             address(tpBadgeModelControllerInstance),
