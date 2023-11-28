@@ -160,15 +160,12 @@ contract CreateBadgeModel is Config {
 
         // Perform assertions over TCRList
         ILightGeneralizedTCR tcrListInstance = ILightGeneralizedTCR(tcrList);
-        assertEq(
-            tcrGovernor,
-            address(tcrListInstance.governor()),
-            "The tcrList should be created with the correct governor"
-        );
+        assertEq(address(0), address(tcrListInstance), "The tcrList should be empty");
+
         assertEq(
             tcrAdmin,
-            address(tcrListInstance.relayerContract()),
-            "The tcrList should be created with the correct admin"
+            address(tpBadgeModelControllerInstance),
+            "The tcrList should match the address of the tpBadgeModelController"
         );
         assertEq(requirementsIPFSHash, "ipfs://requirementsIPFSHash.json");
         // TODO: Assert creation event if needed
