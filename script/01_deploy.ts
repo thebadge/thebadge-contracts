@@ -203,6 +203,7 @@ const deployThirdPartyControllers = async (
   const { ethers, network } = hre;
   const [deployer] = await ethers.getSigners();
   const chainId = network.config.chainId;
+  console.log(`Deploying thirdPartyControllers on chain: ${chainId}...`);
 
   // The admin that is allowed to upgrade the contracts
   const contractsAdmin = deployer.address;
@@ -236,14 +237,16 @@ const deployThirdPartyControllers = async (
 
   console.log(`Grant claimer role to the relayer address: ${relayerAddress} on ThirdPartyModelControllerStore...`);
   const claimerRole = keccak256(utils.toUtf8Bytes("CLAIMER_ROLE"));
-  await tpBadgeModelController.grantRole(claimerRole, relayerAddress);
+  await (await tpBadgeModelController.grantRole(claimerRole, relayerAddress)).wait();
 
   console.log("Allowing ThirdPartyModelController to access TpBadgeModelControllerSTore...");
-  await tpBadgeModelControllerStore.addPermittedContract("TpBadgeModelController", tpBadgeModelController.address);
+  await (
+    await tpBadgeModelControllerStore.addPermittedContract("TpBadgeModelController", tpBadgeModelController.address)
+  ).wait();
 
   console.log("Adding ThirdPartyModelController to TheBadge...");
   theBadgeModels.connect(deployer);
-  await theBadgeModels.addBadgeModelController("thirdParty", tpBadgeModelController.address);
+  await (await theBadgeModels.addBadgeModelController("thirdParty", tpBadgeModelController.address)).wait();
 
   return [
     ["ThirdPartyModelController", tpBadgeModelController.address],
@@ -264,9 +267,6 @@ const deployControllers = async (
     theBadgeUsersStore: Contract;
   },
 ): Promise<string[][]> => {
-  const { network } = hre;
-
-  console.log("network", network.config.chainId);
   const klerosControllers = await deployKlerosControllers(hre, { theBadge, theBadgeModels });
 
   const thirdPartyControllers = await deployThirdPartyControllers(hre, { theBadge, theBadgeModels, theBadgeUsers });
