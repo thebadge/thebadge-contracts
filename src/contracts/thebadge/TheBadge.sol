@@ -219,7 +219,7 @@ contract TheBadge is
         uint256 badgeId = _badgeStore.getCurrentBadgeIdCounter();
 
         // Mints the badge on the controller
-        uint256 controllerBadgeId = controller.mint{ value: (msg.value - _badgeModel.mintCreatorFee) }(
+        uint256 controllerBadgeId = controller.mint{ value: controller.mintValue(_badgeModelId) }(
             _msgSender(),
             _badgeModelId,
             badgeId,
@@ -361,14 +361,16 @@ contract TheBadge is
 
     function payProtocolFees(uint256 _badgeModelId) internal {
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
-        address feeCollector = _badgeStore.feeCollector();
-        uint256 theBadgeMintFee = _badgeModel.mintCreatorFee > 0
-            ? calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee)
-            : 0;
-        uint256 theBadgeFee = theBadgeMintFee + _badgeStore.claimBadgeProtocolFee();
-        uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeMintFee;
+        // Gas costs of the claim function sponsored by the creator on behalf of the user
+        uint256 claimBadgeProtocolFee = _badgeStore.claimBadgeProtocolFee();
+        // TheBadge revenue from the creator's fee
+        uint256 theBadgeFee = calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee);
+        // Final revenue of the creator
+        uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeFee;
 
-        (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
+        address feeCollector = _badgeStore.feeCollector();
+        // Stores both the revenue fee plus the fees required for sponsoring the claim
+        (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee + claimBadgeProtocolFee }("");
         if (protocolFeeSent == false) {
             revert LibTheBadge.TheBadge__mint_protocolFeesPaymentFailed();
         }
@@ -577,6 +579,9 @@ contract TheBadge is
      * @param mintProtocolFeeInBps fee that TheBadge protocol charges from the creator revenue
      */
     function calculateFee(uint256 mintCreatorFee, uint256 mintProtocolFeeInBps) internal pure returns (uint256) {
+        if (mintCreatorFee <= 0) {
+            return 0;
+        }
         if ((mintCreatorFee * mintProtocolFeeInBps) < 10_000) {
             revert LibTheBadge.TheBadge__calculateFee_protocolFeesInvalidValues();
         }
