@@ -14,9 +14,42 @@ const verifyControllers = async (hre: HardhatRuntimeEnvironment) => {
     throw new Error(`Network: ${chainId} is not defined or is not supported`);
   }
 
-  const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
   const tpBadgeModelControllerDeployedAddress = contracts.TpBadgeModelController.address[chainId as Chains];
   const tpBadgeModelControllerStoreDeployedAddress = contracts.TpBadgeModelControllerStore.address[chainId as Chains];
+
+  console.log("Verifying TpBadgeModelController contract on Etherscan...");
+  await run(`verify:verify`, {
+    address: tpBadgeModelControllerDeployedAddress,
+    constructorArguments: [],
+  });
+
+  console.log("Verifying tpBadgeModelControllerStore contract on Etherscan...");
+  await run(`verify:verify`, {
+    address: tpBadgeModelControllerStoreDeployedAddress,
+    constructorArguments: [],
+  });
+
+  console.log("Verifying TP controller contracts on Tenderly...");
+  const deployedTpControllerContracts = [
+    {
+      name: "TpBadgeModelController",
+      address: await getImplementationAddress(ethers.provider, tpBadgeModelControllerDeployedAddress),
+      network: chainId.toString(),
+    },
+    {
+      name: "TpBadgeModelControllerStore",
+      address: await getImplementationAddress(ethers.provider, tpBadgeModelControllerStoreDeployedAddress),
+      network: chainId.toString(),
+    },
+  ];
+  await tenderly.verify(...deployedTpControllerContracts);
+
+  if (chainId === Chains.polygon) {
+    console.log("Skipping kleros contracts verifications, the network is polygon...");
+    return;
+  }
+
+  const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
   const klerosBadgeModelControllerStoreDeployedAddress =
     contracts.KlerosBadgeModelControllerStore.address[chainId as Chains];
 
@@ -32,20 +65,8 @@ const verifyControllers = async (hre: HardhatRuntimeEnvironment) => {
     constructorArguments: [],
   });
 
-  console.log("Verifying TpBadgeModelController contract on Etherscan...");
-  await run(`verify:verify`, {
-    address: tpBadgeModelControllerDeployedAddress,
-    constructorArguments: [],
-  });
-
-  console.log("Verifying tpBadgeModelControllerStore contract on Etherscan...");
-  await run(`verify:verify`, {
-    address: tpBadgeModelControllerStoreDeployedAddress,
-    constructorArguments: [],
-  });
-
-  console.log("Verifying controller contracts on Tenderly...");
-  const deployedControllerContracts = [
+  console.log("Verifying kleros controller contracts on Tenderly...");
+  const deployedKlerosControllerContracts = [
     {
       name: "KlerosBadgeModelController",
       address: await getImplementationAddress(ethers.provider, klerosBadgeModelControllerDeployedAddress),
@@ -56,18 +77,8 @@ const verifyControllers = async (hre: HardhatRuntimeEnvironment) => {
       address: await getImplementationAddress(ethers.provider, klerosBadgeModelControllerStoreDeployedAddress),
       network: chainId.toString(),
     },
-    {
-      name: "TpBadgeModelController",
-      address: await getImplementationAddress(ethers.provider, tpBadgeModelControllerDeployedAddress),
-      network: chainId.toString(),
-    },
-    {
-      name: "TpBadgeModelControllerStore",
-      address: await getImplementationAddress(ethers.provider, tpBadgeModelControllerStoreDeployedAddress),
-      network: chainId.toString(),
-    },
   ];
-  await tenderly.verify(...deployedControllerContracts);
+  await tenderly.verify(...deployedKlerosControllerContracts);
 };
 
 const verifyMainContracts = async (hre: HardhatRuntimeEnvironment) => {
