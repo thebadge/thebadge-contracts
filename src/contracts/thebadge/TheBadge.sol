@@ -198,11 +198,9 @@ contract TheBadge is
         }
 
         // Distribute fees
-        TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
-        if (_badgeModel.mintCreatorFee > 0) {
-            payProtocolFees(_badgeModelId);
-        }
+        payProtocolFees(_badgeModelId);
 
+        TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
             _badgeModel.controllerName
         );
@@ -221,7 +219,7 @@ contract TheBadge is
         uint256 badgeId = _badgeStore.getCurrentBadgeIdCounter();
 
         // Mints the badge on the controller
-        uint256 controllerBadgeId = controller.mint{ value: (msg.value - _badgeModel.mintCreatorFee) }(
+        uint256 controllerBadgeId = controller.mint{ value: controller.mintValue(_badgeModelId) }(
             _msgSender(),
             _badgeModelId,
             badgeId,
@@ -344,6 +342,15 @@ contract TheBadge is
     }
 
     /*
+     * @notice Updates the value of the protocol: _claimProtocolFee
+     * @param _claimProtocolFee the fee that TheBadge protocol charges for the claim execution
+     */
+    function updateClaimBadgeProtocolFee(uint256 _claimProtocolFee) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _badgeStore.updateClaimBadgeProtocolFee(_claimProtocolFee);
+        emit ProtocolSettingsUpdated();
+    }
+
+    /*
      * @notice Updates the value of the protocol: _createBadgeModelValue
      * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
      */
@@ -354,11 +361,16 @@ contract TheBadge is
 
     function payProtocolFees(uint256 _badgeModelId) internal {
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
-        address feeCollector = _badgeStore.feeCollector();
+        // Gas costs of the claim function sponsored by the creator on behalf of the user
+        uint256 claimBadgeProtocolFee = _badgeStore.claimBadgeProtocolFee();
+        // TheBadge revenue from the creator's fee
         uint256 theBadgeFee = calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee);
+        // Final revenue of the creator
         uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeFee;
 
-        (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
+        address feeCollector = _badgeStore.feeCollector();
+        // Stores both the revenue fee plus the fees required for sponsoring the claim
+        (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee + claimBadgeProtocolFee }("");
         if (protocolFeeSent == false) {
             revert LibTheBadge.TheBadge__mint_protocolFeesPaymentFailed();
         }
@@ -567,6 +579,9 @@ contract TheBadge is
      * @param mintProtocolFeeInBps fee that TheBadge protocol charges from the creator revenue
      */
     function calculateFee(uint256 mintCreatorFee, uint256 mintProtocolFeeInBps) internal pure returns (uint256) {
+        if (mintCreatorFee <= 0) {
+            return 0;
+        }
         if ((mintCreatorFee * mintProtocolFeeInBps) < 10_000) {
             revert LibTheBadge.TheBadge__calculateFee_protocolFeesInvalidValues();
         }
@@ -592,11 +607,12 @@ contract TheBadge is
     }
 
     /*
-     * @notice given badgeModelId returns the cost of minting that badge (controller minting fee + mintCreatorFee)
+     * @notice given badgeModelId returns the cost of minting that badge (controller minting fee + mintCreatorFee + theBadgeClaimFee)
      * @param badgeModelId the id of the badgeModel
      */
     function mintValue(uint256 badgeModelId) public view returns (uint256) {
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
+        uint256 theBadgeClaimFee = _badgeStore.claimBadgeProtocolFee();
 
         if (_badgeModel.creator == address(0)) {
             revert LibTheBadge.TheBadge__requestBadge_badgeModelNotFound();
@@ -607,7 +623,7 @@ contract TheBadge is
         );
 
         IBadgeModelController controller = IBadgeModelController(_badgeModelController.controller);
-        return controller.mintValue(badgeModelId) + _badgeModel.mintCreatorFee;
+        return controller.mintValue(badgeModelId) + _badgeModel.mintCreatorFee + theBadgeClaimFee;
     }
 
     /**

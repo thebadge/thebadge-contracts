@@ -24,6 +24,8 @@ interface ITheBadge is IERC1155 {
 
     function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) external;
 
+    function updateClaimBadgeProtocolFee(uint256 _claimProtocolFee) external;
+
     function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) external;
 
     function pause() external;
