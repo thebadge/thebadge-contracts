@@ -145,7 +145,9 @@ contract CreateBadgeModel is Config {
         // Perform assertions over thirdPartyBadgeModel
         assertEq(owner, user1, "Owner should match");
         assertEq(badgeModelId, currentTpBadgeModelId - 1, "Tp badgeModelId and TheBadge badgeModelId should match");
-
+        if (tcrList == address(0)) {
+            revert("The tcrAdmin should not be empty");
+        }
         assertEq(
             tcrGovernor,
             address(tpBadgeModelControllerInstance),
@@ -160,12 +162,15 @@ contract CreateBadgeModel is Config {
 
         // Perform assertions over TCRList
         ILightGeneralizedTCR tcrListInstance = ILightGeneralizedTCR(tcrList);
-        assertEq(address(0), address(tcrListInstance), "The tcrList should be empty");
-
+        assertEq(
+            tcrGovernor,
+            address(tcrListInstance.governor()),
+            "The tcrList should be created with the correct governor"
+        );
         assertEq(
             tcrAdmin,
-            address(tpBadgeModelControllerInstance),
-            "The tcrList should match the address of the tpBadgeModelController"
+            address(tcrListInstance.relayerContract()),
+            "The tcrList should be created with the correct admin"
         );
         assertEq(requirementsIPFSHash, "ipfs://requirementsIPFSHash.json");
         // TODO: Assert creation event if needed

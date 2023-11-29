@@ -123,8 +123,6 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     mapping(uint256 => ThirdPartyBadge) public thirdPartyBadges;
     // Mapping to store the list of addresses that are allowed by the owner as co-administrators in each thirdPartyBadgeModel
     mapping(uint256 => mapping(address => bool)) public thirdPartyAdministratorsByBadgeModel;
-    // Mapping to store the list of tcrIDs
-    mapping(bytes32 => bool) public tcrItemIds;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
@@ -163,10 +161,6 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         ThirdPartyBadge memory badge = thirdPartyBadges[badgeId];
         ThirdPartyBadgeModel memory _tpBadgeModel = thirdPartyBadgeModels[badge.badgeModelId];
         return _tpBadgeModel.tcrList;
-    }
-
-    function tcrItemExists(bytes32 tcrItemId) external view returns (bool) {
-        return tcrItemIds[tcrItemId];
     }
 
     function getCurrentBadgeModelsIdCounter() external view returns (uint256) {

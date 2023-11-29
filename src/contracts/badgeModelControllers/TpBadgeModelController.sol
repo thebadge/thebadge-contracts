@@ -134,8 +134,7 @@ contract TpBadgeModelController is
         TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _badgeModel = tpBadgeModelControllerStore.getBadgeModel(
             _badgeModelId
         );
-
-        if (_badgeModel.initialized == true) {
+        if (_badgeModel.tcrList != address(0)) {
             revert LibTpBadgeModelController.ThirdPartyModelController__createBadgeModel_badgeModelAlreadyCreated();
         }
 
@@ -144,14 +143,40 @@ contract TpBadgeModelController is
             (TpBadgeModelControllerStore.CreateBadgeModel)
         );
 
+        ILightGTCRFactory lightGTCRFactory = ILightGTCRFactory(tpBadgeModelControllerStore.tcrFactory());
+        uint256 thirdPartyBaseDeposit = LibTpBadgeModelController.THIRD_PARTY_BASE_DEPOSIT;
+        uint256 thirdPartyStakeMultiplier = LibTpBadgeModelController.THIRD_PARTY_STAKE_MULTIPLIER;
         address _admin = address(this);
         address _governor = address(this);
+        lightGTCRFactory.deploy(
+            IArbitrator(address(tpBadgeModelControllerStore.arbitrator())), // Arbitrator address
+            bytes.concat(
+                abi.encodePacked(LibTpBadgeModelController.COURT_ID),
+                abi.encodePacked(LibTpBadgeModelController.NUMBER_OF_JURORS)
+            ), // ArbitratorExtraData
+            address(0), // TODO: check this. The address of the TCR that stores related TCR addresses. This parameter can be left empty.
+            LibTpBadgeModelController.REGISTRATION_META_EVIDENCE, // The URI of the meta evidence object for registration requests.
+            LibTpBadgeModelController.CLEARING_META_EVIDENCE, // The URI of the meta evidence object for clearing requests.
+            _governor, // The governor of the TCR list, it's allowed to update the tcr parameters
+            // The base deposits for requests/challenges (4 values: submit, remove, challenge and removal request)
+            [thirdPartyBaseDeposit, thirdPartyBaseDeposit, thirdPartyBaseDeposit, thirdPartyBaseDeposit],
+            LibTpBadgeModelController.CHALLENGE_TIME_SECONDS, // The time in seconds parties have to challenge a request.
+            [thirdPartyStakeMultiplier, thirdPartyStakeMultiplier, thirdPartyStakeMultiplier], // Multipliers of the arbitration cost in basis points (see LightGeneralizedTCR MULTIPLIER_DIVISOR)
+            _admin // The address of the relay contract that's allowed add/remove items directly.
+        );
+
+        // Get the address for the TCR created
+        uint256 index = lightGTCRFactory.count() - 1;
+        address tcrListAddress = address(lightGTCRFactory.instances(index));
+        if (tcrListAddress == address(0)) {
+            revert LibTpBadgeModelController.ThirdPartyModelController__createBadgeModel_TCRListAddressZero();
+        }
 
         TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _newBadgeModel = TpBadgeModelControllerStore
             .ThirdPartyBadgeModel(
                 _callee,
                 _badgeModelId,
-                address(0),
+                tcrListAddress,
                 _governor,
                 _admin,
                 true,
@@ -160,7 +185,7 @@ contract TpBadgeModelController is
         tpBadgeModelControllerStore.addBadgeModel(_badgeModelId, _newBadgeModel);
         tpBadgeModelControllerStore.addAdministratorsToBadgeModel(_badgeModelId, args.administrators);
 
-        emit NewThirdPartyBadgeModel(_badgeModelId, address(0));
+        emit NewThirdPartyBadgeModel(_badgeModelId, tcrListAddress);
     }
 
     /**
@@ -185,20 +210,20 @@ contract TpBadgeModelController is
             revert LibTpBadgeModelController.ThirdPartyModelController__mintBadge_wrongValue();
         }
 
+        TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _badgeModel = tpBadgeModelControllerStore.getBadgeModel(
+            _badgeModelId
+        );
+        ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(_badgeModel.tcrList);
         TpBadgeModelControllerStore.MintParams memory args = abi.decode(
             _data,
             (TpBadgeModelControllerStore.MintParams)
         );
 
+        lightGeneralizedTCR.addItemDirectly(args.badgeDataUri);
+
         // Calculates which is the itemID inside the TCR list
         // Its needed on the subgraph to check the disputes status for that item
         bytes32 tcrItemID = keccak256(abi.encodePacked(args.badgeDataUri));
-
-        bool tcrItemExists = tpBadgeModelControllerStore.tcrItemExists(tcrItemID);
-
-        if (tcrItemExists == true) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__mintBadge_itemExists();
-        }
 
         TpBadgeModelControllerStore.ThirdPartyBadge memory _newBadge = TpBadgeModelControllerStore.ThirdPartyBadge(
             tcrItemID,
@@ -304,10 +329,6 @@ contract TpBadgeModelController is
     function isAssetActive(uint256 badgeId) public view returns (bool) {
         ILightGeneralizedTCR lightGeneralizedTCR = getLightGeneralizedTCR(badgeId);
         TpBadgeModelControllerStore.ThirdPartyBadge memory _tpBadge = tpBadgeModelControllerStore.getBadge(badgeId);
-
-        if (address(lightGeneralizedTCR) == address(0)) {
-            return tpBadgeModelControllerStore.tcrItemExists(_tpBadge.itemID);
-        }
 
         (uint8 itemStatus, , ) = lightGeneralizedTCR.getItemInfo(_tpBadge.itemID);
         // The status is REGISTERED or ClearingRequested
