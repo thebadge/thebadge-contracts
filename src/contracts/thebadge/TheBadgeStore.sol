@@ -42,6 +42,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     uint256 public createBadgeModelProtocolFee;
     uint256 public mintBadgeProtocolDefaultFeeInBps;
     address public feeCollector;
+    uint256 public claimBadgeProtocolFee;
 
     /**
      * =========================
@@ -114,6 +115,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         feeCollector = _feeCollector;
         createBadgeModelProtocolFee = uint256(0);
         mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
+        claimBadgeProtocolFee = 0 ether;
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -280,6 +282,14 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      */
     function updateMintBadgeDefaultProtocolFee(uint256 _mintBadgeDefaultFee) public onlyPermittedContract {
         mintBadgeProtocolDefaultFeeInBps = _mintBadgeDefaultFee;
+    }
+
+    /*
+     * @notice Updates the value of the protocol: _claimProtocolFee
+     * @param _claimProtocolFee the fee that TheBadge protocol charges for the claim execution
+     */
+    function updateClaimBadgeProtocolFee(uint256 _claimProtocolFee) public onlyPermittedContract {
+        claimBadgeProtocolFee = _claimProtocolFee;
     }
 
     /*
