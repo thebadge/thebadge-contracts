@@ -362,10 +362,11 @@ contract TheBadge is
     function payProtocolFees(uint256 _badgeModelId) internal {
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
         address feeCollector = _badgeStore.feeCollector();
-        uint256 theBadgeMintFee = calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee);
-        uint256 theBadgeClaimFee = _badgeStore.claimBadgeProtocolFee();
-        uint256 theBadgeFee = theBadgeMintFee + theBadgeClaimFee;
-        uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeFee;
+        uint256 theBadgeMintFee = _badgeModel.mintCreatorFee > 0
+            ? calculateFee(_badgeModel.mintCreatorFee, _badgeModel.mintProtocolFee)
+            : 0;
+        uint256 theBadgeFee = theBadgeMintFee + _badgeStore.claimBadgeProtocolFee();
+        uint256 creatorPayment = _badgeModel.mintCreatorFee - theBadgeMintFee;
 
         (bool protocolFeeSent, ) = payable(feeCollector).call{ value: theBadgeFee }("");
         if (protocolFeeSent == false) {

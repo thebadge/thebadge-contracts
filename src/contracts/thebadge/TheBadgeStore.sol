@@ -42,7 +42,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     uint256 public createBadgeModelProtocolFee;
     uint256 public mintBadgeProtocolDefaultFeeInBps;
     address public feeCollector;
-    uint256 public claimBadgeProtocolFee;
 
     /**
      * =========================
@@ -103,6 +102,8 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     mapping(uint256 => BadgeModel) public badgeModels;
     mapping(uint256 => Badge) public badges;
     mapping(uint256 => mapping(address => uint256[])) public userMintedBadgesByBadgeModel;
+
+    uint256 public claimBadgeProtocolFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
@@ -365,7 +366,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[50] private __gap;
+    uint256[49] private __gap;
 
     // tslint:disable-next-line:no-empty
     receive() external payable {}
