@@ -62,7 +62,7 @@ const config: HardhatUserConfig = {
       accounts: accounts,
       timeout: 100000000,
       chainId: 137,
-     // gasPrice: 2132662188670,
+      // gasPrice: 2132662188670,
     },
   },
   etherscan: {
