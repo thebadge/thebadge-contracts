@@ -187,7 +187,7 @@ const verifyMainContracts = async (hre: HardhatRuntimeEnvironment) => {
     constructorArguments: [],
   });
 
- await tenderlyVerifyMainContracts(hre);
+  await tenderlyVerifyMainContracts(hre);
 };
 
 async function main() {
