@@ -64,6 +64,41 @@
       "address": "0xC277084C7237a60826844995F4Daec0be690EB9a",
       "txHash": "0x8e672f032543f5dea7f6644583d564796c07dbad0905b845fbc39418310f9b5a",
       "kind": "transparent"
+    },
+    {
+      "address": "0x870cDfe4c9b4FFe0687b7f871f6e96793440B214",
+      "txHash": "0x1ce76832891b088cf320796310940b50c9eb4c01e478d65947db195ce8b17bbf",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x7808B0320a21851139207EdAaAAfb1dc4039ceC2",
+      "txHash": "0x0379749cbd08b89cd83196e89bb5530b0a08ca7d23a32a3a4675056ff45e4751",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x8Edfc741aED6B2C43485983d4C7b6B095b00500c",
+      "txHash": "0xdf3e19b767725c772e9f57a6f0021905629d465fc5ca7245b93656060437f7c8",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3C838b8571c53D29108F69b98145f8FcC446Fa5a",
+      "txHash": "0xef20905643f27134bed5a60346eb682b4fd0ee4109ec2abe82d779978749412b",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xE6c5c3174439DA7D2D60456Ca7eB97E7Dcd551e6",
+      "txHash": "0xbcaa4f298a126254abb7f2375cb20fcdb50f907afead62b686e1163714a16676",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x46d5469385C4Af4a3dd858AA839fc49d1f6c485f",
+      "txHash": "0xf1e6788c14240df06c6054b3638e72d075f516ab34de5766713aba47adc3a91e",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x4dC5E2FaC3D0254fEF7f40163261b9307c1C9df3",
+      "txHash": "0xd34af93955dfdaa37adca6fe2e1f134290c9159bf2f22c5bcf70f224b5585023",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -446,7 +481,11 @@
           },
           "t_enum(VerificationStatus)9416": {
             "label": "enum LibTheBadgeUsers.VerificationStatus",
-            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
+            "members": [
+              "VerificationSubmitted",
+              "Verified",
+              "VerificationRejected"
+            ],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {

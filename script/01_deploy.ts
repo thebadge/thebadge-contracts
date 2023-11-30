@@ -300,17 +300,17 @@ const configurePermissions = async (
 
   console.log("Grant userManager role to TheBadgeModels on TheBadgeUsers...");
   const managerRole = keccak256(utils.toUtf8Bytes("USER_MANAGER_ROLE"));
-  await theBadgeUsers.grantRole(managerRole, theBadgeModels.address);
+  await (await theBadgeUsers.grantRole(managerRole, theBadgeModels.address)).wait();
 
   console.log("Allowing TheBadge to access TheBadgeStore...");
-  await theBadgeStore.addPermittedContract("TheBadge", theBadge.address);
+  await (await theBadgeStore.addPermittedContract("TheBadge", theBadge.address)).wait();
   console.log("Allowing TheBadgeModels to access TheBadgeStore...");
-  await theBadgeStore.addPermittedContract("TheBadgeModels", theBadgeModels.address);
+  await (await theBadgeStore.addPermittedContract("TheBadgeModels", theBadgeModels.address)).wait();
   console.log("Allowing TheBadgeUsers to access TheBadgeStore...");
-  await theBadgeStore.addPermittedContract("TheBadgeUsers", theBadgeUsers.address);
+  await (await theBadgeStore.addPermittedContract("TheBadgeUsers", theBadgeUsers.address)).wait();
 
   console.log("Allowing TheBadgeUsers to access TheBadgeUsersStore...");
-  await theBadgeUsersStore.addPermittedContract("TheBadgeUsers", theBadgeUsers.address);
+  await (await theBadgeUsersStore.addPermittedContract("TheBadgeUsers", theBadgeUsers.address)).wait();
 
   console.log(`Grant claimer role to the relayer address: ${relayerAddress} on ThirdPartyModelControllerStore...`);
   const claimerRole = keccak256(utils.toUtf8Bytes("CLAIMER_ROLE"));
@@ -328,13 +328,15 @@ const configurePermissions = async (
   if (chainId !== Chains.polygon && chainId !== Chains.mumbai) {
     console.log("Adding KlerosBadgeModelController to TheBadge...");
     theBadgeModels.connect(deployer);
-    await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address);
+    await (await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address)).wait();
 
     console.log("Allowing KlerosBadgeModelController to access KlerosBadgeModelControllerStore...");
-    await klerosBadgeModelControllerStore.addPermittedContract(
-      "KlerosBadgeModelController",
-      klerosBadgeModelController.address,
-    );
+    await (
+      await klerosBadgeModelControllerStore.addPermittedContract(
+        "KlerosBadgeModelController",
+        klerosBadgeModelController.address,
+      )
+    ).wait();
   }
 };
 
