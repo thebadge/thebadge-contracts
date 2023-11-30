@@ -64,6 +64,11 @@ const config: HardhatUserConfig = {
       chainId: 137,
       // gasPrice: 2132662188670,
     },
+    mumbai: {
+      url: "https://rpc-mumbai.maticvigil.com",
+      accounts: accounts,
+      chainId: 80001,
+    },
   },
   etherscan: {
     customChains: [
@@ -83,6 +88,7 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY || "",
       gnosis: process.env.GNOSISSCAN_API_KEY || "",
       polygon: process.env.ETHERSCAN_POLYGON_API_KEY || "",
+      polygon_mumbai: process.env.ETHERSCAN_POLYGON_API_KEY || "",
     },
   },
   tenderly: {

@@ -24,7 +24,10 @@
     "verify:gnosis": "hardhat run --network gnosis ./script/03_verify.ts",
     "deploy:polygon": "hardhat run --network polygon ./script/01_deploy.ts",
     "upgrade:polygon": "hardhat run --network polygon ./script/02_upgrade.ts",
-    "verify:polygon": "hardhat run --network polygon ./script/03_verify.ts"
+    "verify:polygon": "hardhat run --network polygon ./script/03_verify.ts",
+    "deploy:mumbai": "hardhat run --network mumbai ./script/01_deploy.ts",
+    "upgrade:mumbai": "hardhat run --network mumbai ./script/02_upgrade.ts",
+    "verify:mumbai": "hardhat run --network mumbai ./script/03_verify.ts"
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",
