@@ -3,7 +3,7 @@
 ## TheBadge
 
 | Network | ChainID  | Tag    | Address                                    |
-|---------| -------- | ------ | ------------------------------------------ |
+| ------- | -------- | ------ | ------------------------------------------ |
 | Goerli  | 5        | v2.3.0 | 0x4e14816A80D7c4FeEeb56C225e821c6374F4AB56 |
 | Sepolia | 11155111 | v2.3.2 | 0x4e14816A80D7c4FeEeb56C225e821c6374F4AB56 |
 | xDai    | 100      | v2.3.2 | 0x5f90580636AE29a9E4CD2AFFCE6d73501cD594F2 |
@@ -30,7 +30,6 @@
 | Polygon | 137      | v2.3.2 | 0x7808B0320a21851139207EdAaAAfb1dc4039ceC2 |
 | Mumbai  | 80001    | v2.3.2 | 0x63e00a9aE661CC88620B5F71FE03DaDa958B5096 |
 
-
 ## TheBadgeUsers
 
 | Network | ChainID  | Tag    | Address                                    |
@@ -40,7 +39,6 @@
 | xDai    | 100      | v2.3.2 | 0x8C0DcD187127b88665fE8FD4F39Cb18758946C0f |
 | Polygon | 137      | v2.3.2 | 0x8Edfc741aED6B2C43485983d4C7b6B095b00500c |
 | Mumbai  | 80001    | v2.3.2 | 0xAdCd2Cd1249211EeD1D4d72b1E8B53F3A792e5da |
-
 
 ## TheBadgeModels
 
@@ -77,7 +75,6 @@
 | xDai    | 100      | v2.3.2 | 0xDd3472bD0B1382e90238D19b5916C71a657eF223 |
 | Polygon | 137      | v2.3.2 | 0x4dC5E2FaC3D0254fEF7f40163261b9307c1C9df3 |
 | Mumbai  | 80001    | v2.3.2 | 0x323370530CC8481Bb1599d4C9d565053c8BADAb1 |
-
 
 ## TpBadgeModelControllerStore
 
