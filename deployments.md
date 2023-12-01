@@ -3,11 +3,12 @@
 ## TheBadge
 
 | Network | ChainID  | Tag    | Address                                    |
-| ------- | -------- | ------ | ------------------------------------------ |
+|---------| -------- | ------ | ------------------------------------------ |
 | Goerli  | 5        | v2.3.0 | 0x4e14816A80D7c4FeEeb56C225e821c6374F4AB56 |
 | Sepolia | 11155111 | v2.3.2 | 0x4e14816A80D7c4FeEeb56C225e821c6374F4AB56 |
 | xDai    | 100      | v2.3.2 | 0x5f90580636AE29a9E4CD2AFFCE6d73501cD594F2 |
-| Polygon | 137      | v2.3.2 | 0x844A31e0E8085Ecc62b9F6f6BEb55f0BdeBBaa4C |
+| Polygon | 137      | v2.3.2 | 0xE6c5c3174439DA7D2D60456Ca7eB97E7Dcd551e6 |
+| Mumbai  | 80001    | v2.3.2 | 0xBc8B15322279D7DEDfA6f38EC22075491aEDDB0f |
 
 ## TheBadgeStore
 
@@ -16,7 +17,8 @@
 | Goerli  | 5        | v2.3.0 | 0x158A8379071d280e811dC7b670c22a0b46dC582D |
 | Sepolia | 11155111 | v2.3.2 | 0x158A8379071d280e811dC7b670c22a0b46dC582D |
 | xDai    | 100      | v2.3.2 | 0xaDe4Dcc3613dc0b77593adb3D694F2F6f71E4125 |
-| Polygon | 137      | v2.3.2 | 0x158A8379071d280e811dC7b670c22a0b46dC582D |
+| Polygon | 137      | v2.3.2 | 0x870cDfe4c9b4FFe0687b7f871f6e96793440B214 |
+| Mumbai  | 80001    | v2.3.2 | 0xfA31e6E50d2Aa260434A056e7CaA3FD582B1FfE8 |
 
 ## TheBadgeUsersStore
 
@@ -25,7 +27,9 @@
 | Goerli  | 5        | v2.3.0 | 0x905a49Ead7540FF8a563EB02F66B5c13c5e8eC71 |
 | Sepolia | 11155111 | v2.3.2 | 0x905a49Ead7540FF8a563EB02F66B5c13c5e8eC71 |
 | xDai    | 100      | v2.3.2 | 0x9316b09049c432E9F69e7d2f613036d936332Ad1 |
-| Polygon | 137      | v2.3.2 | 0xbAaA5510144470eBE7260B743CA5516596A0250E |
+| Polygon | 137      | v2.3.2 | 0x7808B0320a21851139207EdAaAAfb1dc4039ceC2 |
+| Mumbai  | 80001    | v2.3.2 | 0x63e00a9aE661CC88620B5F71FE03DaDa958B5096 |
+
 
 ## TheBadgeUsers
 
@@ -34,7 +38,9 @@
 | Goerli  | 5        | v2.3.0 | 0xbAaA5510144470eBE7260B743CA5516596A0250E |
 | Sepolia | 11155111 | v2.3.2 | 0xbAaA5510144470eBE7260B743CA5516596A0250E |
 | xDai    | 100      | v2.3.2 | 0x8C0DcD187127b88665fE8FD4F39Cb18758946C0f |
-| Polygon | 137      | v2.3.2 | 0x1D408E53a18dF1C01E51b412Cd60fA3aB11733c3 |
+| Polygon | 137      | v2.3.2 | 0x8Edfc741aED6B2C43485983d4C7b6B095b00500c |
+| Mumbai  | 80001    | v2.3.2 | 0xAdCd2Cd1249211EeD1D4d72b1E8B53F3A792e5da |
+
 
 ## TheBadgeModels
 
@@ -43,7 +49,8 @@
 | Goerli  | 5        | v2.3.0 | 0xDb5c2bcfD8cc522B8DD634DC507E135383049566 |
 | Sepolia | 11155111 | v2.3.2 | 0xDb5c2bcfD8cc522B8DD634DC507E135383049566 |
 | xDai    | 100      | v2.3.2 | 0x277D01AACE02C9e6Fa617Ea61Ece24BEDa46453c |
-| Polygon | 137      | v2.3.2 | 0xF7FAAB24e9fDBC37b270510AdAB45e672eFD5D0d |
+| Polygon | 137      | v2.3.2 | 0x3C838b8571c53D29108F69b98145f8FcC446Fa5a |
+| Mumbai  | 80001    | v2.3.2 | 0x3540D8484C5ab270b53e16EDD71791d37A49BBf8 |
 
 ## KlerosBadgeModelController
 
@@ -68,7 +75,9 @@
 | Goerli  | 5        | v2.3.0 | 0xB085F625E976c913b82Bf291d32Dc0E55566D3Af |
 | Sepolia | 11155111 | v2.3.2 | 0xB085F625E976c913b82Bf291d32Dc0E55566D3Af |
 | xDai    | 100      | v2.3.2 | 0xDd3472bD0B1382e90238D19b5916C71a657eF223 |
-| Polygon | 137      | v2.3.2 | 0x5F7BF602cF2cc5f631C639293CA0bC733eCD31A6 |
+| Polygon | 137      | v2.3.2 | 0x4dC5E2FaC3D0254fEF7f40163261b9307c1C9df3 |
+| Mumbai  | 80001    | v2.3.2 | 0x323370530CC8481Bb1599d4C9d565053c8BADAb1 |
+
 
 ## TpBadgeModelControllerStore
 
@@ -77,4 +86,5 @@
 | Goerli  | 5        | v2.3.0 | 0x9521e582c3d52cF6a8Dd5adc350f66cB0814c281 |
 | Sepolia | 11155111 | v2.3.2 | 0x9521e582c3d52cF6a8Dd5adc350f66cB0814c281 |
 | xDai    | 100      | v2.3.2 | 0x59168cE4F00531D8d86aB1eeBBB670DB537dA8AB |
-| Polygon | 137      | v2.3.2 | 0x00d7F503531523d446F746387D53BFaa2B0ee182 |
+| Polygon | 137      | v2.3.2 | 0x46d5469385C4Af4a3dd858AA839fc49d1f6c485f |
+| Mumbai  | 80001    | v2.3.2 | 0x76c422969185675Ec46a80B765621B63451cF9F1 |
