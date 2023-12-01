@@ -65,8 +65,9 @@ const config: HardhatUserConfig = {
       // gasPrice: 2132662188670,
     },
     mumbai: {
-      url: "https://rpc-mumbai.maticvigil.com",
+      url: process.env.MUMBAI_URL || "",
       accounts: accounts,
+      timeout: 100000000,
       chainId: 80001,
     },
   },
@@ -88,7 +89,7 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY || "",
       gnosis: process.env.GNOSISSCAN_API_KEY || "",
       polygon: process.env.ETHERSCAN_POLYGON_API_KEY || "",
-      polygon_mumbai: process.env.ETHERSCAN_POLYGON_API_KEY || "",
+      polygonMumbai: process.env.ETHERSCAN_POLYGON_API_KEY || "",
     },
   },
   tenderly: {
