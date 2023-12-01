@@ -99,6 +99,11 @@
       "address": "0x4dC5E2FaC3D0254fEF7f40163261b9307c1C9df3",
       "txHash": "0xd34af93955dfdaa37adca6fe2e1f134290c9159bf2f22c5bcf70f224b5585023",
       "kind": "transparent"
+    },
+    {
+      "address": "0xe5331128FACBAd1F9B90D29c90248F05718211F4",
+      "txHash": "0xb4f6c851dcdacbd7171d46fdc68e2d91aa8297f1bf0f9d2e2756b64624b5f766",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -481,11 +486,7 @@
           },
           "t_enum(VerificationStatus)9416": {
             "label": "enum LibTheBadgeUsers.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -1096,6 +1097,77 @@
           "t_contract(TpBadgeModelControllerStore)9272": {
             "label": "contract TpBadgeModelControllerStore",
             "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "b3a12d620770395b06ab9ff0fcafd1abacc8d8d648b6ef0c43d96ae7f50b87b2": {
+      "address": "0xAdCd2Cd1249211EeD1D4d72b1E8B53F3A792e5da",
+      "txHash": "0x3f65f66c1c742b2210b66a945566f8be97c9f8113db61adf10b14c1e12c8b902",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "_badgeStore",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(TheBadgeStore)13411",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:32"
+          },
+          {
+            "label": "_badgeUsers",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(TheBadgeUsers)14545",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:33"
+          },
+          {
+            "label": "name",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_string_storage",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:34"
+          },
+          {
+            "label": "symbol",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_string_storage",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:35"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:702"
+          }
+        ],
+        "types": {
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_contract(TheBadgeStore)13411": {
+            "label": "contract TheBadgeStore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeUsers)14545": {
+            "label": "contract TheBadgeUsers",
+            "numberOfBytes": "20"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
           },
           "t_uint256": {
             "label": "uint256",
