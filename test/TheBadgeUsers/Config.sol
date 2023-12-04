@@ -9,8 +9,8 @@ import { TheBadgeModels } from "../../src/contracts/thebadge/TheBadgeModels.sol"
 import { KlerosBadgeModelController } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
 import { KlerosBadgeModelControllerStore } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
 
-import "../../src/contracts/libraries/LibTheBadgeUsers.sol";
-import "../../src/contracts/libraries/LibTheBadge.sol";
+import { LibTheBadgeUsers } from "../../src/contracts/libraries/LibTheBadgeUsers.sol";
+import { LibTheBadge } from "../../src/contracts/libraries/LibTheBadge.sol";
 import { IBadgeModelController } from "../../src/interfaces/IBadgeModelController.sol";
 
 contract Config is Test {
