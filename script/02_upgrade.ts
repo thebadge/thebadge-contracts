@@ -86,7 +86,7 @@ const upgradeKlerosControllers = async (hre: HardhatRuntimeEnvironment): Promise
   const { ethers, network } = hre;
   const chainId = network.config.chainId;
 
-  if (chainId === Chains.polygon) {
+  if (chainId === Chains.polygon || chainId === Chains.mumbai) {
     console.warn("Upgrading kleros on Polygon is not allowed, ignoring kleros upgrade...");
     return [];
   }
