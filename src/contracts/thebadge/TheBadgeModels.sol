@@ -146,14 +146,12 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
      * @param controllerName - name of the controller (for instance: Kleros)
      * @param controllerAddress - new address of the controller
      */
+
     function updateBadgeModelController(
         string memory controllerName,
-        address controllerAddress
+        address controllerAddress,
+        bool paused
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
-            controllerName
-        );
-
         if (bytes(controllerName).length == 0) {
             revert LibTheBadgeModels.TheBadge__addBadgeModelController_emptyName();
         }
@@ -162,9 +160,20 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
             revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
         }
 
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
+
+        if (_badgeModelController.controller == address(0)) {
+            revert LibTheBadge.TheBadge__controller_invalidController();
+        }
+        if (_badgeModelController.initialized == false) {
+            revert LibTheBadge.TheBadge__controller_invalidController();
+        }
+
         _badgeModelController.controller = controllerAddress;
         _badgeModelController.initialized = true;
-        _badgeModelController.paused = false;
+        _badgeModelController.paused = paused;
 
         _badgeStore.updateBadgeModelController(controllerName, _badgeModelController);
         emit BadgeModelControllerUpdated(controllerName, controllerAddress);
@@ -365,6 +374,12 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         }
 
         return false;
+    }
+
+    function getBadgeModelController(
+        string memory badgeModelName
+    ) public view returns (TheBadgeStore.BadgeModelController memory badgeModelController) {
+        return _badgeStore.getBadgeModelController(badgeModelName);
     }
 
     /**

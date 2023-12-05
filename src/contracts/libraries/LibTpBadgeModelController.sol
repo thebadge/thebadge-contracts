@@ -30,7 +30,7 @@ library LibTpBadgeModelController {
     error ThirdPartyModelController__claimBadge_invalidBadgeOrAlreadyClaimed();
     error ThirdPartyModelController__claimBadge_userNotAllowed();
 
-    error ThirdPartyModelController__badge__tcrKlerosBadgeNotFound();
+    error ThirdPartyModelController__badge__tcrBadgeNotFound();
 
     error ThirdPartyModelController__user__userVerificationAlreadyStarted();
     error ThirdPartyModelController__user__userVerificationNotStarted();

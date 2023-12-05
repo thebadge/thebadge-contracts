@@ -170,7 +170,7 @@ const deployKlerosControllers = async (
   // The admin that is allowed to upgrade the contracts
   const contractsAdmin = deployer.address;
 
-  console.log("Deploying KlerosBadgeModelControllerStore...");
+  console.log(`Deploying KlerosBadgeModelControllerStore... with contractsAdmin: ${contractsAdmin}`);
   const KlerosBadgeModelControllerStore = await ethers.getContractFactory("KlerosBadgeModelControllerStore");
   const klerosBadgeModelControllerStore = contracts.KlerosBadgeModelControllerStore.address[chainId as Chains]
     ? KlerosBadgeModelControllerStore.attach(contracts.KlerosBadgeModelControllerStore.address[chainId as Chains])
@@ -326,7 +326,7 @@ const configurePermissions = async (
   await (await theBadgeModels.addBadgeModelController("thirdParty", tpBadgeModelController.address)).wait();
 
   if (chainId !== Chains.polygon && chainId !== Chains.mumbai) {
-    console.log("Adding KlerosBadgeModelController to TheBadge...");
+    console.log("Adding KlerosBadgeModelController to TheBadgeModels...");
     theBadgeModels.connect(deployer);
     await (await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address)).wait();
 

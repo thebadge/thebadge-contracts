@@ -389,7 +389,7 @@ contract TpBadgeModelController is
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
         address tcrList = tpBadgeModelControllerStore.getBadgeTcrList(badgeId);
         if (tcrList == address(0)) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__badge__tcrKlerosBadgeNotFound();
+            revert LibTpBadgeModelController.ThirdPartyModelController__badge__tcrBadgeNotFound();
         }
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(tcrList);
         return lightGeneralizedTCR;
@@ -418,7 +418,7 @@ contract TpBadgeModelController is
     uint256[50] private __gap;
 
     /**
-     * @notice we need a receive function to receive deposits devolution from kleros
+     * @notice we need a receive function to receive deposits devolution
      */
     receive() external payable {}
 }
