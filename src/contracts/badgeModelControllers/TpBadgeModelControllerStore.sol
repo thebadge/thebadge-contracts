@@ -54,9 +54,11 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     /**
      * @param owner address of the creator of the model (the third party address)
      * @param administrators the list of addresses that are allowed to maintain the badgeModel apart from the owner
+     * @param requirementsIPFSHash ipfs hash of the configuration attributes for the certificate
      */
     struct CreateBadgeModel {
         address[] administrators;
+        string requirementsIPFSHash;
     }
 
     struct MintParams {
@@ -73,6 +75,7 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      * @param tcrList The TCR List created for a particular badge model
      * @param governor An address with permission to updates parameters of the list. Use Kleros governor for full decentralization.
      * @param admin The address with permission to add/remove items directly.
+     * @param requirementsIPFSHash ipfs hash of the configuration attributes for the certificate
      */
     struct ThirdPartyBadgeModel {
         address owner;
@@ -81,6 +84,7 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         address governor;
         address admin;
         bool initialized;
+        string requirementsIPFSHash;
     }
 
     /**
@@ -94,14 +98,7 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         uint256 badgeModelId;
         uint256 badgeId;
         bool initialized;
-    }
-
-    struct ThirdPartyUser {
-        address user;
-        string userMetadata;
-        string verificationEvidence;
-        LibTpBadgeModelController.VerificationStatus verificationStatus;
-        bool initialized;
+        string badgeDataUri;
     }
 
     /**
@@ -124,7 +121,6 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     mapping(string => address) public allowedContractAddressesByContractName;
     mapping(uint256 => ThirdPartyBadgeModel) public thirdPartyBadgeModels;
     mapping(uint256 => ThirdPartyBadge) public thirdPartyBadges;
-    mapping(address => ThirdPartyUser) public thirdPartyUsers;
     // Mapping to store the list of addresses that are allowed by the owner as co-administrators in each thirdPartyBadgeModel
     mapping(uint256 => mapping(address => bool)) public thirdPartyAdministratorsByBadgeModel;
 
@@ -153,10 +149,6 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      * Getters
      * =========================
      */
-    function getUser(address userAddress) external view returns (ThirdPartyUser memory) {
-        return thirdPartyUsers[userAddress];
-    }
-
     function getBadgeModel(uint256 badgeModelId) external view returns (ThirdPartyBadgeModel memory) {
         return thirdPartyBadgeModels[badgeModelId];
     }
@@ -269,27 +261,6 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     function addBadge(uint256 badgeId, ThirdPartyBadge memory badge) external onlyPermittedContract {
         thirdPartyBadges[badgeId] = badge;
         badgeIdsCounter++;
-    }
-
-    /**
-     * @notice Creates a ThirdPartyUser's details.
-     * @param userAddress The address of the user to be created.
-     * @param newUser The new ThirdPartyUser struct.
-     */
-    function registerTpUser(address userAddress, ThirdPartyUser memory newUser) external onlyPermittedContract {
-        ThirdPartyUser memory _user = thirdPartyUsers[userAddress];
-        if (_user.initialized == true) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationAlreadyStarted();
-        }
-        thirdPartyUsers[userAddress] = newUser;
-    }
-
-    function updateUser(address userAddress, ThirdPartyUser memory updatedUser) external onlyPermittedContract {
-        ThirdPartyUser memory _user = thirdPartyUsers[userAddress];
-        if (bytes(_user.userMetadata).length == 0) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userNotFound();
-        }
-        thirdPartyUsers[userAddress] = updatedUser;
     }
 
     /*

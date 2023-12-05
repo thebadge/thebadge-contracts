@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import { TheBadgeRoles } from "./TheBadgeRoles.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
-import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadgeStore } from "../libraries/LibTheBadgeStore.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
@@ -40,8 +39,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
 
     uint256 internal badgeModelIdsCounter;
     uint256 internal badgeIdsCounter;
-
-    uint256 public registerUserProtocolFee;
     uint256 public createBadgeModelProtocolFee;
     uint256 public mintBadgeProtocolDefaultFeeInBps;
     address public feeCollector;
@@ -51,21 +48,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * Types
      * =========================
      */
-
-    /**
-     * @param metadata information related with the user.
-     * @param isCompany true if the user is a company, otherwise is false (default value)
-     * @param isCreator true if the user has created at least one badge model
-     * @param suspended If true, the user is not allowed to do any actions and if it's a creator, their badges are not mintable anymore.
-     * @param initialized When the struct is created its true, if the struct was never initialized, its false, used in validations
-     */
-    struct User {
-        string metadata;
-        bool isCompany;
-        bool isCreator;
-        bool suspended;
-        bool initialized;
-    }
 
     /**
      * @param controller the smart contract that controls a badge model.
@@ -115,12 +97,13 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     // Mapping to store contract addresses by name
     mapping(address => bool) public allowedContractAddresses;
     mapping(string => address) public allowedContractAddressesByContractName;
-    mapping(address => User) public registeredUsers;
     mapping(string => BadgeModelController) public badgeModelControllers;
     mapping(address => BadgeModelController) public badgeModelControllersByAddress;
     mapping(uint256 => BadgeModel) public badgeModels;
     mapping(uint256 => Badge) public badges;
     mapping(uint256 => mapping(address => uint256[])) public userMintedBadgesByBadgeModel;
+
+    uint256 public claimBadgeProtocolFee;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
@@ -131,9 +114,9 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     function initialize(address admin, address _feeCollector) public initializer {
         __Ownable_init(admin);
         feeCollector = _feeCollector;
-        registerUserProtocolFee = uint256(0);
         createBadgeModelProtocolFee = uint256(0);
         mintBadgeProtocolDefaultFeeInBps = uint256(1000); // in bps (= 10%)
+        claimBadgeProtocolFee = 0 ether;
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -142,10 +125,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * Getters
      * =========================
      */
-    function getUser(address userAddress) external view returns (User memory) {
-        return registeredUsers[userAddress];
-    }
-
     function getBadgeModelController(string memory controllerName) external view returns (BadgeModelController memory) {
         return badgeModelControllers[controllerName];
     }
@@ -184,21 +163,6 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * Setters
      * =========================
      */
-    function createUser(address userAddress, User calldata newUser) external onlyPermittedContract {
-        User storage _user = registeredUsers[userAddress];
-        if (_user.initialized == true) {
-            revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
-        }
-        registeredUsers[userAddress] = newUser;
-    }
-
-    function updateUser(address userAddress, User calldata updatedUser) external onlyPermittedContract {
-        User storage _user = registeredUsers[userAddress];
-        if (_user.initialized == false) {
-            revert LibTheBadgeUsers.TheBadge__updateUser_notFound();
-        }
-        registeredUsers[userAddress] = updatedUser;
-    }
 
     function addBadgeModelController(
         string memory controllerName,
@@ -303,6 +267,16 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
         userMintedBadgesByBadgeModel[badge.badgeModelId][destination].push(badgeId);
     }
 
+    function updateBadgeDueDate(uint256 badgeId, uint256 dueDate) external onlyPermittedContract {
+        Badge storage badge = badges[badgeId];
+
+        if (badge.initialized == false) {
+            revert LibTheBadgeStore.TheBadge__Store_InvalidBadgeID();
+        }
+
+        badge.dueDate = dueDate;
+    }
+
     /*
      * @notice Updates the value of the protocol: _mintBadgeDefaultFee
      * @param _mintBadgeDefaultFee the default fee that TheBadge protocol charges for each mint (in bps)
@@ -312,19 +286,19 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
     }
 
     /*
+     * @notice Updates the value of the protocol: _claimProtocolFee
+     * @param _claimProtocolFee the fee that TheBadge protocol charges for the claim execution
+     */
+    function updateClaimBadgeProtocolFee(uint256 _claimProtocolFee) public onlyPermittedContract {
+        claimBadgeProtocolFee = _claimProtocolFee;
+    }
+
+    /*
      * @notice Updates the value of the protocol: _createBadgeModelValue
      * @param _createBadgeModelValue the default fee that TheBadge protocol charges for each badge model creation (in bps)
      */
     function updateCreateBadgeModelProtocolFee(uint256 _createBadgeModelValue) public onlyPermittedContract {
         createBadgeModelProtocolFee = _createBadgeModelValue;
-    }
-
-    /*
-     * @notice Updates the value of the protocol: _registerCreatorValue
-     * @param _registerCreatorValue the default fee that TheBadge protocol charges for each user registration (in bps)
-     */
-    function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyPermittedContract {
-        registerUserProtocolFee = _registerCreatorValue;
     }
 
     // Function to add a contract to the list of permitted contracts
@@ -392,7 +366,7 @@ contract TheBadgeStore is TheBadgeRoles, OwnableUpgradeable {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[50] private __gap;
+    uint256[49] private __gap;
 
     // tslint:disable-next-line:no-empty
     receive() external payable {}

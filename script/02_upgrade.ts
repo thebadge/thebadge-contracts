@@ -47,6 +47,14 @@ const upgradeMainContracts = async (hre: HardhatRuntimeEnvironment): Promise<str
   console.log(`TheBadgeStore Upgraded with address: ${theBadgeStore.address}`);
   deployedAddresses.push(["TheBadgeStore", theBadgeStore.address]);
 
+  console.log("Upgrading TheBadgeUsersStore...");
+  const TheBadgeUsersStore = await ethers.getContractFactory("TheBadgeUsersStore");
+  const theBadgeUsersStoreDeployment = contracts.TheBadgeUsersStore.address[chainId as Chains];
+  const theBadgeUsersStore = await upgrades.upgradeProxy(theBadgeUsersStoreDeployment, TheBadgeUsersStore);
+  await theBadgeUsersStore.deployed();
+  console.log(`TheBadgeUsersStore Upgraded with address: ${theBadgeUsersStore.address}`);
+  deployedAddresses.push(["TheBadgeUsersStore", theBadgeUsersStore.address]);
+
   console.log("Upgrading TheBadgeUsers...");
   const TheBadgeUsers = await ethers.getContractFactory("TheBadgeUsers");
   const theBadgeUsersDeployment = contracts.TheBadgeUsers.address[chainId as Chains];
@@ -74,10 +82,14 @@ const upgradeMainContracts = async (hre: HardhatRuntimeEnvironment): Promise<str
   return deployedAddresses;
 };
 
-const updateControllers = async (hre: HardhatRuntimeEnvironment): Promise<string[][]> => {
+const upgradeKlerosControllers = async (hre: HardhatRuntimeEnvironment): Promise<string[][]> => {
   const { ethers, network } = hre;
-
   const chainId = network.config.chainId;
+
+  if (chainId === Chains.polygon || chainId === Chains.mumbai) {
+    console.warn("Upgrading kleros on Polygon is not allowed, ignoring kleros upgrade...");
+    return [];
+  }
 
   console.log("Upgrading KlerosBadgeModelController...");
   const KlerosBadgeModelController = await ethers.getContractFactory("KlerosBadgeModelController");
@@ -98,6 +110,16 @@ const updateControllers = async (hre: HardhatRuntimeEnvironment): Promise<string
   );
   await klerosBadgeModelControllerStore.deployed();
 
+  return [
+    ["KlerosBadgeModelController", klerosBadgeModelController.address],
+    ["KlerosBadgeModelControllerStore", klerosBadgeModelControllerStore.address],
+  ];
+};
+
+const upgradeThirdPartyControllers = async (hre: HardhatRuntimeEnvironment): Promise<string[][]> => {
+  const { ethers, network } = hre;
+  const chainId = network.config.chainId;
+
   console.log("Upgrading TpBadgeModelController...");
   const TpBadgeModelController = await ethers.getContractFactory("TpBadgeModelController");
   const tpBadgeModelControllerDeployment = contracts.TpBadgeModelController.address[chainId as Chains];
@@ -114,11 +136,16 @@ const updateControllers = async (hre: HardhatRuntimeEnvironment): Promise<string
   await tpBadgeModelController.deployed();
 
   return [
-    ["KlerosBadgeModelController", klerosBadgeModelController.address],
-    ["KlerosBadgeModelControllerStore", klerosBadgeModelControllerStore.address],
     ["TpBadgeModelController", tpBadgeModelController.address],
     ["TpBadgeModelControllerStore", tpBadgeModelControllerStore.address],
   ];
+};
+
+const updateControllers = async (hre: HardhatRuntimeEnvironment): Promise<string[][]> => {
+  const upgradedThirdPartyControllers = await upgradeThirdPartyControllers(hre);
+  const upgradedKlerosControllers = await upgradeKlerosControllers(hre);
+
+  return [...upgradedThirdPartyControllers, ...upgradedKlerosControllers];
 };
 
 // We recommend this pattern to be able to use async/await everywhere

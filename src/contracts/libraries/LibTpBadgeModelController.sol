@@ -11,12 +11,6 @@ library LibTpBadgeModelController {
     uint256 public constant THIRD_PARTY_BASE_DEPOSIT = CHALLENGE_COST;
     uint256 public constant THIRD_PARTY_STAKE_MULTIPLIER = 100;
 
-    enum VerificationStatus {
-        VerificationSubmitted, // The user submitted a request to verify himself
-        Verified, // The verification was granted to the user
-        VerificationRejected // The verification was rejected after qhe submission
-    }
-
     /**
      * =========================
      * Errors
@@ -36,7 +30,7 @@ library LibTpBadgeModelController {
     error ThirdPartyModelController__claimBadge_invalidBadgeOrAlreadyClaimed();
     error ThirdPartyModelController__claimBadge_userNotAllowed();
 
-    error ThirdPartyModelController__badge__tcrKlerosBadgeNotFound();
+    error ThirdPartyModelController__badge__tcrBadgeNotFound();
 
     error ThirdPartyModelController__user__userVerificationAlreadyStarted();
     error ThirdPartyModelController__user__userVerificationNotStarted();

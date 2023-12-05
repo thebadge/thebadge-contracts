@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
       accounts: accounts,
       timeout: 100000000,
       chainId: 5,
-      gasPrice: 5000000000,
+      //gasPrice: 5000000000,
     },
     sepolia: {
       url: process.env.SEPOLIA_URL || "",
@@ -50,18 +50,46 @@ const config: HardhatUserConfig = {
       chainId: 11155111,
       // gasPrice: 5000000000,
     },
-    // gnosis: {
-    //   url: process.env.GNOSIS_URL || "",
-    //   accounts: accounts,
-    // },
+    gnosis: {
+      url: process.env.GNOSIS_URL || "",
+      accounts: accounts,
+      timeout: 100000000,
+      chainId: 100,
+      //gasPrice: 5000000000,
+    },
+    polygon: {
+      url: process.env.POLYGON_URL || "",
+      accounts: accounts,
+      timeout: 100000000,
+      chainId: 137,
+      // gasPrice: 2132662188670,
+    },
+    mumbai: {
+      url: process.env.MUMBAI_URL || "",
+      accounts: accounts,
+      timeout: 100000000,
+      chainId: 80001,
+    },
   },
   etherscan: {
+    customChains: [
+      {
+        network: "gnosis",
+        chainId: 100,
+        urls: {
+          apiURL: "https://api.gnosisscan.io/api",
+          browserURL: "https://gnosisscan.io/",
+        },
+      },
+    ],
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
     apiKey: {
       goerli: process.env.ETHERSCAN_API_KEY || "",
       sepolia: process.env.ETHERSCAN_API_KEY || "",
-      gnosis: process.env.ETHERSCAN_API_KEY || "",
+      gnosis: process.env.GNOSISSCAN_API_KEY || "",
+      polygon: process.env.ETHERSCAN_POLYGON_API_KEY || "",
+      polygonMumbai: process.env.ETHERSCAN_POLYGON_API_KEY || "",
     },
   },
   tenderly: {

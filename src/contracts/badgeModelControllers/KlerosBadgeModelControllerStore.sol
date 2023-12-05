@@ -5,6 +5,7 @@ import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { LibKlerosBadgeModelController } from "../libraries/LibKlerosBadgeModelController.sol";
+import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 
 contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
@@ -104,11 +105,12 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         bool initialized;
     }
 
-    struct KlerosUser {
+    struct UserVerification {
         address user;
         string userMetadata;
         string verificationEvidence;
-        LibKlerosBadgeModelController.VerificationStatus verificationStatus;
+        LibTheBadgeUsers.VerificationStatus verificationStatus;
+        address verificationController;
         bool initialized;
     }
 
@@ -128,7 +130,6 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
     mapping(string => address) public allowedContractAddressesByContractName;
     mapping(uint256 => KlerosBadgeModel) public klerosBadgeModels;
     mapping(uint256 => KlerosBadge) public klerosBadges;
-    mapping(address => KlerosUser) public klerosUsers;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     // See https://docs.openzeppelin.com/learn/upgrading-smart-contracts#initialization
@@ -173,15 +174,6 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
      */
     function getKlerosBadge(uint256 badgeId) external view returns (KlerosBadge memory) {
         return klerosBadges[badgeId];
-    }
-
-    /**
-     * @notice Get KlerosUser by user address.
-     * @param userAddress The address of the user.
-     * @return KlerosUser struct representing the user.
-     */
-    function getKlerosUser(address userAddress) external view returns (KlerosUser memory) {
-        return klerosUsers[userAddress];
     }
 
     /**
@@ -361,36 +353,6 @@ contract KlerosBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         }
 
         existingBadge.deposit = 0;
-    }
-
-    /**
-     * @notice Creates a KlerosUser's details.
-     * @param userAddress The address of the user to be created.
-     * @param newUser The new KlerosUser struct.
-     */
-    function registerKlerosUser(address userAddress, KlerosUser memory newUser) external onlyPermittedContract {
-        KlerosUser memory _user = klerosUsers[userAddress];
-        if (_user.initialized == true) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userVerificationAlreadyStarted();
-        }
-        klerosUsers[userAddress] = newUser;
-    }
-
-    /**
-     * @notice Update a KlerosUser's details.
-     * @param userAddress The address of the user to be updated.
-     * @param _verificationStatus the new verification status of the user
-     */
-    function updateKlerosUserVerificationStatus(
-        address userAddress,
-        LibKlerosBadgeModelController.VerificationStatus _verificationStatus
-    ) external onlyPermittedContract {
-        KlerosUser memory _user = klerosUsers[userAddress];
-        if (_user.initialized == false) {
-            revert LibKlerosBadgeModelController.KlerosBadgeModelController__user__userNotFound();
-        }
-        _user.verificationStatus = _verificationStatus;
-        klerosUsers[userAddress] = _user;
     }
 
     /**

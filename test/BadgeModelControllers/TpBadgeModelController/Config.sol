@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 import { Test } from "forge-std/Test.sol";
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
 import { TheBadgeStore } from "../../../src/contracts/thebadge/TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "../../../src/contracts/thebadge/TheBadgeUsersStore.sol";
 import { TheBadgeUsers } from "../../../src/contracts/thebadge/TheBadgeUsers.sol";
 import { TheBadgeModels } from "../../../src/contracts/thebadge/TheBadgeModels.sol";
 import { TpBadgeModelController } from "../../../src/contracts/badgeModelControllers/TpBadgeModelController.sol";
@@ -12,6 +13,7 @@ contract Config is Test {
     TheBadgeModels public badgeModelsInstance;
     TheBadgeUsers public badgeUsersInstance;
     TheBadgeStore public badgeStoreInstance;
+    TheBadgeUsersStore public badgeUsersStore;
     TpBadgeModelController public tpBadgeModelControllerInstance;
     TpBadgeModelControllerStore public tpBadgeModelControllerStoreInstance;
     address public admin = vm.addr(1);
@@ -32,11 +34,16 @@ contract Config is Test {
         badgeStoreInstance = TheBadgeStore(payable(theBadgeStoreProxy));
         badgeStoreInstance.initialize(admin, feeCollector); //
 
+        // Instantiates the store
+        address badgeUsersStoreProxy = Clones.clone(address(new TheBadgeUsersStore()));
+        badgeUsersStore = TheBadgeUsersStore(payable(badgeUsersStoreProxy));
+        badgeUsersStore.initialize(admin);
+
         // Instantiates the TheBadgeUsers
         address theBadgeUsersImp = address(new TheBadgeUsers());
         address theBadgeUsersProxy = Clones.clone(theBadgeUsersImp);
         badgeUsersInstance = TheBadgeUsers(payable(theBadgeUsersProxy));
-        badgeUsersInstance.initialize(admin, address(badgeStoreInstance));
+        badgeUsersInstance.initialize(admin, address(badgeStoreInstance), address(badgeUsersStore));
 
         // Instantiates the TheBadgeModels
         address badgeModelsInstanceImp = address(new TheBadgeModels());
@@ -60,8 +67,8 @@ contract Config is Test {
             admin,
             _badgeContractAddress,
             address(badgeModelsInstance),
-            address(badgeUsersInstance),
-            address(tpBadgeModelControllerStoreInstance)
+            address(tpBadgeModelControllerStoreInstance),
+            address(badgeUsersInstance)
         );
 
         // Adds the permissions to TheBadgeModels and TheBadgeUsers to access the store...
@@ -83,7 +90,7 @@ contract Config is Test {
         // Finally adds the permission to TpBadgeModelController to access the TpBadgeModelControllerStore...
         vm.prank(admin);
         tpBadgeModelControllerStoreInstance.addPermittedContract(
-            "tpBadgeModelController",
+            tpControllerName,
             address(tpBadgeModelControllerInstance)
         );
 
@@ -92,5 +99,12 @@ contract Config is Test {
         bytes32 managerRole = keccak256("USER_MANAGER_ROLE");
         vm.prank(admin);
         badgeUsersInstance.grantRole(managerRole, address(badgeModelsInstance));
+
+        // Adds the permissions to TheBadgeUsers to access the users store...
+        vm.startPrank(admin);
+        badgeUsersStore.addPermittedContract("TheBadgeUsers", address(badgeUsersInstance));
+        badgeUsersStore.addPermittedContract("TheBadgeModels", address(badgeModelsInstance));
+        badgeUsersStore.addPermittedContract(tpControllerName, address(tpBadgeModelControllerInstance));
+        vm.stopPrank();
     }
 }

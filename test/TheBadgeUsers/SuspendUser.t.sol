@@ -16,7 +16,7 @@ contract SuspendUser is Config {
         vm.prank(u2);
         badgeUsers.suspendUser(u1, true);
 
-        (, , , bool _suspended, ) = badgeStore.registeredUsers(u1);
+        (, , , bool _suspended, ) = badgeUsersStore.registeredUsers(u1);
 
         assertEq(_suspended, true);
     }

@@ -1,10 +1,12 @@
 pragma solidity ^0.8.20;
 
 import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
+import { TheBadgeUsers } from "../../src/contracts/thebadge/TheBadgeUsers.sol";
 import "../../src/contracts/libraries/LibTheBadge.sol";
 import "../../src/contracts/libraries/LibTheBadgeUsers.sol";
 
 import { IBadgeModelController } from "../../src/interfaces/IBadgeModelController.sol";
+import { ITheBadgeUsers } from "../../src/interfaces/ITheBadgeUsers.sol";
 import { Config } from "./Config.sol";
 
 contract SubmitUserVerification is Config {
@@ -26,7 +28,7 @@ contract SubmitUserVerification is Config {
 
         vm.prank(u1);
 
-        // mock fuction getBadgeModelController
+        // mock function getBadgeModelController
         vm.mockCall(
             address(badgeStore),
             abi.encodeWithSelector(TheBadgeStore.getBadgeModelController.selector),
@@ -57,8 +59,8 @@ contract SubmitUserVerification is Config {
 
         // check submitUserVerification has been called with expected params
         vm.expectCall(
-            controller,
-            abi.encodeWithSelector(IBadgeModelController.submitUserVerification.selector, u1, metadata, evidenceUri)
+            address(badgeUsers),
+            abi.encodeWithSelector(ITheBadgeUsers.submitUserVerification.selector, controllerName, evidenceUri)
         );
 
         badgeUsers.submitUserVerification{ value: verifyCreatorProtocolFee }(controllerName, evidenceUri);

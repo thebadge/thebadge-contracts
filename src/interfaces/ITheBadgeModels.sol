@@ -7,6 +7,8 @@ interface ITheBadgeModels {
     // Write methods
     function addBadgeModelController(string memory controllerName, address controllerAddress) external;
 
+    function updateBadgeModelController(string memory controllerName, address controllerAddress, bool paused) external;
+
     function createBadgeModel(TheBadgeStore.CreateBadgeModel memory args, bytes memory data) external payable;
 
     function updateBadgeModel(uint256 badgeModelId, uint256 mintCreatorFee, bool paused) external;
@@ -18,4 +20,8 @@ interface ITheBadgeModels {
     function updateBadgeModelProtocolFee(uint256 badgeModelId, uint256 feeInBps) external;
 
     function isBadgeModelSuspended(uint256 badgeModelId) external returns (bool);
+
+    function getBadgeModelController(
+        string memory controllerName
+    ) external returns (TheBadgeStore.BadgeModelController memory badgeModelController);
 }

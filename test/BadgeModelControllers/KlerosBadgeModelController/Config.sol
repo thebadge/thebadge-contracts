@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 import { Test } from "forge-std/Test.sol";
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
 import { TheBadgeStore } from "../../../src/contracts/thebadge/TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "../../../src/contracts/thebadge/TheBadgeUsersStore.sol";
 import { TheBadgeUsers } from "../../../src/contracts/thebadge/TheBadgeUsers.sol";
 import { TheBadgeModels } from "../../../src/contracts/thebadge/TheBadgeModels.sol";
 import { KlerosBadgeModelController } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
@@ -12,6 +13,7 @@ contract Config is Test {
     TheBadgeModels public badgeModelsInstance;
     TheBadgeUsers public badgeUsersInstance;
     TheBadgeStore public badgeStoreInstance;
+    TheBadgeUsersStore public badgeUsersStoreInstance;
     KlerosBadgeModelController public klerosBadgeModelControllerInstance;
     KlerosBadgeModelControllerStore public klerosBadgeModelControllerStoreInstance;
     address public admin = vm.addr(1);
@@ -30,13 +32,19 @@ contract Config is Test {
         address theBadgeStoreImp = address(new TheBadgeStore());
         address theBadgeStoreProxy = Clones.clone(theBadgeStoreImp);
         badgeStoreInstance = TheBadgeStore(payable(theBadgeStoreProxy));
-        badgeStoreInstance.initialize(admin, feeCollector); //
+        badgeStoreInstance.initialize(admin, feeCollector);
+
+        // Instantiates the store
+        address theBadgeUsersStoreImp = address(new TheBadgeUsersStore());
+        address theBadgeUsersStoreProxy = Clones.clone(theBadgeUsersStoreImp);
+        badgeUsersStoreInstance = TheBadgeUsersStore(payable(theBadgeUsersStoreProxy));
+        badgeUsersStoreInstance.initialize(admin); //
 
         // Instantiates the TheBadgeUsers
         address theBadgeUsersImp = address(new TheBadgeUsers());
         address theBadgeUsersProxy = Clones.clone(theBadgeUsersImp);
         badgeUsersInstance = TheBadgeUsers(payable(theBadgeUsersProxy));
-        badgeUsersInstance.initialize(admin, address(badgeStoreInstance));
+        badgeUsersInstance.initialize(admin, address(badgeStoreInstance), address(badgeUsersStoreInstance));
 
         // Instantiates the TheBadgeModels
         address badgeModelsInstanceImp = address(new TheBadgeModels());
@@ -62,7 +70,6 @@ contract Config is Test {
             admin,
             _badgeContractAddress,
             address(badgeModelsInstance),
-            address(badgeUsersInstance),
             address(klerosBadgeModelControllerStoreInstance)
         );
 
@@ -85,7 +92,7 @@ contract Config is Test {
         // Finally adds the permission to KlerosBadgeModelController to access the KlerosBadgeModelControllerStore...
         vm.prank(admin);
         klerosBadgeModelControllerStoreInstance.addPermittedContract(
-            "KlerosBadgeModelController",
+            klerosControllerName,
             address(klerosBadgeModelControllerInstance)
         );
 
@@ -94,5 +101,12 @@ contract Config is Test {
         bytes32 managerRole = keccak256("USER_MANAGER_ROLE");
         vm.prank(admin);
         badgeUsersInstance.grantRole(managerRole, address(badgeModelsInstance));
+
+        // Adds the permissions to TheBadgeUsers to access the users store...
+        vm.startPrank(admin);
+        badgeUsersStoreInstance.addPermittedContract("TheBadgeUsers", address(badgeUsersInstance));
+        badgeUsersStoreInstance.addPermittedContract("TheBadgeModels", address(badgeModelsInstance));
+        badgeUsersStoreInstance.addPermittedContract(klerosControllerName, address(klerosBadgeModelControllerInstance));
+        vm.stopPrank();
     }
 }

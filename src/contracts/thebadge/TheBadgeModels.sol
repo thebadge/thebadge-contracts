@@ -12,6 +12,7 @@ import { LibTheBadgeModels } from "../libraries/LibTheBadgeModels.sol";
 import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
 import { LibTheBadge } from "../libraries/LibTheBadge.sol";
 import { TheBadgeStore } from "./TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "./TheBadgeUsersStore.sol";
 import { ITheBadgeModels } from "../../interfaces/ITheBadgeModels.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { TheBadgeUsers } from "./TheBadgeUsers.sol";
@@ -43,7 +44,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
      * =========================
      */
     modifier onlyRegisteredUser(address _user) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+        TheBadgeUsersStore.User memory user = _theBadgeUsers.getUser(_user);
         if (bytes(user.metadata).length == 0) {
             revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
@@ -70,7 +71,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
     }
 
     modifier onlyBadgeModelOwnerCreator(uint256 badgeModelId, address _user) {
-        TheBadgeStore.User memory user = _badgeStore.getUser(_user);
+        TheBadgeUsersStore.User memory user = _theBadgeUsers.getUser(_user);
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(badgeModelId);
 
         if (bytes(user.metadata).length == 0) {
@@ -145,14 +146,12 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
      * @param controllerName - name of the controller (for instance: Kleros)
      * @param controllerAddress - new address of the controller
      */
+
     function updateBadgeModelController(
         string memory controllerName,
-        address controllerAddress
+        address controllerAddress,
+        bool paused
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
-            controllerName
-        );
-
         if (bytes(controllerName).length == 0) {
             revert LibTheBadgeModels.TheBadge__addBadgeModelController_emptyName();
         }
@@ -161,9 +160,20 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
             revert LibTheBadgeModels.TheBadge__badgeModel_badgeModelNotFound();
         }
 
+        TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
+            controllerName
+        );
+
+        if (_badgeModelController.controller == address(0)) {
+            revert LibTheBadge.TheBadge__controller_invalidController();
+        }
+        if (_badgeModelController.initialized == false) {
+            revert LibTheBadge.TheBadge__controller_invalidController();
+        }
+
         _badgeModelController.controller = controllerAddress;
         _badgeModelController.initialized = true;
-        _badgeModelController.paused = false;
+        _badgeModelController.paused = paused;
 
         _badgeStore.updateBadgeModelController(controllerName, _badgeModelController);
         emit BadgeModelControllerUpdated(controllerName, controllerAddress);
@@ -208,7 +218,7 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
         );
 
         emit BadgeModelCreated(currentBadgeModelId);
-        TheBadgeStore.User memory user = _badgeStore.getUser(_msgSender());
+        TheBadgeUsersStore.User memory user = _theBadgeUsers.getUser(_msgSender());
         if (user.isCreator == false) {
             _theBadgeUsers.makeUserCreator(_msgSender());
         }
@@ -358,12 +368,18 @@ contract TheBadgeModels is TheBadgeRoles, ITheBadgeModels, OwnableUpgradeable {
             return true;
         }
 
-        TheBadgeStore.User memory creator = _badgeStore.getUser(_badgeModel.creator);
+        TheBadgeUsersStore.User memory creator = _theBadgeUsers.getUser(_badgeModel.creator);
         if (creator.suspended == true) {
             return true;
         }
 
         return false;
+    }
+
+    function getBadgeModelController(
+        string memory badgeModelName
+    ) public view returns (TheBadgeStore.BadgeModelController memory badgeModelController) {
+        return _badgeStore.getBadgeModelController(badgeModelName);
     }
 
     /**

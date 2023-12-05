@@ -1,12 +1,12 @@
 {
   "name": "hardhat-project",
   "license": "BUSL-1.1",
-  "version": "2.2.1",
+  "version": "2.3.3",
   "scripts": {
     "forge": "forge",
-    "build": "forge build --via-ir",
+    "build": "forge build",
     "clean": "forge clean",
-    "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 9883736 --via-ir",
+    "test": "yarn forge test -vvv --fork-url https://rpc.ankr.com/eth_goerli --fork-block-number 9883736",
     "test:all": "yarn forge test -vv --fork-url $(grep ALCHEMY_ENDPOINT_URL .env | cut -d '=' -f2) --fork-block-number 9883736",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json \"src/**/*.sol\"",
@@ -18,7 +18,16 @@
     "verify:goerli": "hardhat run --network goerli ./script/03_verify.ts",
     "deploy:sepolia": "hardhat run --network sepolia ./script/01_deploy.ts",
     "upgrade:sepolia": "hardhat run --network sepolia ./script/02_upgrade.ts",
-    "verify:sepolia": "hardhat run --network sepolia ./script/03_verify.ts"
+    "verify:sepolia": "hardhat run --network sepolia ./script/03_verify.ts",
+    "deploy:gnosis": "hardhat run --network gnosis ./script/01_deploy.ts",
+    "upgrade:gnosis": "hardhat run --network gnosis ./script/02_upgrade.ts",
+    "verify:gnosis": "hardhat run --network gnosis ./script/03_verify.ts",
+    "deploy:polygon": "hardhat run --network polygon ./script/01_deploy.ts",
+    "upgrade:polygon": "hardhat run --network polygon ./script/02_upgrade.ts",
+    "verify:polygon": "hardhat run --network polygon ./script/03_verify.ts",
+    "deploy:mumbai": "hardhat run --network mumbai ./script/01_deploy.ts",
+    "upgrade:mumbai": "hardhat run --network mumbai ./script/02_upgrade.ts",
+    "verify:mumbai": "hardhat run --network mumbai ./script/03_verify.ts"
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",

@@ -11,12 +11,14 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 import { IBadgeModelController } from "../../interfaces/IBadgeModelController.sol";
 import { TheBadge } from "../thebadge/TheBadge.sol";
 import { TheBadgeModels } from "../thebadge/TheBadgeModels.sol";
-import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
 import { TheBadgeRoles } from "../thebadge/TheBadgeRoles.sol";
 import { CappedMath } from "../../utils/CappedMath.sol";
 import { IArbitrator } from "../../../lib/erc-792/contracts/IArbitrator.sol";
 import { TpBadgeModelControllerStore } from "./TpBadgeModelControllerStore.sol";
 import { LibTpBadgeModelController } from "../libraries/LibTpBadgeModelController.sol";
+import { LibTheBadgeUsers } from "../libraries/LibTheBadgeUsers.sol";
+import { TheBadgeUsersStore } from "../thebadge/TheBadgeUsersStore.sol";
+import { TheBadgeUsers } from "../thebadge/TheBadgeUsers.sol";
 
 contract TpBadgeModelController is
     Initializable,
@@ -27,9 +29,9 @@ contract TpBadgeModelController is
 {
     using CappedMath for uint256;
     TpBadgeModelControllerStore public tpBadgeModelControllerStore;
+    TheBadgeUsers public theBadgeUsers;
     TheBadge public theBadge;
     TheBadgeModels public theBadgeModels;
-    TheBadgeUsers public theBadgeUsers;
 
     /**
      * =========================
@@ -66,31 +68,16 @@ contract TpBadgeModelController is
         _;
     }
 
-    modifier onlyTheBadgeUsers() {
-        if (address(theBadgeUsers) != msg.sender) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__onlyTheBadge_senderNotTheBadgeUsers();
-        }
-        _;
-    }
-
-    modifier onlyUserOnVerification(address _user) {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _thirdPartyUser = tpBadgeModelControllerStore.getUser(_user);
-        if (_thirdPartyUser.initialized == false) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userNotFound();
-        }
-        if (_thirdPartyUser.verificationStatus != LibTpBadgeModelController.VerificationStatus.VerificationSubmitted) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationNotStarted();
-        }
-        _;
-    }
-
     modifier onlyThirdPartyUser(address callee) {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _thirdPartyUser = tpBadgeModelControllerStore.getUser(callee);
-        if (_thirdPartyUser.initialized == false) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userNotFound();
+        TheBadgeUsersStore.UserVerification memory _verificationUser = theBadgeUsers.getUserVerifyStatus(
+            address(this),
+            callee
+        );
+        if (_verificationUser.initialized == false) {
+            revert LibTheBadgeUsers.TheBadge__onlyUser_userNotFound();
         }
-        if (_thirdPartyUser.verificationStatus != LibTpBadgeModelController.VerificationStatus.Verified) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationRejected();
+        if (_verificationUser.verificationStatus != LibTheBadgeUsers.VerificationStatus.Verified) {
+            revert LibTheBadgeUsers.TheBadge__verifyUser__userVerificationRejected();
         }
         _;
     }
@@ -116,16 +103,16 @@ contract TpBadgeModelController is
         address admin,
         address _theBadge,
         address _theBadgeModels,
-        address _theBadgeUsers,
-        address _tpBadgeModelStore
+        address _tpBadgeModelStore,
+        address _theBadgeUsers
     ) public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(PAUSER_ROLE, admin);
         _grantRole(UPGRADER_ROLE, admin);
         theBadge = TheBadge(payable(_theBadge));
         theBadgeModels = TheBadgeModels(payable(_theBadgeModels));
-        theBadgeUsers = TheBadgeUsers(payable(_theBadgeUsers));
         tpBadgeModelControllerStore = TpBadgeModelControllerStore(payable(_tpBadgeModelStore));
+        theBadgeUsers = TheBadgeUsers(payable(_theBadgeUsers));
         emit Initialize(admin);
     }
 
@@ -186,7 +173,15 @@ contract TpBadgeModelController is
         }
 
         TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _newBadgeModel = TpBadgeModelControllerStore
-            .ThirdPartyBadgeModel(_callee, _badgeModelId, tcrListAddress, _governor, _admin, true);
+            .ThirdPartyBadgeModel(
+                _callee,
+                _badgeModelId,
+                tcrListAddress,
+                _governor,
+                _admin,
+                true,
+                args.requirementsIPFSHash
+            );
         tpBadgeModelControllerStore.addBadgeModel(_badgeModelId, _newBadgeModel);
         tpBadgeModelControllerStore.addAdministratorsToBadgeModel(_badgeModelId, args.administrators);
 
@@ -234,7 +229,8 @@ contract TpBadgeModelController is
             tcrItemID,
             _badgeModelId,
             _badgeId,
-            true
+            true,
+            args.badgeDataUri
         );
         tpBadgeModelControllerStore.addBadge(_badgeId, _newBadge);
         emit ThirdPartyBadgeMinted(_badgeId, tcrItemID);
@@ -289,39 +285,6 @@ contract TpBadgeModelController is
     }
 
     // Write methods
-    function submitUserVerification(
-        address _user,
-        string memory userMetadata,
-        string memory evidenceUri
-    ) public onlyTheBadgeUsers {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _tpUser = tpBadgeModelControllerStore.getUser(_user);
-
-        if (_tpUser.initialized) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__user__userVerificationAlreadyStarted();
-        }
-
-        _tpUser.initialized = true;
-        _tpUser.verificationStatus = LibTpBadgeModelController.VerificationStatus.VerificationSubmitted;
-        _tpUser.userMetadata = userMetadata;
-        _tpUser.verificationEvidence = evidenceUri;
-        tpBadgeModelControllerStore.registerTpUser(_user, _tpUser);
-    }
-
-    /**
-     * @notice Executes the request to verify an user
-     * @param _user address of the user
-     * @param verify true if the user should be verified, otherwise false
-     */
-    function executeUserVerification(
-        address _user,
-        bool verify
-    ) public onlyTheBadgeUsers onlyUserOnVerification(_user) {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _tpUser = tpBadgeModelControllerStore.getUser(_user);
-        _tpUser.verificationStatus = verify
-            ? LibTpBadgeModelController.VerificationStatus.Verified
-            : LibTpBadgeModelController.VerificationStatus.VerificationRejected;
-        tpBadgeModelControllerStore.updateUser(_user, _tpUser);
-    }
 
     /*
      * @notice Updates the value of the protocol: _verifyUserProtocolFee
@@ -398,21 +361,6 @@ contract TpBadgeModelController is
     }
 
     /**
-     * @notice returns true if the given userAddress exists and has been verified, otherwise returns false.
-     * @param _user the userAddress
-     */
-    function isUserVerified(address _user) external view returns (bool) {
-        TpBadgeModelControllerStore.ThirdPartyUser memory _tpUser = tpBadgeModelControllerStore.getUser(_user);
-        if (_tpUser.initialized == false) {
-            return false;
-        }
-        if (_tpUser.verificationStatus == LibTpBadgeModelController.VerificationStatus.Verified) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * @notice If if this badgeModel can be upgraded or not
      */
     function isBadgeModelMetadataUpgradeable() external pure returns (bool) {
@@ -427,13 +375,21 @@ contract TpBadgeModelController is
     }
 
     /**
+     * @notice It's true if this badgeModel can be automatically claimed after the mint event has occurred
+     * In this model, the badges are available to claim right after the mint
+     */
+    function isAutomaticClaimable() external pure returns (bool) {
+        return true;
+    }
+
+    /**
      * @notice Internal function that returns the TCR contract instance for a given badgeId
      * @param badgeId the badgeId
      */
     function getLightGeneralizedTCR(uint256 badgeId) internal view returns (ILightGeneralizedTCR) {
         address tcrList = tpBadgeModelControllerStore.getBadgeTcrList(badgeId);
         if (tcrList == address(0)) {
-            revert LibTpBadgeModelController.ThirdPartyModelController__badge__tcrKlerosBadgeNotFound();
+            revert LibTpBadgeModelController.ThirdPartyModelController__badge__tcrBadgeNotFound();
         }
         ILightGeneralizedTCR lightGeneralizedTCR = ILightGeneralizedTCR(tcrList);
         return lightGeneralizedTCR;
@@ -462,7 +418,7 @@ contract TpBadgeModelController is
     uint256[50] private __gap;
 
     /**
-     * @notice we need a receive function to receive deposits devolution from kleros
+     * @notice we need a receive function to receive deposits devolution
      */
     receive() external payable {}
 }
