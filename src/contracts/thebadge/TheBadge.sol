@@ -272,7 +272,8 @@ contract TheBadge is
         if (tempStoredBadgeAddress == address(0)) {
             tempStoredBadgeAddress = address(_badgeModelController.controller);
         }
-        address claimAddress = controller.claim(badgeId, data, _msgSender());
+
+        // First, update the state before making external calls
         uint256 dueDate = calculateBadgeDueDate(
             _badgeModel.validFor,
             badge.dueDate,
@@ -280,7 +281,14 @@ contract TheBadge is
             controller.isAutomaticClaimable()
         );
         _badgeStore.updateBadgeDueDate(badgeId, dueDate);
+
+        // Second, make the external call
+        address claimAddress = controller.claim(badgeId, data, _msgSender());
+
+        // Third, transfer the badge after the external call
         _badgeStore.transferBadge(badgeId, tempStoredBadgeAddress, claimAddress);
+
+        // Finally, emit the event after all state changes and external calls
         emit BadgeClaimed(badgeId, tempStoredBadgeAddress, claimAddress);
     }
 
