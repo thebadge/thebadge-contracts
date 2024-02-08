@@ -486,11 +486,7 @@
           },
           "t_enum(VerificationStatus)9418": {
             "label": "enum LibTheBadgeUsers.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
