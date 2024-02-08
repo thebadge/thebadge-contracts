@@ -22,15 +22,15 @@ async function main(hre: HardhatRuntimeEnvironment) {
   const mainContracts = await upgradeMainContracts(hre);
 
   // Deploys all the controllers
-  // const controllersAddresses = await updateControllers(hre);
+  const controllersAddresses = await updateControllers(hre);
 
   console.log("///////// Upgrade finished /////////");
   for (const mainContractsAddresses of mainContracts) {
     console.log(`${mainContractsAddresses[0]}-${mainContractsAddresses[1]}`);
   }
-  // for (const controllerAddress of controllersAddresses) {
-  //   console.log(`${controllerAddress[0]}-${controllerAddress[1]}`);
-  // }
+  for (const controllerAddress of controllersAddresses) {
+    console.log(`${controllerAddress[0]}-${controllerAddress[1]}`);
+  }
   console.log("///////// Upgrade finished /////////");
 }
 
