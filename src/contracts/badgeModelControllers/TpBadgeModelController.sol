@@ -298,8 +298,11 @@ contract TpBadgeModelController is
     /*
      * @notice Returns the cost to mint a third-party badge
      */
-    function mintValue(uint256 /*badgeModelId*/) external pure returns (uint256) {
-        return 0;
+    function mintValue(uint256 /*badgeModelId*/) public view returns (uint256) {
+        // The cost of minting in thirdParty is the cost of register a new user
+        // This is intended to be always 0 as the registration should not have any fees, TheBadge DAO will cover it
+        // But in case we deploy in a network expensive we could consider it
+        return theBadgeUsers.getRegisterFee();
     }
 
     /**
