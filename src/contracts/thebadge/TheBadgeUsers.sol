@@ -150,38 +150,24 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
     /**
      * @notice Register a new user
      * @param _metadata IPFS url with the metadata of the user
+     * @param _isCompany true if is an entitiy, false otherwise
      */
     function registerUser(string memory _metadata, bool _isCompany) public payable {
-        TheBadgeUsersStore.User memory user = _badgeUsersStore.getUser(_msgSender());
-        if (bytes(user.metadata).length != 0) {
-            revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
-        }
+        submitUserRegistrationLogic(_msgSender(), _metadata, _isCompany);
+    }
 
-        uint256 registerUserProtocolFee = _badgeUsersStore.registerUserProtocolFee();
-        if (msg.value != registerUserProtocolFee) {
-            revert LibTheBadgeUsers.TheBadge__registerUser_wrongValue();
-        }
-        if (msg.value > 0) {
-            address feeCollector = _badgeStore.feeCollector();
-            payable(feeCollector).transfer(msg.value);
-            emit PaymentMade(
-                feeCollector,
-                _msgSender(),
-                msg.value,
-                LibTheBadge.PaymentType.UserRegistrationFee,
-                0,
-                "0x"
-            );
-        }
-
-        user.metadata = _metadata;
-        user.isCompany = _isCompany;
-        user.isCreator = false;
-        user.suspended = false;
-        user.initialized = true;
-
-        _badgeUsersStore.createUser(_msgSender(), user);
-        emit UserRegistered(_msgSender(), user.metadata);
+    /**
+     * @notice Creates a request to register an user on behalf of the user
+     * @param userToRegister address of the user
+     * @param _metadata IPFS url with the metadata of the user
+     * @param _isCompany true if is an entitiy, false otherwise
+     */
+    function registerUser(
+        address userToRegister,
+        string memory _metadata,
+        bool _isCompany
+    ) public payable onlyRole(VERIFIER_ROLE) nonReentrant {
+        submitUserRegistrationLogic(userToRegister, _metadata, _isCompany);
     }
 
     /**
@@ -332,6 +318,39 @@ contract TheBadgeUsers is ITheBadgeUsers, TheBadgeRoles, OwnableUpgradeable, Ree
     function updateRegisterCreatorProtocolFee(uint256 _registerCreatorValue) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _badgeUsersStore.updateRegisterCreatorProtocolFee(_registerCreatorValue);
         emit ProtocolSettingsUpdated();
+    }
+
+    function submitUserRegistrationLogic(address userToRegister, string memory _metadata, bool _isCompany) internal {
+        TheBadgeUsersStore.User memory user = _badgeUsersStore.getUser(userToRegister);
+        if (bytes(user.metadata).length != 0) {
+            revert LibTheBadgeUsers.TheBadge__registerUser_alreadyRegistered();
+        }
+
+        uint256 registerUserProtocolFee = _badgeUsersStore.registerUserProtocolFee();
+        if (msg.value != registerUserProtocolFee) {
+            revert LibTheBadgeUsers.TheBadge__registerUser_wrongValue();
+        }
+        if (msg.value > 0) {
+            address feeCollector = _badgeStore.feeCollector();
+            payable(feeCollector).transfer(msg.value);
+            emit PaymentMade(
+                feeCollector,
+                userToRegister,
+                msg.value,
+                LibTheBadge.PaymentType.UserRegistrationFee,
+                0,
+                "0x"
+            );
+        }
+
+        user.metadata = _metadata;
+        user.isCompany = _isCompany;
+        user.isCreator = false;
+        user.suspended = false;
+        user.initialized = true;
+
+        _badgeUsersStore.createUser(userToRegister, user);
+        emit UserRegistered(userToRegister, user.metadata);
     }
 
     function submitUserVerificationLogic(

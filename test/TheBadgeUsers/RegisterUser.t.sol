@@ -29,6 +29,34 @@ contract RegisterUser is Config {
         assertEq(_initialized, true);
     }
 
+    function testRegisterUserOnBehalf() public {
+        string memory metadata = "ipfs://creatorMetadata.json";
+        // Sets u1 as the relayer by assigning him the role
+        bytes32 verifierRole = keccak256("VERIFIER_ROLE");
+        // grant role
+        vm.prank(admin);
+        badgeUsers.grantRole(verifierRole, u1);
+
+        vm.prank(u1);
+        vm.expectEmit(true, false, false, true);
+        emit UserRegistered(u2, metadata);
+        badgeUsers.registerUser(u2, metadata, false);
+
+        (
+            string memory _metadata,
+            bool _isCompany,
+            bool _isCreator,
+            bool _suspended,
+            bool _initialized
+        ) = badgeUsersStore.registeredUsers(u2);
+
+        assertEq(_metadata, metadata);
+        assertEq(_isCompany, false);
+        assertEq(_isCreator, false);
+        assertEq(_suspended, false);
+        assertEq(_initialized, true);
+    }
+
     function testRevertsRegisterUserWhenAlreadyExist() public {
         string memory metadata = "ipfs://creatorMetadata.json";
         vm.prank(u1);
