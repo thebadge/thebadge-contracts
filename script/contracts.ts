@@ -105,7 +105,7 @@ export const contracts = {
       [Chains.gnosis]: "0x08e58Bc26CFB0d346bABD253A1799866F269805a",
       [Chains.polygon]: "0xf6740379930fef3a812e00c4a725c8bb10052a1d",
       [Chains.mumbai]: "0xf6740379930fef3a812e00c4a725c8bb10052a1d",
-      [Chains.avax]: "",
+      [Chains.avax]: "0x905a49Ead7540FF8a563EB02F66B5c13c5e8eC71",
     },
   },
   CustomLightGTCRFactory: {
@@ -135,7 +135,7 @@ export const contracts = {
       [Chains.gnosis]: "0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002",
       [Chains.polygon]: "0x0f7aa4776538b83A7Afd4802880512979f7E8F93",
       [Chains.mumbai]: "0x0f7aa4776538b83a7afd4802880512979f7e8f93",
-      [Chains.avax]: "",
+      [Chains.avax]: "0xbAaA5510144470eBE7260B743CA5516596A0250E",
     },
   },
 } as const;
