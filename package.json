@@ -29,7 +29,9 @@
     "verify:polygon": "hardhat run --network polygon ./script/03_verify.ts",
     "deploy:mumbai": "hardhat run --network mumbai ./script/01_deploy.ts",
     "upgrade:mumbai": "hardhat run --network mumbai ./script/02_upgrade.ts",
-    "verify:mumbai": "hardhat run --network mumbai ./script/03_verify.ts"
+    "verify:mumbai": "hardhat run --network mumbai ./script/03_verify.ts",
+    "deploy:avaxtcr": "hardhat run --network snowtrace ./script/01_deploy_tcr.ts",
+    "verify:avaxtcr": "hardhat run --network snowtrace ./script/03_verify_tcr.ts"
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",
