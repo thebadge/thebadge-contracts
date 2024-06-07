@@ -427,7 +427,7 @@ contract LightGeneralizedTCR is IArbitrable, IEvidence {
         request.challenger = requester;
 
         // Raise a dispute.
-        disputeData.disputeID = arbitrator.createDispute{value: arbitrationCost}(
+        disputeData.disputeID = arbitrator.createDispute{ value: arbitrationCost }(
             RULING_OPTIONS,
             arbitrationParams.arbitratorExtraData
         );
@@ -502,7 +502,15 @@ contract LightGeneralizedTCR is IArbitrable, IEvidence {
 
         uint256 appealCost = arbitrator.appealCost(disputeData.disputeID, arbitrationParams.arbitratorExtraData);
         uint256 totalCost = appealCost.addCap(appealCost.mulCap(multiplier) / MULTIPLIER_DIVISOR);
-        contribute(_itemID, lastRequestIndex, lastRoundIndex, uint256(_side), payable(msg.sender), msg.value, totalCost);
+        contribute(
+            _itemID,
+            lastRequestIndex,
+            lastRoundIndex,
+            uint256(_side),
+            payable(msg.sender),
+            msg.value,
+            totalCost
+        );
 
         if (round.amountPaid[uint256(_side)] >= totalCost) {
             if (round.sideFunded == Party.None) {
@@ -512,7 +520,7 @@ contract LightGeneralizedTCR is IArbitrable, IEvidence {
                 round.sideFunded = Party.None;
 
                 // Raise appeal if both sides are fully funded.
-                arbitrator.appeal{value: appealCost}(disputeData.disputeID, arbitrationParams.arbitratorExtraData);
+                arbitrator.appeal{ value: appealCost }(disputeData.disputeID, arbitrationParams.arbitratorExtraData);
                 disputeData.roundCount++;
                 round.feeRewards = round.feeRewards.subCap(appealCost);
             }
@@ -818,7 +826,7 @@ contract LightGeneralizedTCR is IArbitrable, IEvidence {
         emit MetaEvidence(2 * arbitrationParamsChanges.length + 1, _clearingMetaEvidence);
 
         arbitrationParamsChanges.push(
-            ArbitrationParams({arbitrator: _arbitrator, arbitratorExtraData: _arbitratorExtraData})
+            ArbitrationParams({ arbitrator: _arbitrator, arbitratorExtraData: _arbitratorExtraData })
         );
     }
 
@@ -936,15 +944,9 @@ contract LightGeneralizedTCR is IArbitrable, IEvidence {
      * @return numberOfRequests Total number of requests for the item.
      * @return sumDeposit The total deposit made by the requester and the challenger (if any)
      */
-    function getItemInfo(bytes32 _itemID)
-        external
-        view
-        returns (
-            Status status,
-            uint256 numberOfRequests,
-            uint256 sumDeposit
-        )
-    {
+    function getItemInfo(
+        bytes32 _itemID
+    ) external view returns (Status status, uint256 numberOfRequests, uint256 sumDeposit) {
         Item storage item = items[_itemID];
         return (item.status, item.requestCount, item.sumDeposit);
     }
@@ -964,7 +966,10 @@ contract LightGeneralizedTCR is IArbitrable, IEvidence {
      * @return requestArbitratorExtraData The extra data for the trusted arbitrator of this request.
      * @return metaEvidenceID The meta evidence to be used in a dispute for this case.
      */
-    function getRequestInfo(bytes32 _itemID, uint256 _requestID)
+    function getRequestInfo(
+        bytes32 _itemID,
+        uint256 _requestID
+    )
         external
         view
         returns (
@@ -1007,16 +1012,10 @@ contract LightGeneralizedTCR is IArbitrable, IEvidence {
      * @return numberOfRounds Number of rounds of dispute.
      * @return ruling The final ruling given, if any.
      */
-    function getRequestDisputeData(bytes32 _itemID, uint256 _requestID)
-        internal
-        view
-        returns (
-            bool disputed,
-            uint256 disputeID,
-            uint256 numberOfRounds,
-            Party ruling
-        )
-    {
+    function getRequestDisputeData(
+        bytes32 _itemID,
+        uint256 _requestID
+    ) internal view returns (bool disputed, uint256 disputeID, uint256 numberOfRounds, Party ruling) {
         DisputeData storage disputeData = requestsDisputeData[_itemID][_requestID];
 
         return (
@@ -1035,15 +1034,10 @@ contract LightGeneralizedTCR is IArbitrable, IEvidence {
      * @return arbitratorExtraData The extra data for the trusted arbitrator of this request.
      * @return metaEvidenceID The meta evidence to be used in a dispute for this case.
      */
-    function getRequestArbitrationParams(bytes32 _itemID, uint256 _requestID)
-        internal
-        view
-        returns (
-            IArbitrator arbitrator,
-            bytes memory arbitratorExtraData,
-            uint256 metaEvidenceID
-        )
-    {
+    function getRequestArbitrationParams(
+        bytes32 _itemID,
+        uint256 _requestID
+    ) internal view returns (IArbitrator arbitrator, bytes memory arbitratorExtraData, uint256 metaEvidenceID) {
         Request storage request = items[_itemID].requests[_requestID];
         ArbitrationParams storage arbitrationParams = arbitrationParamsChanges[request.arbitrationParamsIndex];
 
@@ -1089,16 +1083,7 @@ contract LightGeneralizedTCR is IArbitrable, IEvidence {
         bytes32 _itemID,
         uint256 _requestID,
         uint256 _roundID
-    )
-        external
-        view
-        returns (
-            bool appealed,
-            uint256[3] memory amountPaid,
-            bool[3] memory hasPaid,
-            uint256 feeRewards
-        )
-    {
+    ) external view returns (bool appealed, uint256[3] memory amountPaid, bool[3] memory hasPaid, uint256 feeRewards) {
         Item storage item = items[_itemID];
         require(item.requestCount > _requestID, "Request does not exist.");
 

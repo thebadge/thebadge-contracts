@@ -8,7 +8,7 @@
 
 pragma solidity ^0.8.20;
 
-import {LightGeneralizedTCR, IArbitrator} from "./LightGeneralizedTCR.sol";
+import { LightGeneralizedTCR, IArbitrator } from "./LightGeneralizedTCR.sol";
 
 /* solium-disable max-len */
 
