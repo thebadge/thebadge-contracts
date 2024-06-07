@@ -97,6 +97,24 @@ export const contracts = {
       [Chains.mumbai]: "0xf6740379930fef3a812e00c4a725c8bb10052a1d",
     },
   },
+  CustomLightGTCRFactory: {
+    address: {
+      [Chains.goerli]: "",
+      [Chains.sepolia]: "0x5B7A6B423246df397daA10f416E42ebff63d0Bc4",
+      [Chains.gnosis]: "",
+      [Chains.polygon]: "",
+      [Chains.mumbai]: "",
+    },
+  },
+  CustomLightGTCR: {
+    address: {
+      [Chains.goerli]: "",
+      [Chains.sepolia]: "0xE7f5dE2dafc9B5Fc954C1b800D82E7868EdF2c07",
+      [Chains.gnosis]: "",
+      [Chains.polygon]: "",
+      [Chains.mumbai]: "",
+    },
+  },
   KlerosArbitror: {
     address: {
       [Chains.goerli]: "0x1128ed55ab2d796fa92d2f8e1f336d745354a77a",
