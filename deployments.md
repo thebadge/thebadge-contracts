@@ -42,7 +42,7 @@
 | xDai    | 100      | v2.3.5 | 0x8C0DcD187127b88665fE8FD4F39Cb18758946C0f |
 | Polygon | 137      | v2.3.5 | 0x8Edfc741aED6B2C43485983d4C7b6B095b00500c |
 | Mumbai  | 80001    | v2.3.5 | 0xAdCd2Cd1249211EeD1D4d72b1E8B53F3A792e5da |
-| Avax    | 43114    | v2.3.5 | 0xba42dC1C5aa0f1094806c2914aA916E2cFe3d10E |
+| Avax    | 43114    | v2.3.5 | 0xDb5c2bcfD8cc522B8DD634DC507E135383049566 |
 
 ## TheBadgeModels
 
