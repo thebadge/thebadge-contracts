@@ -70,6 +70,12 @@ const config: HardhatUserConfig = {
       timeout: 100000000,
       chainId: 80001,
     },
+    snowtrace: {
+      url: process.env.AVAX_URL || "",
+      accounts: accounts,
+      timeout: 100000000,
+      chainId: 43114,
+    },
   },
   etherscan: {
     customChains: [
@@ -81,6 +87,14 @@ const config: HardhatUserConfig = {
           browserURL: "https://gnosisscan.io/",
         },
       },
+      {
+        network: "snowtrace",
+        chainId: 43114,
+        urls: {
+          apiURL: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan",
+          browserURL: "https://avalanche.routescan.io",
+        },
+      },
     ],
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
@@ -90,6 +104,7 @@ const config: HardhatUserConfig = {
       gnosis: process.env.GNOSISSCAN_API_KEY || "",
       polygon: process.env.ETHERSCAN_POLYGON_API_KEY || "",
       polygonMumbai: process.env.ETHERSCAN_POLYGON_API_KEY || "",
+      snowtrace: "snowtrace", // apiKey is not required, just set a placeholder
     },
   },
   tenderly: {

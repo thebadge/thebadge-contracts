@@ -31,8 +31,8 @@ const tenderlyVerifyControllers = async (hre: HardhatRuntimeEnvironment) => {
   ];
   await tenderly.verify(...deployedTpControllerContracts);
 
-  if (chainId === Chains.polygon || chainId == Chains.mumbai) {
-    console.log("Skipping kleros contracts verifications, the network is polygon...");
+  if (chainId === Chains.polygon || chainId == Chains.mumbai || chainId == Chains.avax) {
+    console.log(`Skipping kleros contracts verifications, the network is: ${chainId}...`);
     return;
   }
 
@@ -124,7 +124,7 @@ const verifyControllers = async (hre: HardhatRuntimeEnvironment) => {
     constructorArguments: [],
   });
 
-  if (chainId !== Chains.polygon && chainId !== Chains.mumbai) {
+  if (chainId !== Chains.polygon && chainId !== Chains.mumbai && chainId !== Chains.avax) {
     const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
     const klerosBadgeModelControllerStoreDeployedAddress =
       contracts.KlerosBadgeModelControllerStore.address[chainId as Chains];

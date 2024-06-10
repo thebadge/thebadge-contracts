@@ -9,7 +9,7 @@
     "func-visibility": ["warn", { "ignoreConstructors": true }],
     "func-name-mixedcase": "off",
     "max-states-count": "off",
-    "max-line-length": ["error", 200],
+    "max-line-length": ["error", 300],
     "reason-string": ["warn", { "maxLength": 64 }]
   }
 }
