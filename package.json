@@ -33,8 +33,13 @@
     "deploy:avax": "hardhat run --network snowtrace ./script/01_deploy.ts",
     "upgrade:avax": "hardhat run --network snowtrace ./script/02_upgrade.ts",
     "verify:avax": "hardhat run --network snowtrace ./script/03_verify.ts",
+    "deploy:optimism": "hardhat run --network optimism ./script/01_deploy.ts",
+    "upgrade:optimism": "hardhat run --network optimism ./script/02_upgrade.ts",
+    "verify:optimism": "hardhat run --network optimism ./script/03_verify.ts",
     "deploy:avaxtcr": "hardhat run --network snowtrace ./script/01_deploy_tcr.ts",
-    "verify:avaxtcr": "hardhat run --network snowtrace ./script/03_verify_tcr.ts"
+    "verify:avaxtcr": "hardhat run --network snowtrace ./script/03_verify_tcr.ts",
+    "deploy:optimismtcr": "hardhat run --network optimism ./script/01_deploy_tcr.ts",
+    "verify:optimismtcr": "hardhat run --network optimism ./script/03_verify_tcr.ts"
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",

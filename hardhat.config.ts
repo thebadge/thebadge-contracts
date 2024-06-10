@@ -76,6 +76,12 @@ const config: HardhatUserConfig = {
       timeout: 100000000,
       chainId: 43114,
     },
+    optimism: {
+      url: process.env.OPTIMISM_URL || "",
+      accounts: accounts,
+      timeout: 100000000,
+      chainId: 10,
+    },
   },
   etherscan: {
     customChains: [
@@ -104,6 +110,7 @@ const config: HardhatUserConfig = {
       gnosis: process.env.GNOSISSCAN_API_KEY || "",
       polygon: process.env.ETHERSCAN_POLYGON_API_KEY || "",
       polygonMumbai: process.env.ETHERSCAN_POLYGON_API_KEY || "",
+      optimisticEthereum: process.env.ETHERSCAN_OPTIMISM_API_KEY || "",
       snowtrace: "snowtrace", // apiKey is not required, just set a placeholder
     },
   },
