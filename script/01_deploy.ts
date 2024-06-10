@@ -156,7 +156,7 @@ const deployKlerosControllers = async (
   const [deployer] = await ethers.getSigners();
   const chainId = network.config.chainId;
 
-  if (chainId === Chains.polygon || chainId == Chains.mumbai) {
+  if (chainId !== Chains.sepolia && chainId !== Chains.gnosis) {
     console.warn("Deploy kleros on Polygon is not allowed, ignoring kleros deployment...");
     return {
       klerosControllers: [],
@@ -325,7 +325,7 @@ const configurePermissions = async (
   theBadgeModels.connect(deployer);
   await (await theBadgeModels.addBadgeModelController("thirdParty", tpBadgeModelController.address)).wait();
 
-  if (chainId !== Chains.polygon && chainId !== Chains.mumbai) {
+  if (chainId === Chains.gnosis || chainId === Chains.sepolia) {
     console.log("Adding KlerosBadgeModelController to TheBadgeModels...");
     theBadgeModels.connect(deployer);
     await (await theBadgeModels.addBadgeModelController("kleros", klerosBadgeModelController.address)).wait();
