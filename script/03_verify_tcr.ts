@@ -1,8 +1,7 @@
 import * as dotenv from "dotenv";
-import hre, { run, tenderly, ethers } from "hardhat";
+import hre, { run, tenderly } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Chains, contracts, isSupportedNetwork } from "./contracts";
-import { getImplementationAddress } from "@openzeppelin/upgrades-core";
 
 dotenv.config();
 
