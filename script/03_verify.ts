@@ -31,7 +31,7 @@ const tenderlyVerifyControllers = async (hre: HardhatRuntimeEnvironment) => {
   ];
   await tenderly.verify(...deployedTpControllerContracts);
 
-  if (chainId === Chains.polygon || chainId == Chains.mumbai || chainId == Chains.avax) {
+  if (chainId !== Chains.gnosis && chainId == Chains.sepolia) {
     console.log(`Skipping kleros contracts verifications, the network is: ${chainId}...`);
     return;
   }
