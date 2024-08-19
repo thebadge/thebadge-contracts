@@ -148,7 +148,23 @@ contract TheBadge is
         string memory tokenURI,
         bytes memory data
     ) external payable onlyBadgeModelMintable(badgeModelId) nonReentrant {
-        mintLogic(badgeModelId, account, tokenURI, data);
+        mintLogic(badgeModelId, account, tokenURI, data, false);
+    }
+
+    /*
+ * @notice Receives a badgeModel, and user account, the token data ipfsURI and the controller's data and mints the badge for the user on behalf of the minter
+     * @param badgeModelId id of theBadgeModel
+     * @param account the recipient address of the badge, if empty and it's allowed, its stored on the controller's address until its claimed
+     * @param tokenURI url of the data of the token stored in IPFS
+     * @param data metaEvidence for the controller
+     */
+    function mintOnBehalf(
+        uint256 badgeModelId,
+        address account,
+        string memory tokenURI,
+        bytes memory data
+    ) external payable onlyBadgeModelMintable(badgeModelId) nonReentrant onlyRole(DEFAULT_ADMIN_ROLE) {
+        mintLogic(badgeModelId, account, tokenURI, data, true);
     }
 
     function mintInBatch(
@@ -173,7 +189,7 @@ contract TheBadge is
             bytes memory userData = data[i];
 
             // Call the existing mint function
-            mintLogic(badgeModelId, recipient, tokenURI, userData);
+            mintLogic(badgeModelId, recipient, tokenURI, userData, false);
 
             // Update the total value
             totalValue += msg.value;
@@ -185,7 +201,7 @@ contract TheBadge is
         }
     }
 
-    function mintLogic(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data) internal {
+    function mintLogic(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data, bool onBehalfMint) internal {
         // Re-declaring variables reduces the stack tree and avoid compilation errors
         uint256 _badgeModelId = badgeModelId;
         address _account = account;
@@ -198,7 +214,7 @@ contract TheBadge is
         }
 
         // Distribute fees
-        payProtocolFees(_badgeModelId);
+        payProtocolFees(_badgeModelId, onBehalfMint);
 
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
         TheBadgeStore.BadgeModelController memory _badgeModelController = _badgeStore.getBadgeModelController(
@@ -367,7 +383,7 @@ contract TheBadge is
         emit ProtocolSettingsUpdated();
     }
 
-    function payProtocolFees(uint256 _badgeModelId) internal {
+    function payProtocolFees(uint256 _badgeModelId, bool payFeesToSender) internal {
         TheBadgeStore.BadgeModel memory _badgeModel = _badgeStore.getBadgeModel(_badgeModelId);
         // Gas costs of the claim function sponsored by the creator on behalf of the user
         uint256 claimBadgeProtocolFee = _badgeStore.claimBadgeProtocolFee();
@@ -391,12 +407,14 @@ contract TheBadge is
             "0x"
         );
 
-        (bool creatorFeeSent, ) = payable(_badgeModel.creator).call{ value: creatorPayment }("");
+        address creatorFeesRecipient = payFeesToSender ? _msgSender() : _badgeModel.creator;
+
+        (bool creatorFeeSent, ) = payable(creatorFeesRecipient).call{ value: creatorPayment }("");
         if (creatorFeeSent == false) {
             revert LibTheBadge.TheBadge__mint_creatorFeesPaymentFailed();
         }
         emit PaymentMade(
-            _badgeModel.creator,
+            creatorFeesRecipient,
             feeCollector,
             creatorPayment,
             LibTheBadge.PaymentType.CreatorMintFee,

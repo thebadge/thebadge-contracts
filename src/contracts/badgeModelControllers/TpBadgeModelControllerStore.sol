@@ -180,6 +180,10 @@ contract TpBadgeModelControllerStore is OwnableUpgradeable, TheBadgeRoles {
         return thirdPartyAdministratorsByBadgeModel[badgeModelId][userAddress];
     }
 
+    function hasBadgeModelRoleAdministrator(address userAddress) external view returns (bool) {
+        return hasRole(DEFAULT_ADMIN_ROLE, userAddress);
+    }
+
     /**
      * =========================
      * Setters

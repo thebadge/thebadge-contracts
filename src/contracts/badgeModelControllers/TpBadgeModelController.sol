@@ -86,7 +86,8 @@ contract TpBadgeModelController is
         bool isOwner = tpBadgeModelControllerStore.isBadgeModelOwner(badgeModelId, callee);
         if (!isOwner) {
             bool isAdministrator = tpBadgeModelControllerStore.isBadgeModelAdministrator(badgeModelId, callee);
-            if (!isAdministrator) {
+            bool isContractAdmin = tpBadgeModelControllerStore.hasBadgeModelRoleAdministrator(callee);
+            if (!isAdministrator && !isContractAdmin) {
                 revert LibTpBadgeModelController.ThirdPartyModelController__store_OperationNotPermitted();
             }
         }

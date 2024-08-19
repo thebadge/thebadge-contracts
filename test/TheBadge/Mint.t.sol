@@ -280,4 +280,170 @@ contract Mint is Config {
         // Ensures that the badgeModel for the badgeModel user now contains 1 badge minted
         assertEq(theBadge.balanceOfBadgeModel(address(tpBadgeModelControllerInstance), 0), 1);
     }
+
+    function testWorksWithThirdPartyWithRecipientOnBehalf() public {
+        // register user
+        // U1 is the creator; U2 is the minter
+        vm.prank(u1);
+        badgeUsers.registerUser("user metadata", false);
+
+        // Register the user as third party one
+        vm.prank(u1);
+        badgeUsers.submitUserVerification(tpControllerName, "ipfs://evidenceMetadata.json");
+
+        // Verify the user to be a third party user
+        vm.prank(admin);
+        badgeUsers.executeUserVerification(u1, tpControllerName, true);
+
+        uint256 claimProtocolFee = 0.0004e18;
+
+        // Setups the claim protocol fee
+        vm.prank(admin);
+        theBadge.updateClaimBadgeProtocolFee(claimProtocolFee);
+        thirdPartyBadgeModelSetup(0.1e18);
+
+        TpBadgeModelControllerStore.MintParams memory mintThirdPartyData = TpBadgeModelControllerStore.MintParams({
+            badgeDataUri: "ipfs://evidence"
+        });
+
+        uint256 badgeModelId = 0;
+        string memory tokenURI = "ipfs://metadata";
+        bytes memory mintData = abi.encode(mintThirdPartyData);
+        uint256 mintCreatorFee = 0.1e18;
+        uint256 mintValue = theBadge.mintValue(badgeModelId);
+        uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
+        uint256 userCreatorInitialBalance = address(u1).balance;
+        uint256 feeCollectorInitialBalance = address(feeCollector).balance;
+        uint256 adminInitialBalance = address(admin).balance;
+
+        // Ensures that the controller fee is well calculated
+        uint256 controllerMintValue = tpBadgeModelControllerInstance.mintValue(badgeModelId);
+        assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
+
+        // Executes the mint and sends the badge to the user2
+        vm.prank(admin);
+        theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, u2, tokenURI, mintData);
+
+        uint256 userCreatorFinalBalance = address(u1).balance;
+        uint256 feeCollectorFinalBalance = address(feeCollector).balance;
+        uint256 adminFinalBalance = address(admin).balance;
+
+        // Ensures that the TheBadge's fee collector receives his payment
+        uint256 theBadgeFees = (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
+        assertEq(feeCollectorFinalBalance, feeCollectorInitialBalance + theBadgeFees + claimProtocolFee);
+
+        // Ensures that the tp creator did not paid anything
+        assertEq(userCreatorFinalBalance, userCreatorInitialBalance);
+
+        // Ensures that the admin did the pay and recovered the fees
+        assertEq(adminFinalBalance, adminInitialBalance - mintValue - theBadgeFees + mintCreatorFee);
+
+        // Ensures that theBadgeBalance is 0
+        assertEq(address(theBadge).balance, 0);
+
+        // Ensures that the thirdPartyController balance is 0
+        assertEq(address(tpBadgeModelControllerInstance).balance, 0);
+
+        // Ensures that the's no deposit stored on the tp tcr
+        TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _tpBadgeModel = tpBadgeModelControllerStoreInstance
+            .getBadgeModel(badgeModelId);
+        uint256 tcrBalance = address(_tpBadgeModel.tcrList).balance;
+        assertEq(tcrBalance, 0);
+
+        // Ensures that the recipient has his badge
+        uint256 badgeId = badgeStore.getCurrentBadgeIdCounter() - 1;
+        assertGt(theBadge.balanceOf(u2, badgeId), 0);
+
+        // Ensures that the badge is not claimable
+        assertFalse(theBadge.isClaimable(badgeId));
+
+        // Ensures that the badge is not expired
+        assertFalse(theBadge.isExpired(badgeId));
+
+        // Ensures that the badgeModel for the user now contains 1 badge minted
+        assertEq(theBadge.balanceOfBadgeModel(u2, 0), 1);
+    }
+
+    function testWorksWithThirdPartyWithoutRecipientOnBehalf() public {
+        // register user
+        // U1 is the creator; U2 is the minter
+        vm.prank(u1);
+        badgeUsers.registerUser("user metadata", false);
+
+        // Register the user as third party one
+        vm.prank(u1);
+        badgeUsers.submitUserVerification(tpControllerName, "ipfs://evidenceMetadata.json");
+
+        // Verify the user to be a third party user
+        vm.prank(admin);
+        badgeUsers.executeUserVerification(u1, tpControllerName, true);
+
+        uint256 claimProtocolFee = 0.0004e18;
+
+        // Setups the claim protocol fee
+        vm.prank(admin);
+        theBadge.updateClaimBadgeProtocolFee(claimProtocolFee);
+        thirdPartyBadgeModelSetup(0.1e18);
+
+        TpBadgeModelControllerStore.MintParams memory mintThirdPartyData = TpBadgeModelControllerStore.MintParams({
+            badgeDataUri: "ipfs://evidence"
+        });
+
+        uint256 badgeModelId = 0;
+        string memory tokenURI = "ipfs://metadata";
+        bytes memory mintData = abi.encode(mintThirdPartyData);
+        uint256 mintCreatorFee = 0.1e18;
+        uint256 mintValue = theBadge.mintValue(badgeModelId);
+        uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
+        uint256 userCreatorInitialBalance = address(u1).balance;
+        uint256 feeCollectorInitialBalance = address(feeCollector).balance;
+        uint256 adminInitialBalance = address(admin).balance;
+
+        // Ensures that the controller fee is well calculated
+        uint256 controllerMintValue = tpBadgeModelControllerInstance.mintValue(badgeModelId);
+        assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
+
+        // Executes the mint and sends the badge to undefined recipient
+        vm.prank(admin);
+        theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, address(0), tokenURI, mintData);
+
+        uint256 userCreatorFinalBalance = address(u1).balance;
+        uint256 feeCollectorFinalBalance = address(feeCollector).balance;
+        uint256 adminFinalBalance = address(admin).balance;
+
+        // Ensures that the TheBadge's fee collector receives his payment
+        uint256 theBadgeFees = (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
+        assertEq(feeCollectorFinalBalance, feeCollectorInitialBalance + theBadgeFees + claimProtocolFee);
+
+        // Ensures that the tp creator did not paid anything
+        assertEq(userCreatorFinalBalance, userCreatorInitialBalance);
+
+        // Ensures that the admin did the pay and recovered the fees
+        assertEq(adminFinalBalance, adminInitialBalance - mintValue - theBadgeFees + mintCreatorFee);
+
+        // Ensures that theBadgeBalance is 0
+        assertEq(address(theBadge).balance, 0);
+
+        // Ensures that the thirdPartyController balance is 0
+        assertEq(address(tpBadgeModelControllerInstance).balance, 0);
+
+        // Ensures that the's no deposit stored on the tp tcr
+        TpBadgeModelControllerStore.ThirdPartyBadgeModel memory _tpBadgeModel = tpBadgeModelControllerStoreInstance
+            .getBadgeModel(badgeModelId);
+        uint256 tcrBalance = address(_tpBadgeModel.tcrList).balance;
+        assertEq(tcrBalance, 0);
+
+        // Ensures that the badge is stored on the tpBadgeModelControllerInstance
+        uint256 badgeId = badgeStore.getCurrentBadgeIdCounter() - 1;
+        assertGt(theBadge.balanceOf(address(tpBadgeModelControllerInstance), badgeId), 0);
+
+        // Ensures that the badge is claimable
+        assertTrue(theBadge.isClaimable(badgeId));
+
+        // Ensures that the badge is not expired
+        assertFalse(theBadge.isExpired(badgeId));
+
+        // Ensures that the badgeModel for the badgeModel user now contains 1 badge minted
+        assertEq(theBadge.balanceOfBadgeModel(address(tpBadgeModelControllerInstance), 0), 1);
+    }
 }
