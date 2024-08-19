@@ -16,10 +16,10 @@ contract Config is Test {
     address feeCollector = vm.addr(2);
     address u1 = vm.addr(3);
     address u2 = vm.addr(4);
-    // TCR Factory address in goerli
-    address public _tcrFactory = 0x55A3d9Bd99F286F1817CAFAAB124ddDDFCb0F314;
-    // Kleros arbitrator address in goerli
-    address public _arbitrator = 0x1128eD55ab2d796fa92D2F8E1f336d745354a77A;
+    // TCR Factory address in sepolia
+    address public _tcrFactory = 0x3FB8314C628E9afE7677946D3E23443Ce748Ac17;
+    // Kleros arbitrator address in sepolia
+    address public _arbitrator = 0x90992fb4E15ce0C59aEFfb376460Fda4Ee19C879;
     string public klerosControllerName = "kleros";
     string public tpControllerName = "thirdParty";
 
