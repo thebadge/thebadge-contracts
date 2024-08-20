@@ -421,11 +421,7 @@
           },
           "t_enum(VerificationStatus)7661": {
             "label": "enum LibTheBadgeUsers.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
@@ -1423,11 +1419,7 @@
           },
           "t_enum(VerificationStatus)9495": {
             "label": "enum LibTheBadgeUsers.VerificationStatus",
-            "members": [
-              "VerificationSubmitted",
-              "Verified",
-              "VerificationRejected"
-            ],
+            "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
           },
           "t_mapping(t_address,t_bool)": {
