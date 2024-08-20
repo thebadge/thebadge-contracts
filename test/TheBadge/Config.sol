@@ -18,6 +18,7 @@ contract Config is Test {
     address feeCollector = vm.addr(2);
     address u1 = vm.addr(3);
     address u2 = vm.addr(4);
+    bytes32 tpMinterRole = keccak256("TP_MINTER_ROLE");
 
     TheBadgeStore badgeStore;
     TheBadge theBadge;
@@ -82,11 +83,15 @@ contract Config is Test {
         badgeModels.addBadgeModelController(tpControllerName, address(tpBadgeModelControllerInstance));
         vm.stopPrank();
 
-        // Finally gives the role USER_MANAGER_ROLE to the contract TheBadgeModels to allow it to call the method makeUserCreator on the contract TheBadgeUsers
+        // Gives the role USER_MANAGER_ROLE to the contract TheBadgeModels to allow it to call the method makeUserCreator on the contract TheBadgeUsers
         // Fore more details you can check the 01_deploy.ts script inside the /script folder
         bytes32 managerRole = keccak256("USER_MANAGER_ROLE");
         vm.prank(admin);
         badgeUsers.grantRole(managerRole, address(badgeModels));
+
+        // Finally gives the role TP_MINTER_ROLE to the contract TheBadgeModels to allow it to call mintOnBehalf method for thirdParty badges
+        vm.prank(admin);
+        theBadge.grantRole(tpMinterRole, address(admin));
     }
 
     function setUpControllers() public {

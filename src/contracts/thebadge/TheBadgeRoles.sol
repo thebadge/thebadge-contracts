@@ -10,4 +10,5 @@ contract TheBadgeRoles is AccessControlUpgradeable {
     bytes32 public constant VERIFIER_ROLE = keccak256("VERIFIER_ROLE");
     bytes32 public constant USER_MANAGER_ROLE = keccak256("USER_MANAGER_ROLE");
     bytes32 public constant CLAIMER_ROLE = keccak256("CLAIMER_ROLE");
+    bytes32 public constant TP_MINTER_ROLE = keccak256("TP_MINTER_ROLE");
 }

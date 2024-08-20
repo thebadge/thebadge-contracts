@@ -12,8 +12,6 @@ import { LibTheBadge } from "contracts/libraries/LibTheBadge.sol";
 import { IAccessControl } from "@openzeppelin/contracts/access/IAccessControl.sol";
 
 contract Mint is Config {
-    bytes32 adminRole = 0x00;
-
     function klerosBadgeModelSetup(uint256 mintCreatorFee) public {
         TheBadgeStore.CreateBadgeModel memory args = TheBadgeStore.CreateBadgeModel({
             metadata: "metadata",
@@ -97,7 +95,7 @@ contract Mint is Config {
         assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
 
         vm.expectRevert(
-            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, u2, adminRole)
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, u2, tpMinterRole)
         );
 
         vm.prank(u2);

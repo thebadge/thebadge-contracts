@@ -163,7 +163,7 @@ contract TheBadge is
         address account,
         string memory tokenURI,
         bytes memory data
-    ) external payable onlyBadgeModelMintable(badgeModelId) nonReentrant onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external payable onlyBadgeModelMintable(badgeModelId) nonReentrant onlyRole(TP_MINTER_ROLE) {
         mintLogic(badgeModelId, account, tokenURI, data, true);
     }
 
