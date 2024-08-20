@@ -2,12 +2,12 @@ pragma solidity ^0.8.20;
 
 import { Test } from "forge-std/Test.sol";
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
-import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
-import { TheBadgeUsersStore } from "../../src/contracts/thebadge/TheBadgeUsersStore.sol";
-import { TheBadgeUsers } from "../../src/contracts/thebadge/TheBadgeUsers.sol";
-import { TheBadgeModels } from "../../src/contracts/thebadge/TheBadgeModels.sol";
-import { KlerosBadgeModelController } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
-import { KlerosBadgeModelControllerStore } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
+import { TheBadgeStore } from "contracts/thebadge/TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "contracts/thebadge/TheBadgeUsersStore.sol";
+import { TheBadgeUsers } from "contracts/thebadge/TheBadgeUsers.sol";
+import { TheBadgeModels } from "contracts/thebadge/TheBadgeModels.sol";
+import { KlerosBadgeModelController } from "contracts/badgeModelControllers/KlerosBadgeModelController.sol";
+import { KlerosBadgeModelControllerStore } from "contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
 
 import { LibTheBadgeUsers } from "../../src/contracts/libraries/LibTheBadgeUsers.sol";
 import { LibTheBadge } from "../../src/contracts/libraries/LibTheBadge.sol";
