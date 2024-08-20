@@ -31,7 +31,7 @@ const tenderlyVerifyControllers = async (hre: HardhatRuntimeEnvironment) => {
   ];
   await tenderly.verify(...deployedTpControllerContracts);
 
-  if (chainId !== Chains.gnosis && chainId == Chains.sepolia) {
+  if (chainId !== Chains.gnosis && chainId !== Chains.sepolia) {
     console.log(`Skipping kleros contracts verifications, the network is: ${chainId}...`);
     return;
   }
@@ -124,7 +124,11 @@ const verifyControllers = async (hre: HardhatRuntimeEnvironment) => {
     constructorArguments: [],
   });
 
-  if (chainId !== Chains.polygon && chainId !== Chains.mumbai && chainId !== Chains.avax) {
+  if (chainId !== Chains.gnosis && chainId !== Chains.sepolia) {
+    console.warn(
+      "Verifying kleros on any other chain than sepolia or gnosis is not allowed, ignoring kleros verification...",
+    );
+  } else {
     const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
     const klerosBadgeModelControllerStoreDeployedAddress =
       contracts.KlerosBadgeModelControllerStore.address[chainId as Chains];
