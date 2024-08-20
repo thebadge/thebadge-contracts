@@ -8,8 +8,12 @@ import { KlerosBadgeModelController } from "contracts/badgeModelControllers/Kler
 import { KlerosBadgeModelControllerStore } from "contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
 import { TpBadgeModelControllerStore } from "contracts/badgeModelControllers/TpBadgeModelControllerStore.sol";
 import { TpBadgeModelController } from "contracts/badgeModelControllers/TpBadgeModelController.sol";
+import { LibTheBadge } from "contracts/libraries/LibTheBadge.sol";
+import { IAccessControl } from "@openzeppelin/contracts/access/IAccessControl.sol";
 
 contract Mint is Config {
+    bytes32 adminRole = 0x00;
+
     function klerosBadgeModelSetup(uint256 mintCreatorFee) public {
         TheBadgeStore.CreateBadgeModel memory args = TheBadgeStore.CreateBadgeModel({
             metadata: "metadata",
@@ -61,7 +65,7 @@ contract Mint is Config {
         vm.stopPrank();
     }
 
-    function testWorksWithKleros() public {
+    function testKlerosCantBeMintedOnBehalfWithNormalAccount() public {
         // register user
         // U1 is the creator; U2 is the minter
         vm.prank(u1);
@@ -92,40 +96,54 @@ contract Mint is Config {
         uint256 controllerMintValue = klerosBadgeModelControllerInstance.mintValue(badgeModelId);
         assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
 
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, u2, adminRole)
+        );
+
         vm.prank(u2);
         // Executes the mint
-        theBadge.mint{ value: mintValue }(badgeModelId, u1, tokenURI, mintData);
-
-        uint256 userCreatorFinalBalance = address(u1).balance;
-        uint256 feeCollectorFinalBalance = address(feeCollector).balance;
-
-        // Ensures that the creator receives his payment
-        assertEq(
-            userCreatorFinalBalance,
-            userCreatorInitialBalance + (mintCreatorFee - (mintCreatorFee * mintProtocolFeeInBps) / 10_000)
-        );
-        // Ensures that the TheBadge's fee collector receives his payment
-        assertEq(
-            feeCollectorFinalBalance,
-            feeCollectorInitialBalance + ((mintCreatorFee * mintProtocolFeeInBps) / 10_000) + claimProtocolFee
-        );
-
-        uint256 theBadgeBalance = address(theBadge).balance;
-        // Ensures that theBadgeBalance is 0
-        assertEq(theBadgeBalance, 0);
-
-        // Ensures that the klerosController balance is 0
-        uint256 klerosControllerBalance = address(klerosBadgeModelControllerInstance).balance;
-        assertEq(klerosControllerBalance, 0);
-
-        // Ensures that the kleros deposit is stored on the tcr
-        KlerosBadgeModelControllerStore.KlerosBadgeModel
-            memory _klerosBadgeModel = klerosBadgeModelControllerStoreInstance.getKlerosBadgeModel(badgeModelId);
-        uint256 tcrBalance = address(_klerosBadgeModel.tcrList).balance;
-        assertEq(tcrBalance, controllerMintValue);
+        theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, u1, tokenURI, mintData);
     }
 
-    function testWorksWithThirdPartyWithRecipient() public {
+    function testKlerosCantBeMintedOnBehalfWithAdminAccount() public {
+        // register user
+        // U1 is the creator; U2 is the minter
+        vm.prank(u1);
+        badgeUsers.registerUser("user metadata", false);
+
+        uint256 claimProtocolFee = 0.0004e18;
+
+        // Setups the claim protocol fee
+        vm.prank(admin);
+        theBadge.updateClaimBadgeProtocolFee(claimProtocolFee);
+        klerosBadgeModelSetup(0.1e18);
+
+        KlerosBadgeModelControllerStore.MintParams memory mintKlerosData = KlerosBadgeModelControllerStore.MintParams({
+            evidence: "ipfs://evidence"
+        });
+
+        uint256 badgeModelId = 0;
+        string memory tokenURI = "ipfs://metadata";
+        bytes memory mintData = abi.encode(mintKlerosData);
+
+        uint256 mintValue = theBadge.mintValue(badgeModelId);
+        uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
+        uint256 userCreatorInitialBalance = address(u1).balance;
+        uint256 feeCollectorInitialBalance = address(feeCollector).balance;
+        uint256 mintCreatorFee = 0.1e18;
+
+        // Ensures that the controller fee is well calculated
+        uint256 controllerMintValue = klerosBadgeModelControllerInstance.mintValue(badgeModelId);
+        assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
+
+        vm.expectRevert(LibTheBadge.TheBadge__requestBadge_badgeNotMintable.selector);
+
+        vm.prank(admin);
+        // Executes the mint
+        theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, u1, tokenURI, mintData);
+    }
+
+    function testWorksWithThirdPartyWithRecipientOnBehalf() public {
         // register user
         // U1 is the creator; U2 is the minter
         vm.prank(u1);
@@ -158,24 +176,29 @@ contract Mint is Config {
         uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
         uint256 userCreatorInitialBalance = address(u1).balance;
         uint256 feeCollectorInitialBalance = address(feeCollector).balance;
+        uint256 adminInitialBalance = address(admin).balance;
 
         // Ensures that the controller fee is well calculated
         uint256 controllerMintValue = tpBadgeModelControllerInstance.mintValue(badgeModelId);
         assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
 
         // Executes the mint and sends the badge to the user2
-        vm.prank(u1);
-        theBadge.mint{ value: mintValue }(badgeModelId, u2, tokenURI, mintData);
+        vm.prank(admin);
+        theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, u2, tokenURI, mintData);
 
         uint256 userCreatorFinalBalance = address(u1).balance;
         uint256 feeCollectorFinalBalance = address(feeCollector).balance;
+        uint256 adminFinalBalance = address(admin).balance;
 
         // Ensures that the TheBadge's fee collector receives his payment
         uint256 theBadgeFees = (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
         assertEq(feeCollectorFinalBalance, feeCollectorInitialBalance + theBadgeFees + claimProtocolFee);
 
-        // Ensures that the tp creator had made his payment
-        assertEq(userCreatorFinalBalance, userCreatorInitialBalance - theBadgeFees - claimProtocolFee);
+        // Ensures that the tp creator did not paid anything
+        assertEq(userCreatorFinalBalance, userCreatorInitialBalance);
+
+        // Ensures that the admin did the pay and recovered the fees
+        assertEq(adminFinalBalance, adminInitialBalance - mintValue - theBadgeFees + mintCreatorFee);
 
         // Ensures that theBadgeBalance is 0
         assertEq(address(theBadge).balance, 0);
@@ -203,7 +226,7 @@ contract Mint is Config {
         assertEq(theBadge.balanceOfBadgeModel(u2, 0), 1);
     }
 
-    function testWorksWithThirdPartyWithoutRecipient() public {
+    function testWorksWithThirdPartyWithoutRecipientOnBehalf() public {
         // register user
         // U1 is the creator; U2 is the minter
         vm.prank(u1);
@@ -236,24 +259,29 @@ contract Mint is Config {
         uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
         uint256 userCreatorInitialBalance = address(u1).balance;
         uint256 feeCollectorInitialBalance = address(feeCollector).balance;
+        uint256 adminInitialBalance = address(admin).balance;
 
         // Ensures that the controller fee is well calculated
         uint256 controllerMintValue = tpBadgeModelControllerInstance.mintValue(badgeModelId);
         assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
 
         // Executes the mint and sends the badge to undefined recipient
-        vm.prank(u1);
-        theBadge.mint{ value: mintValue }(badgeModelId, address(0), tokenURI, mintData);
+        vm.prank(admin);
+        theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, address(0), tokenURI, mintData);
 
         uint256 userCreatorFinalBalance = address(u1).balance;
         uint256 feeCollectorFinalBalance = address(feeCollector).balance;
+        uint256 adminFinalBalance = address(admin).balance;
 
         // Ensures that the TheBadge's fee collector receives his payment
         uint256 theBadgeFees = (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
         assertEq(feeCollectorFinalBalance, feeCollectorInitialBalance + theBadgeFees + claimProtocolFee);
 
-        // Ensures that the tp creator had made his payment
-        assertEq(userCreatorFinalBalance, userCreatorInitialBalance - theBadgeFees - claimProtocolFee);
+        // Ensures that the tp creator did not paid anything
+        assertEq(userCreatorFinalBalance, userCreatorInitialBalance);
+
+        // Ensures that the admin did the pay and recovered the fees
+        assertEq(adminFinalBalance, adminInitialBalance - mintValue - theBadgeFees + mintCreatorFee);
 
         // Ensures that theBadgeBalance is 0
         assertEq(address(theBadge).balance, 0);

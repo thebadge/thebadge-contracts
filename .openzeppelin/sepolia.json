@@ -9710,7 +9710,7 @@
             "label": "registeredUsers",
             "offset": 0,
             "slot": "3",
-            "type": "t_mapping(t_address,t_struct(User)14670_storage)",
+            "type": "t_mapping(t_address,t_struct(User)17777_storage)",
             "contract": "TheBadgeUsersStore",
             "src": "src/contracts/thebadge/TheBadgeUsersStore.sol:83"
           },
@@ -9718,7 +9718,7 @@
             "label": "verifiedUsersByControllerAddress",
             "offset": 0,
             "slot": "4",
-            "type": "t_mapping(t_address,t_mapping(t_address,t_struct(UserVerification)14685_storage))",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_struct(UserVerification)17792_storage))",
             "contract": "TheBadgeUsersStore",
             "src": "src/contracts/thebadge/TheBadgeUsersStore.sol:84"
           },
@@ -9744,7 +9744,7 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
-          "t_enum(VerificationStatus)9418": {
+          "t_enum(VerificationStatus)9477": {
             "label": "enum LibTheBadgeUsers.VerificationStatus",
             "members": ["VerificationSubmitted", "Verified", "VerificationRejected"],
             "numberOfBytes": "1"
@@ -9753,15 +9753,15 @@
             "label": "mapping(address => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_mapping(t_address,t_struct(UserVerification)14685_storage))": {
+          "t_mapping(t_address,t_mapping(t_address,t_struct(UserVerification)17792_storage))": {
             "label": "mapping(address => mapping(address => struct TheBadgeUsersStore.UserVerification))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(User)14670_storage)": {
+          "t_mapping(t_address,t_struct(User)17777_storage)": {
             "label": "mapping(address => struct TheBadgeUsersStore.User)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(UserVerification)14685_storage)": {
+          "t_mapping(t_address,t_struct(UserVerification)17792_storage)": {
             "label": "mapping(address => struct TheBadgeUsersStore.UserVerification)",
             "numberOfBytes": "32"
           },
@@ -9777,7 +9777,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(User)14670_storage": {
+          "t_struct(User)17777_storage": {
             "label": "struct TheBadgeUsersStore.User",
             "members": [
               {
@@ -9813,7 +9813,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(UserVerification)14685_storage": {
+          "t_struct(UserVerification)17792_storage": {
             "label": "struct TheBadgeUsersStore.UserVerification",
             "members": [
               {
@@ -9836,7 +9836,7 @@
               },
               {
                 "label": "verificationStatus",
-                "type": "t_enum(VerificationStatus)9418",
+                "type": "t_enum(VerificationStatus)9477",
                 "offset": 0,
                 "slot": "3"
               },
@@ -10101,7 +10101,7 @@
             "label": "klerosBadgeModels",
             "offset": 0,
             "slot": "7",
-            "type": "t_mapping(t_uint256,t_struct(KlerosBadgeModel)7092_storage)",
+            "type": "t_mapping(t_uint256,t_struct(KlerosBadgeModel)7128_storage)",
             "contract": "KlerosBadgeModelControllerStore",
             "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:131"
           },
@@ -10109,7 +10109,7 @@
             "label": "klerosBadges",
             "offset": 0,
             "slot": "8",
-            "type": "t_mapping(t_uint256,t_struct(KlerosBadge)7106_storage)",
+            "type": "t_mapping(t_uint256,t_struct(KlerosBadge)7142_storage)",
             "contract": "KlerosBadgeModelControllerStore",
             "src": "src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol:132"
           },
@@ -10151,11 +10151,11 @@
             "label": "mapping(string => address)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(KlerosBadge)7106_storage)": {
+          "t_mapping(t_uint256,t_struct(KlerosBadge)7142_storage)": {
             "label": "mapping(uint256 => struct KlerosBadgeModelControllerStore.KlerosBadge)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(KlerosBadgeModel)7092_storage)": {
+          "t_mapping(t_uint256,t_struct(KlerosBadgeModel)7128_storage)": {
             "label": "mapping(uint256 => struct KlerosBadgeModelControllerStore.KlerosBadgeModel)",
             "numberOfBytes": "32"
           },
@@ -10163,7 +10163,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(KlerosBadge)7106_storage": {
+          "t_struct(KlerosBadge)7142_storage": {
             "label": "struct KlerosBadgeModelControllerStore.KlerosBadge",
             "members": [
               {
@@ -10205,7 +10205,7 @@
             ],
             "numberOfBytes": "160"
           },
-          "t_struct(KlerosBadgeModel)7092_storage": {
+          "t_struct(KlerosBadgeModel)7128_storage": {
             "label": "struct KlerosBadgeModelControllerStore.KlerosBadgeModel",
             "members": [
               {
@@ -10267,7 +10267,7 @@
             "label": "klerosBadgeModelControllerStore",
             "offset": 0,
             "slot": "0",
-            "type": "t_contract(KlerosBadgeModelControllerStore)7606",
+            "type": "t_contract(KlerosBadgeModelControllerStore)7642",
             "contract": "KlerosBadgeModelController",
             "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:30"
           },
@@ -10275,7 +10275,7 @@
             "label": "theBadge",
             "offset": 0,
             "slot": "1",
-            "type": "t_contract(TheBadge)11399",
+            "type": "t_contract(TheBadge)14506",
             "contract": "KlerosBadgeModelController",
             "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:31"
           },
@@ -10283,7 +10283,7 @@
             "label": "theBadgeModels",
             "offset": 0,
             "slot": "2",
-            "type": "t_contract(TheBadgeModels)12449",
+            "type": "t_contract(TheBadgeModels)15556",
             "contract": "KlerosBadgeModelController",
             "src": "src/contracts/badgeModelControllers/KlerosBadgeModelController.sol:32"
           },
@@ -10301,15 +10301,15 @@
             "label": "uint256[50]",
             "numberOfBytes": "1600"
           },
-          "t_contract(KlerosBadgeModelControllerStore)7606": {
+          "t_contract(KlerosBadgeModelControllerStore)7642": {
             "label": "contract KlerosBadgeModelControllerStore",
             "numberOfBytes": "20"
           },
-          "t_contract(TheBadge)11399": {
+          "t_contract(TheBadge)14506": {
             "label": "contract TheBadge",
             "numberOfBytes": "20"
           },
-          "t_contract(TheBadgeModels)12449": {
+          "t_contract(TheBadgeModels)15556": {
             "label": "contract TheBadgeModels",
             "numberOfBytes": "20"
           },
@@ -11164,7 +11164,7 @@
             "label": "thirdPartyModelController",
             "offset": 0,
             "slot": "2",
-            "type": "t_contract(TpBadgeModelController)8643",
+            "type": "t_contract(TpBadgeModelController)6612",
             "contract": "TpBadgeModelControllerStore",
             "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:113"
           },
@@ -11220,7 +11220,7 @@
             "label": "thirdPartyBadgeModels",
             "offset": 0,
             "slot": "9",
-            "type": "t_mapping(t_uint256,t_struct(ThirdPartyBadgeModel)8746_storage)",
+            "type": "t_mapping(t_uint256,t_struct(ThirdPartyBadgeModel)6715_storage)",
             "contract": "TpBadgeModelControllerStore",
             "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:122"
           },
@@ -11228,7 +11228,7 @@
             "label": "thirdPartyBadges",
             "offset": 0,
             "slot": "10",
-            "type": "t_mapping(t_uint256,t_struct(ThirdPartyBadge)8758_storage)",
+            "type": "t_mapping(t_uint256,t_struct(ThirdPartyBadge)6727_storage)",
             "contract": "TpBadgeModelControllerStore",
             "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:123"
           },
@@ -11270,7 +11270,7 @@
             "label": "contract IArbitrator",
             "numberOfBytes": "20"
           },
-          "t_contract(TpBadgeModelController)8643": {
+          "t_contract(TpBadgeModelController)6612": {
             "label": "contract TpBadgeModelController",
             "numberOfBytes": "20"
           },
@@ -11286,11 +11286,11 @@
             "label": "mapping(uint256 => mapping(address => bool))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(ThirdPartyBadge)8758_storage)": {
+          "t_mapping(t_uint256,t_struct(ThirdPartyBadge)6727_storage)": {
             "label": "mapping(uint256 => struct TpBadgeModelControllerStore.ThirdPartyBadge)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(ThirdPartyBadgeModel)8746_storage)": {
+          "t_mapping(t_uint256,t_struct(ThirdPartyBadgeModel)6715_storage)": {
             "label": "mapping(uint256 => struct TpBadgeModelControllerStore.ThirdPartyBadgeModel)",
             "numberOfBytes": "32"
           },
@@ -11302,7 +11302,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(ThirdPartyBadge)8758_storage": {
+          "t_struct(ThirdPartyBadge)6727_storage": {
             "label": "struct TpBadgeModelControllerStore.ThirdPartyBadge",
             "members": [
               {
@@ -11338,7 +11338,7 @@
             ],
             "numberOfBytes": "160"
           },
-          "t_struct(ThirdPartyBadgeModel)8746_storage": {
+          "t_struct(ThirdPartyBadgeModel)6715_storage": {
             "label": "struct TpBadgeModelControllerStore.ThirdPartyBadgeModel",
             "members": [
               {
@@ -11459,7 +11459,7 @@
             "label": "badgeModelControllers",
             "offset": 0,
             "slot": "7",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(BadgeModelController)12557_storage)",
+            "type": "t_mapping(t_string_memory_ptr,t_struct(BadgeModelController)15664_storage)",
             "contract": "TheBadgeStore",
             "src": "src/contracts/thebadge/TheBadgeStore.sol:100"
           },
@@ -11467,7 +11467,7 @@
             "label": "badgeModelControllersByAddress",
             "offset": 0,
             "slot": "8",
-            "type": "t_mapping(t_address,t_struct(BadgeModelController)12557_storage)",
+            "type": "t_mapping(t_address,t_struct(BadgeModelController)15664_storage)",
             "contract": "TheBadgeStore",
             "src": "src/contracts/thebadge/TheBadgeStore.sol:101"
           },
@@ -11475,7 +11475,7 @@
             "label": "badgeModels",
             "offset": 0,
             "slot": "9",
-            "type": "t_mapping(t_uint256,t_struct(BadgeModel)12591_storage)",
+            "type": "t_mapping(t_uint256,t_struct(BadgeModel)15698_storage)",
             "contract": "TheBadgeStore",
             "src": "src/contracts/thebadge/TheBadgeStore.sol:102"
           },
@@ -11483,7 +11483,7 @@
             "label": "badges",
             "offset": 0,
             "slot": "10",
-            "type": "t_mapping(t_uint256,t_struct(Badge)12600_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Badge)15707_storage)",
             "contract": "TheBadgeStore",
             "src": "src/contracts/thebadge/TheBadgeStore.sol:103"
           },
@@ -11537,7 +11537,7 @@
             "label": "mapping(address => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(BadgeModelController)12557_storage)": {
+          "t_mapping(t_address,t_struct(BadgeModelController)15664_storage)": {
             "label": "mapping(address => struct TheBadgeStore.BadgeModelController)",
             "numberOfBytes": "32"
           },
@@ -11545,7 +11545,7 @@
             "label": "mapping(string => address)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_string_memory_ptr,t_struct(BadgeModelController)12557_storage)": {
+          "t_mapping(t_string_memory_ptr,t_struct(BadgeModelController)15664_storage)": {
             "label": "mapping(string => struct TheBadgeStore.BadgeModelController)",
             "numberOfBytes": "32"
           },
@@ -11553,11 +11553,11 @@
             "label": "mapping(uint256 => mapping(address => uint256[]))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Badge)12600_storage)": {
+          "t_mapping(t_uint256,t_struct(Badge)15707_storage)": {
             "label": "mapping(uint256 => struct TheBadgeStore.Badge)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(BadgeModel)12591_storage)": {
+          "t_mapping(t_uint256,t_struct(BadgeModel)15698_storage)": {
             "label": "mapping(uint256 => struct TheBadgeStore.BadgeModel)",
             "numberOfBytes": "32"
           },
@@ -11569,7 +11569,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(Badge)12600_storage": {
+          "t_struct(Badge)15707_storage": {
             "label": "struct TheBadgeStore.Badge",
             "members": [
               {
@@ -11599,7 +11599,7 @@
             ],
             "numberOfBytes": "128"
           },
-          "t_struct(BadgeModel)12591_storage": {
+          "t_struct(BadgeModel)15698_storage": {
             "label": "struct TheBadgeStore.BadgeModel",
             "members": [
               {
@@ -11671,7 +11671,7 @@
             ],
             "numberOfBytes": "320"
           },
-          "t_struct(BadgeModelController)12557_storage": {
+          "t_struct(BadgeModelController)15664_storage": {
             "label": "struct TheBadgeStore.BadgeModelController",
             "members": [
               {
@@ -11854,7 +11854,7 @@
             "label": "_badgeStore",
             "offset": 0,
             "slot": "0",
-            "type": "t_contract(TheBadgeStore)13436",
+            "type": "t_contract(TheBadgeStore)16543",
             "contract": "TheBadgeModels",
             "src": "src/contracts/thebadge/TheBadgeModels.sol:21"
           },
@@ -11862,7 +11862,7 @@
             "label": "_theBadgeUsers",
             "offset": 0,
             "slot": "1",
-            "type": "t_contract(TheBadgeUsers)14605",
+            "type": "t_contract(TheBadgeUsers)17712",
             "contract": "TheBadgeModels",
             "src": "src/contracts/thebadge/TheBadgeModels.sol:22"
           },
@@ -11880,11 +11880,11 @@
             "label": "uint256[50]",
             "numberOfBytes": "1600"
           },
-          "t_contract(TheBadgeStore)13436": {
+          "t_contract(TheBadgeStore)16543": {
             "label": "contract TheBadgeStore",
             "numberOfBytes": "20"
           },
-          "t_contract(TheBadgeUsers)14605": {
+          "t_contract(TheBadgeUsers)17712": {
             "label": "contract TheBadgeUsers",
             "numberOfBytes": "20"
           },
@@ -11980,7 +11980,7 @@
             "label": "_badgeStore",
             "offset": 0,
             "slot": "0",
-            "type": "t_contract(TheBadgeStore)13436",
+            "type": "t_contract(TheBadgeStore)11361",
             "contract": "TheBadge",
             "src": "src/contracts/thebadge/TheBadge.sol:30"
           },
@@ -11988,7 +11988,7 @@
             "label": "_badgeUsers",
             "offset": 0,
             "slot": "1",
-            "type": "t_contract(TheBadgeUsers)14605",
+            "type": "t_contract(TheBadgeUsers)12530",
             "contract": "TheBadge",
             "src": "src/contracts/thebadge/TheBadge.sol:31"
           },
@@ -12022,11 +12022,11 @@
             "label": "uint256[50]",
             "numberOfBytes": "1600"
           },
-          "t_contract(TheBadgeStore)13436": {
+          "t_contract(TheBadgeStore)11361": {
             "label": "contract TheBadgeStore",
             "numberOfBytes": "20"
           },
-          "t_contract(TheBadgeUsers)14605": {
+          "t_contract(TheBadgeUsers)12530": {
             "label": "contract TheBadgeUsers",
             "numberOfBytes": "20"
           },
@@ -12051,7 +12051,7 @@
             "label": "_badgeStore",
             "offset": 0,
             "slot": "0",
-            "type": "t_contract(TheBadgeStore)13436",
+            "type": "t_contract(TheBadgeStore)16543",
             "contract": "TheBadgeUsers",
             "src": "src/contracts/thebadge/TheBadgeUsers.sol:20"
           },
@@ -12059,7 +12059,7 @@
             "label": "_badgeUsersStore",
             "offset": 0,
             "slot": "1",
-            "type": "t_contract(TheBadgeUsersStore)15115",
+            "type": "t_contract(TheBadgeUsersStore)18222",
             "contract": "TheBadgeUsers",
             "src": "src/contracts/thebadge/TheBadgeUsers.sol:21"
           },
@@ -12077,11 +12077,11 @@
             "label": "uint256[50]",
             "numberOfBytes": "1600"
           },
-          "t_contract(TheBadgeStore)13436": {
+          "t_contract(TheBadgeStore)16543": {
             "label": "contract TheBadgeStore",
             "numberOfBytes": "20"
           },
-          "t_contract(TheBadgeUsersStore)15115": {
+          "t_contract(TheBadgeUsersStore)18222": {
             "label": "contract TheBadgeUsersStore",
             "numberOfBytes": "20"
           },
@@ -12102,7 +12102,7 @@
             "label": "tpBadgeModelControllerStore",
             "offset": 0,
             "slot": "0",
-            "type": "t_contract(TpBadgeModelControllerStore)9274",
+            "type": "t_contract(TpBadgeModelControllerStore)7243",
             "contract": "TpBadgeModelController",
             "src": "src/contracts/badgeModelControllers/TpBadgeModelController.sol:31"
           },
@@ -12110,7 +12110,7 @@
             "label": "theBadgeUsers",
             "offset": 0,
             "slot": "1",
-            "type": "t_contract(TheBadgeUsers)14605",
+            "type": "t_contract(TheBadgeUsers)12530",
             "contract": "TpBadgeModelController",
             "src": "src/contracts/badgeModelControllers/TpBadgeModelController.sol:32"
           },
@@ -12118,7 +12118,7 @@
             "label": "theBadge",
             "offset": 0,
             "slot": "2",
-            "type": "t_contract(TheBadge)11399",
+            "type": "t_contract(TheBadge)9324",
             "contract": "TpBadgeModelController",
             "src": "src/contracts/badgeModelControllers/TpBadgeModelController.sol:33"
           },
@@ -12126,7 +12126,7 @@
             "label": "theBadgeModels",
             "offset": 0,
             "slot": "3",
-            "type": "t_contract(TheBadgeModels)12449",
+            "type": "t_contract(TheBadgeModels)10374",
             "contract": "TpBadgeModelController",
             "src": "src/contracts/badgeModelControllers/TpBadgeModelController.sol:34"
           },
@@ -12144,21 +12144,422 @@
             "label": "uint256[50]",
             "numberOfBytes": "1600"
           },
-          "t_contract(TheBadge)11399": {
+          "t_contract(TheBadge)9324": {
             "label": "contract TheBadge",
             "numberOfBytes": "20"
           },
-          "t_contract(TheBadgeModels)12449": {
+          "t_contract(TheBadgeModels)10374": {
             "label": "contract TheBadgeModels",
             "numberOfBytes": "20"
           },
-          "t_contract(TheBadgeUsers)14605": {
+          "t_contract(TheBadgeUsers)12530": {
             "label": "contract TheBadgeUsers",
             "numberOfBytes": "20"
           },
-          "t_contract(TpBadgeModelControllerStore)9274": {
+          "t_contract(TpBadgeModelControllerStore)7243": {
             "label": "contract TpBadgeModelControllerStore",
             "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "ca2bf9306446261d5b4b47a4d8aeaa846a1d79bfe6a6f84685d0c00b9183deac": {
+      "address": "0x7fbD3837F5b36B28610BEC8452aFb53dc16892Be",
+      "txHash": "0x0de8e85ec57eab52ada5d01b82c077af03664460cb6e34e6b0249997074b655d",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "_badgeStore",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(TheBadgeStore)16543",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:30"
+          },
+          {
+            "label": "_badgeUsers",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(TheBadgeUsers)17712",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:31"
+          },
+          {
+            "label": "name",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_string_storage",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:32"
+          },
+          {
+            "label": "symbol",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_string_storage",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:33"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "TheBadge",
+            "src": "src/contracts/thebadge/TheBadge.sol:716"
+          }
+        ],
+        "types": {
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_contract(TheBadgeStore)16543": {
+            "label": "contract TheBadgeStore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeUsers)17712": {
+            "label": "contract TheBadgeUsers",
+            "numberOfBytes": "20"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "4ecf06ec7aa5330a4d6945a0e8aae76958e0fdb06f0fc13f2483376e3ce6d3bc": {
+      "address": "0xF7241F4AA2d3aE4eD0A2546E0b9Bcb4205EE3499",
+      "txHash": "0x372cb1ea505c80b45cb34cefa3a3f76148d5c050aefc4088845544519e23fc1f",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "tpBadgeModelControllerStore",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(TpBadgeModelControllerStore)9333",
+            "contract": "TpBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelController.sol:31"
+          },
+          {
+            "label": "theBadgeUsers",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(TheBadgeUsers)17712",
+            "contract": "TpBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelController.sol:32"
+          },
+          {
+            "label": "theBadge",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(TheBadge)14506",
+            "contract": "TpBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelController.sol:33"
+          },
+          {
+            "label": "theBadgeModels",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(TheBadgeModels)15556",
+            "contract": "TpBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelController.sol:34"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "TpBadgeModelController",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelController.sol:422"
+          }
+        ],
+        "types": {
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_contract(TheBadge)14506": {
+            "label": "contract TheBadge",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeModels)15556": {
+            "label": "contract TheBadgeModels",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TheBadgeUsers)17712": {
+            "label": "contract TheBadgeUsers",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TpBadgeModelControllerStore)9333": {
+            "label": "contract TpBadgeModelControllerStore",
+            "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "5be0303caa4efe555f85d7194458c5fc94ba77244c61482773b9b2404ef3df51": {
+      "address": "0xd054EbC8228988aC5cAB0bb66Dd13c99e9924990",
+      "txHash": "0x37462141258d8fce6d8188084bb6bdda28b5c6645a8677ceea7748b2228f2b54",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "badgeModelIdsCounter",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:110"
+          },
+          {
+            "label": "badgeIdsCounter",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:111"
+          },
+          {
+            "label": "thirdPartyModelController",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(TpBadgeModelController)8689",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:113"
+          },
+          {
+            "label": "arbitrator",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(IArbitrator)5575",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:114"
+          },
+          {
+            "label": "tcrFactory",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:115"
+          },
+          {
+            "label": "feeCollector",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_address",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:116"
+          },
+          {
+            "label": "verifyUserProtocolFee",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:117"
+          },
+          {
+            "label": "allowedContractAddresses",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:120"
+          },
+          {
+            "label": "allowedContractAddressesByContractName",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_string_memory_ptr,t_address)",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:121"
+          },
+          {
+            "label": "thirdPartyBadgeModels",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_uint256,t_struct(ThirdPartyBadgeModel)8792_storage)",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:122"
+          },
+          {
+            "label": "thirdPartyBadges",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_mapping(t_uint256,t_struct(ThirdPartyBadge)8804_storage)",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:123"
+          },
+          {
+            "label": "thirdPartyAdministratorsByBadgeModel",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_bool))",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:125"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "TpBadgeModelControllerStore",
+            "src": "src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol:315"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IArbitrator)5575": {
+            "label": "contract IArbitrator",
+            "numberOfBytes": "20"
+          },
+          "t_contract(TpBadgeModelController)8689": {
+            "label": "contract TpBadgeModelController",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_address)": {
+            "label": "mapping(string => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_bool))": {
+            "label": "mapping(uint256 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(ThirdPartyBadge)8804_storage)": {
+            "label": "mapping(uint256 => struct TpBadgeModelControllerStore.ThirdPartyBadge)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(ThirdPartyBadgeModel)8792_storage)": {
+            "label": "mapping(uint256 => struct TpBadgeModelControllerStore.ThirdPartyBadgeModel)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(ThirdPartyBadge)8804_storage": {
+            "label": "struct TpBadgeModelControllerStore.ThirdPartyBadge",
+            "members": [
+              {
+                "label": "itemID",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "badgeModelId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "badgeId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "initialized",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "badgeDataUri",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(ThirdPartyBadgeModel)8792_storage": {
+            "label": "struct TpBadgeModelControllerStore.ThirdPartyBadgeModel",
+            "members": [
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "badgeModelId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "tcrList",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "governor",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "admin",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "initialized",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "4"
+              },
+              {
+                "label": "requirementsIPFSHash",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
           },
           "t_uint256": {
             "label": "uint256",
