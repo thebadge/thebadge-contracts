@@ -482,6 +482,13 @@ contract KlerosBadgeModelController is
     }
 
     /**
+     * @notice It's true if this badgeModel can be minted on behalf of the creator
+     */
+    function isMintableOnBehalf() external pure returns (bool) {
+        return false;
+    }
+
+    /**
      * @notice Internal function that returns the TCR contract instance for a given klerosBadgeModel
      * @param badgeId the klerosBadgeId
      */

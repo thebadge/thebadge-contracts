@@ -45,4 +45,6 @@ interface IBadgeModelController {
     function isBadgeModelMetadataUpdatable() external view returns (bool);
 
     function isAutomaticClaimable() external view returns (bool);
+
+    function isMintableOnBehalf() external pure returns (bool);
 }

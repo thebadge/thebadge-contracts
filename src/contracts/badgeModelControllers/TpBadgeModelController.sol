@@ -387,6 +387,13 @@ contract TpBadgeModelController is
     }
 
     /**
+     * @notice It's true if this badgeModel can be minted on behalf of the creator
+     */
+    function isMintableOnBehalf() external pure returns (bool) {
+        return true;
+    }
+
+    /**
      * @notice Internal function that returns the TCR contract instance for a given badgeId
      * @param badgeId the badgeId
      */

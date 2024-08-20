@@ -152,7 +152,7 @@ contract TheBadge is
     }
 
     /*
- * @notice Receives a badgeModel, and user account, the token data ipfsURI and the controller's data and mints the badge for the user on behalf of the minter
+     * @notice Receives a badgeModel, and user account, the token data ipfsURI and the controller's data and mints the badge for the user on behalf of the minter
      * @param badgeModelId id of theBadgeModel
      * @param account the recipient address of the badge, if empty and it's allowed, its stored on the controller's address until its claimed
      * @param tokenURI url of the data of the token stored in IPFS
@@ -201,7 +201,13 @@ contract TheBadge is
         }
     }
 
-    function mintLogic(uint256 badgeModelId, address account, string memory tokenURI, bytes memory data, bool onBehalfMint) internal {
+    function mintLogic(
+        uint256 badgeModelId,
+        address account,
+        string memory tokenURI,
+        bytes memory data,
+        bool onBehalfMint
+    ) internal {
         // Re-declaring variables reduces the stack tree and avoid compilation errors
         uint256 _badgeModelId = badgeModelId;
         address _account = account;
@@ -229,6 +235,12 @@ contract TheBadge is
                 revert LibTheBadge.TheBadge__requestBadge_badgeNotMintable();
             }
             _mintingAccount = _badgeModelController.controller;
+        }
+
+        if (onBehalfMint) {
+            if (!controller.isMintableOnBehalf()) {
+                revert LibTheBadge.TheBadge__requestBadge_badgeNotMintable();
+            }
         }
 
         // save asset info
