@@ -413,7 +413,7 @@ contract TheBadge is
         emit PaymentMade(
             feeCollector,
             _msgSender(),
-            theBadgeFee,
+            theBadgeFee, // The claimBadgeProtocolFee is not show because is not a fee, the money is still owed to the minter
             LibTheBadge.PaymentType.ProtocolFee,
             _badgeModelId,
             "0x"
