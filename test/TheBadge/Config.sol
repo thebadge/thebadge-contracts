@@ -15,10 +15,12 @@ import { TpBadgeModelController } from "../../src/contracts/badgeModelController
 
 contract Config is Test {
     address admin = vm.addr(1);
+    address tpMinter = vm.addr(6);
     address feeCollector = vm.addr(2);
     address u1 = vm.addr(3);
     address u2 = vm.addr(4);
     bytes32 tpMinterRole = keccak256("TP_MINTER_ROLE");
+    bytes32 adminRole = 0x00;
 
     TheBadgeStore badgeStore;
     TheBadge theBadge;
@@ -41,6 +43,7 @@ contract Config is Test {
         vm.deal(u1, 1 ether);
         vm.deal(u2, 1 ether);
         vm.deal(admin, 1 ether);
+        vm.deal(tpMinter, 1 ether);
         vm.deal(feeCollector, 0 ether);
 
         address badgeUsersStoreProxy = Clones.clone(address(new TheBadgeUsersStore()));
@@ -91,7 +94,10 @@ contract Config is Test {
 
         // Finally gives the role TP_MINTER_ROLE to the contract TheBadgeModels to allow it to call mintOnBehalf method for thirdParty badges
         vm.prank(admin);
-        theBadge.grantRole(tpMinterRole, address(admin));
+        theBadge.grantRole(tpMinterRole, address(tpMinter));
+        vm.prank(admin);
+        // This is for hasBadgeModelRoleTpMinter to work within the tpBadgeModelControllerInstance
+        tpBadgeModelControllerStoreInstance.grantRole(tpMinterRole, address(tpMinter));
     }
 
     function setUpControllers() public {

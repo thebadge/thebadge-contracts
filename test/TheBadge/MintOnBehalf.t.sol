@@ -134,16 +134,56 @@ contract Mint is Config {
         uint256 controllerMintValue = klerosBadgeModelControllerInstance.mintValue(badgeModelId);
         assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
 
-        vm.expectRevert(LibTheBadge.TheBadge__requestBadge_badgeNotMintable.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, admin, tpMinterRole)
+        );
 
         vm.prank(admin);
         // Executes the mint
         theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, u1, tokenURI, mintData);
     }
 
-    function testWorksWithThirdPartyWithRecipientOnBehalf() public {
+    function testKlerosCantBeMintedOnBehalfWithTpMinterRoleAccount() public {
         // register user
         // U1 is the creator; U2 is the minter
+        vm.prank(u1);
+        badgeUsers.registerUser("user metadata", false);
+
+        uint256 claimProtocolFee = 0.0004e18;
+
+        // Setups the claim protocol fee
+        vm.prank(admin);
+        theBadge.updateClaimBadgeProtocolFee(claimProtocolFee);
+        klerosBadgeModelSetup(0.1e18);
+
+        KlerosBadgeModelControllerStore.MintParams memory mintKlerosData = KlerosBadgeModelControllerStore.MintParams({
+            evidence: "ipfs://evidence"
+        });
+
+        uint256 badgeModelId = 0;
+        string memory tokenURI = "ipfs://metadata";
+        bytes memory mintData = abi.encode(mintKlerosData);
+
+        uint256 mintValue = theBadge.mintValue(badgeModelId);
+        uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
+        uint256 userCreatorInitialBalance = address(u1).balance;
+        uint256 feeCollectorInitialBalance = address(feeCollector).balance;
+        uint256 mintCreatorFee = 0.1e18;
+
+        // Ensures that the controller fee is well calculated
+        uint256 controllerMintValue = klerosBadgeModelControllerInstance.mintValue(badgeModelId);
+        assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
+
+        vm.expectRevert(LibTheBadge.TheBadge__requestBadge_badgeNotMintable.selector);
+
+        vm.prank(tpMinter);
+        // Executes the mint
+        theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, u1, tokenURI, mintData);
+    }
+
+    function testWorksWithThirdPartyWithRecipientOnBehalf() public {
+        // register user
+        // U1 is the creator; U2 is the minter; tpMinter its an special user with tpMinterRole
         vm.prank(u1);
         badgeUsers.registerUser("user metadata", false);
 
@@ -174,19 +214,19 @@ contract Mint is Config {
         uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
         uint256 userCreatorInitialBalance = address(u1).balance;
         uint256 feeCollectorInitialBalance = address(feeCollector).balance;
-        uint256 adminInitialBalance = address(admin).balance;
+        uint256 adminInitialBalance = address(tpMinter).balance;
 
         // Ensures that the controller fee is well calculated
         uint256 controllerMintValue = tpBadgeModelControllerInstance.mintValue(badgeModelId);
         assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
 
         // Executes the mint and sends the badge to the user2
-        vm.prank(admin);
+        vm.prank(tpMinter);
         theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, u2, tokenURI, mintData);
 
         uint256 userCreatorFinalBalance = address(u1).balance;
         uint256 feeCollectorFinalBalance = address(feeCollector).balance;
-        uint256 adminFinalBalance = address(admin).balance;
+        uint256 adminFinalBalance = address(tpMinter).balance;
 
         // Ensures that the TheBadge's fee collector receives his payment
         uint256 theBadgeFees = (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
@@ -257,19 +297,19 @@ contract Mint is Config {
         uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
         uint256 userCreatorInitialBalance = address(u1).balance;
         uint256 feeCollectorInitialBalance = address(feeCollector).balance;
-        uint256 adminInitialBalance = address(admin).balance;
+        uint256 adminInitialBalance = address(tpMinter).balance;
 
         // Ensures that the controller fee is well calculated
         uint256 controllerMintValue = tpBadgeModelControllerInstance.mintValue(badgeModelId);
         assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
 
         // Executes the mint and sends the badge to undefined recipient
-        vm.prank(admin);
+        vm.prank(tpMinter);
         theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, address(0), tokenURI, mintData);
 
         uint256 userCreatorFinalBalance = address(u1).balance;
         uint256 feeCollectorFinalBalance = address(feeCollector).balance;
-        uint256 adminFinalBalance = address(admin).balance;
+        uint256 adminFinalBalance = address(tpMinter).balance;
 
         // Ensures that the TheBadge's fee collector receives his payment
         uint256 theBadgeFees = (mintCreatorFee * mintProtocolFeeInBps) / 10_000;
@@ -305,5 +345,53 @@ contract Mint is Config {
 
         // Ensures that the badgeModel for the badgeModel user now contains 1 badge minted
         assertEq(theBadge.balanceOfBadgeModel(address(tpBadgeModelControllerInstance), 0), 1);
+    }
+
+    function testNotWorksWithThirdPartyOnBehalfWithoutTpRole() public {
+        // register user
+        // U1 is the creator; U2 is the minter; tpMinter its an special user with tpMinterRole
+        vm.prank(u1);
+        badgeUsers.registerUser("user metadata", false);
+
+        // Register the user as third party one
+        vm.prank(u1);
+        badgeUsers.submitUserVerification(tpControllerName, "ipfs://evidenceMetadata.json");
+
+        // Verify the user to be a third party user
+        vm.prank(admin);
+        badgeUsers.executeUserVerification(u1, tpControllerName, true);
+
+        uint256 claimProtocolFee = 0.0004e18;
+
+        // Setups the claim protocol fee
+        vm.prank(admin);
+        theBadge.updateClaimBadgeProtocolFee(claimProtocolFee);
+        thirdPartyBadgeModelSetup(0.1e18);
+
+        TpBadgeModelControllerStore.MintParams memory mintThirdPartyData = TpBadgeModelControllerStore.MintParams({
+            badgeDataUri: "ipfs://evidence"
+        });
+
+        uint256 badgeModelId = 0;
+        string memory tokenURI = "ipfs://metadata";
+        bytes memory mintData = abi.encode(mintThirdPartyData);
+        uint256 mintCreatorFee = 0.1e18;
+        uint256 mintValue = theBadge.mintValue(badgeModelId);
+        uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
+        uint256 userCreatorInitialBalance = address(u1).balance;
+        uint256 feeCollectorInitialBalance = address(feeCollector).balance;
+        uint256 adminInitialBalance = address(tpMinter).balance;
+
+        // Ensures that the controller fee is well calculated
+        uint256 controllerMintValue = tpBadgeModelControllerInstance.mintValue(badgeModelId);
+        assertEq(mintValue, controllerMintValue + mintCreatorFee + claimProtocolFee);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, u1, tpMinterRole)
+        );
+
+        // Executes the mint and sends the badge to the user2
+        vm.prank(u1);
+        theBadge.mintOnBehalf{ value: mintValue }(badgeModelId, u2, tokenURI, mintData);
     }
 }
