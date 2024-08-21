@@ -145,8 +145,6 @@ const verifyControllers = async (hre: HardhatRuntimeEnvironment) => {
       constructorArguments: [],
     });
   }
-
-  await tenderlyVerifyControllers(hre);
 };
 
 const verifyMainContracts = async (hre: HardhatRuntimeEnvironment) => {
@@ -192,8 +190,6 @@ const verifyMainContracts = async (hre: HardhatRuntimeEnvironment) => {
     address: theBadgeModels,
     constructorArguments: [],
   });
-
-  await tenderlyVerifyMainContracts(hre);
 };
 
 async function main() {
@@ -205,9 +201,11 @@ async function main() {
 
   console.log("Verifying main contracts...");
   await verifyMainContracts(hre);
+  await tenderlyVerifyMainContracts(hre);
 
   console.log("Verifying controllers...");
   await verifyControllers(hre);
+  await tenderlyVerifyControllers(hre);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
