@@ -85,9 +85,6 @@ contract Mint is Config {
         bytes memory mintData = abi.encode(mintKlerosData);
 
         uint256 mintValue = theBadge.mintValue(badgeModelId);
-        uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
-        uint256 userCreatorInitialBalance = address(u1).balance;
-        uint256 feeCollectorInitialBalance = address(feeCollector).balance;
         uint256 mintCreatorFee = 0.1e18;
 
         // Ensures that the controller fee is well calculated
@@ -125,9 +122,6 @@ contract Mint is Config {
         bytes memory mintData = abi.encode(mintKlerosData);
 
         uint256 mintValue = theBadge.mintValue(badgeModelId);
-        uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
-        uint256 userCreatorInitialBalance = address(u1).balance;
-        uint256 feeCollectorInitialBalance = address(feeCollector).balance;
         uint256 mintCreatorFee = 0.1e18;
 
         // Ensures that the controller fee is well calculated
@@ -165,9 +159,6 @@ contract Mint is Config {
         bytes memory mintData = abi.encode(mintKlerosData);
 
         uint256 mintValue = theBadge.mintValue(badgeModelId);
-        uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
-        uint256 userCreatorInitialBalance = address(u1).balance;
-        uint256 feeCollectorInitialBalance = address(feeCollector).balance;
         uint256 mintCreatorFee = 0.1e18;
 
         // Ensures that the controller fee is well calculated
@@ -377,10 +368,6 @@ contract Mint is Config {
         bytes memory mintData = abi.encode(mintThirdPartyData);
         uint256 mintCreatorFee = 0.1e18;
         uint256 mintValue = theBadge.mintValue(badgeModelId);
-        uint256 mintProtocolFeeInBps = badgeStore.mintBadgeProtocolDefaultFeeInBps();
-        uint256 userCreatorInitialBalance = address(u1).balance;
-        uint256 feeCollectorInitialBalance = address(feeCollector).balance;
-        uint256 adminInitialBalance = address(tpMinter).balance;
 
         // Ensures that the controller fee is well calculated
         uint256 controllerMintValue = tpBadgeModelControllerInstance.mintValue(badgeModelId);
