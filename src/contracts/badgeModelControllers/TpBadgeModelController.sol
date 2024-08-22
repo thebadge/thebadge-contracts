@@ -86,7 +86,8 @@ contract TpBadgeModelController is
         bool isOwner = tpBadgeModelControllerStore.isBadgeModelOwner(badgeModelId, callee);
         if (!isOwner) {
             bool isAdministrator = tpBadgeModelControllerStore.isBadgeModelAdministrator(badgeModelId, callee);
-            if (!isAdministrator) {
+            bool isTpMinter = tpBadgeModelControllerStore.hasBadgeModelRoleTpMinter(callee);
+            if (!isAdministrator && !isTpMinter) {
                 revert LibTpBadgeModelController.ThirdPartyModelController__store_OperationNotPermitted();
             }
         }
@@ -382,6 +383,13 @@ contract TpBadgeModelController is
      * In this model, the badges are available to claim right after the mint
      */
     function isAutomaticClaimable() external pure returns (bool) {
+        return true;
+    }
+
+    /**
+     * @notice It's true if this badgeModel can be minted on behalf of the creator
+     */
+    function isMintableOnBehalf() external pure returns (bool) {
         return true;
     }
 

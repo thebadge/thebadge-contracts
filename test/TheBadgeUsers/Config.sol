@@ -2,12 +2,12 @@ pragma solidity ^0.8.20;
 
 import { Test } from "forge-std/Test.sol";
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
-import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
-import { TheBadgeUsersStore } from "../../src/contracts/thebadge/TheBadgeUsersStore.sol";
-import { TheBadgeUsers } from "../../src/contracts/thebadge/TheBadgeUsers.sol";
-import { TheBadgeModels } from "../../src/contracts/thebadge/TheBadgeModels.sol";
-import { KlerosBadgeModelController } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
-import { KlerosBadgeModelControllerStore } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
+import { TheBadgeStore } from "contracts/thebadge/TheBadgeStore.sol";
+import { TheBadgeUsersStore } from "contracts/thebadge/TheBadgeUsersStore.sol";
+import { TheBadgeUsers } from "contracts/thebadge/TheBadgeUsers.sol";
+import { TheBadgeModels } from "contracts/thebadge/TheBadgeModels.sol";
+import { KlerosBadgeModelController } from "contracts/badgeModelControllers/KlerosBadgeModelController.sol";
+import { KlerosBadgeModelControllerStore } from "contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
 
 import { LibTheBadgeUsers } from "../../src/contracts/libraries/LibTheBadgeUsers.sol";
 import { LibTheBadge } from "../../src/contracts/libraries/LibTheBadge.sol";
@@ -27,10 +27,10 @@ contract Config is Test {
     TheBadgeUsersStore badgeUsersStore;
     KlerosBadgeModelController public klerosBadgeModelControllerInstance;
     KlerosBadgeModelControllerStore public klerosBadgeModelControllerStoreInstance;
-    // TCR Factory address in goerli
-    address public _tcrFactory = 0x55A3d9Bd99F286F1817CAFAAB124ddDDFCb0F314;
-    // Kleros arbitrator address in goerli
-    address public _arbitrator = 0x1128eD55ab2d796fa92D2F8E1f336d745354a77A;
+    // TCR Factory address in sepolia
+    address public _tcrFactory = 0x3FB8314C628E9afE7677946D3E23443Ce748Ac17;
+    // Kleros arbitrator address in sepolia
+    address public _arbitrator = 0x90992fb4E15ce0C59aEFfb376460Fda4Ee19C879;
 
     event UserRegistered(address indexed user, string metadata);
     event PaymentMade(

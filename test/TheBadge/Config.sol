@@ -15,9 +15,12 @@ import { TpBadgeModelController } from "../../src/contracts/badgeModelController
 
 contract Config is Test {
     address admin = vm.addr(1);
+    address tpMinter = vm.addr(6);
     address feeCollector = vm.addr(2);
     address u1 = vm.addr(3);
     address u2 = vm.addr(4);
+    bytes32 tpMinterRole = keccak256("TP_MINTER_ROLE");
+    bytes32 adminRole = 0x00;
 
     TheBadgeStore badgeStore;
     TheBadge theBadge;
@@ -31,14 +34,16 @@ contract Config is Test {
 
     string public klerosControllerName = "kleros";
     string public tpControllerName = "thirdParty";
-    // TCR Factory address in goerli
-    address public _tcrFactory = 0x55A3d9Bd99F286F1817CAFAAB124ddDDFCb0F314;
-    // Kleros arbitrator address in goerli
-    address public _arbitrator = 0x1128eD55ab2d796fa92D2F8E1f336d745354a77A;
+    // TCR Factory address in sepolia
+    address public _tcrFactory = 0x3FB8314C628E9afE7677946D3E23443Ce748Ac17;
+    // Kleros arbitrator address in sepolia
+    address public _arbitrator = 0x90992fb4E15ce0C59aEFfb376460Fda4Ee19C879;
 
     function setUp() public {
         vm.deal(u1, 1 ether);
         vm.deal(u2, 1 ether);
+        vm.deal(admin, 1 ether);
+        vm.deal(tpMinter, 1 ether);
         vm.deal(feeCollector, 0 ether);
 
         address badgeUsersStoreProxy = Clones.clone(address(new TheBadgeUsersStore()));
@@ -81,11 +86,18 @@ contract Config is Test {
         badgeModels.addBadgeModelController(tpControllerName, address(tpBadgeModelControllerInstance));
         vm.stopPrank();
 
-        // Finally gives the role USER_MANAGER_ROLE to the contract TheBadgeModels to allow it to call the method makeUserCreator on the contract TheBadgeUsers
+        // Gives the role USER_MANAGER_ROLE to the contract TheBadgeModels to allow it to call the method makeUserCreator on the contract TheBadgeUsers
         // Fore more details you can check the 01_deploy.ts script inside the /script folder
         bytes32 managerRole = keccak256("USER_MANAGER_ROLE");
         vm.prank(admin);
         badgeUsers.grantRole(managerRole, address(badgeModels));
+
+        // Finally gives the role TP_MINTER_ROLE to the contract TheBadgeModels to allow it to call mintOnBehalf method for thirdParty badges
+        vm.prank(admin);
+        theBadge.grantRole(tpMinterRole, address(tpMinter));
+        vm.prank(admin);
+        // This is for hasBadgeModelRoleTpMinter to work within the tpBadgeModelControllerInstance
+        tpBadgeModelControllerStoreInstance.grantRole(tpMinterRole, address(tpMinter));
     }
 
     function setUpControllers() public {

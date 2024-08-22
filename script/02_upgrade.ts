@@ -86,8 +86,10 @@ const upgradeKlerosControllers = async (hre: HardhatRuntimeEnvironment): Promise
   const { ethers, network } = hre;
   const chainId = network.config.chainId;
 
-  if (chainId === Chains.polygon || chainId === Chains.mumbai) {
-    console.warn("Upgrading kleros on Polygon is not allowed, ignoring kleros upgrade...");
+  if (chainId !== Chains.gnosis && chainId !== Chains.sepolia) {
+    console.warn(
+      "Upgrading kleros on any other chain than sepolia or gnosis is not allowed, ignoring kleros upgrade...",
+    );
     return [];
   }
 

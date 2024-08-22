@@ -31,7 +31,7 @@ const tenderlyVerifyControllers = async (hre: HardhatRuntimeEnvironment) => {
   ];
   await tenderly.verify(...deployedTpControllerContracts);
 
-  if (chainId !== Chains.gnosis && chainId == Chains.sepolia) {
+  if (chainId !== Chains.gnosis && chainId !== Chains.sepolia) {
     console.log(`Skipping kleros contracts verifications, the network is: ${chainId}...`);
     return;
   }
@@ -124,7 +124,11 @@ const verifyControllers = async (hre: HardhatRuntimeEnvironment) => {
     constructorArguments: [],
   });
 
-  if (chainId !== Chains.polygon && chainId !== Chains.mumbai && chainId !== Chains.avax) {
+  if (chainId !== Chains.gnosis && chainId !== Chains.sepolia) {
+    console.warn(
+      "Verifying kleros on any other chain than sepolia or gnosis is not allowed, ignoring kleros verification...",
+    );
+  } else {
     const klerosBadgeModelControllerDeployedAddress = contracts.KlerosBadgeModelController.address[chainId as Chains];
     const klerosBadgeModelControllerStoreDeployedAddress =
       contracts.KlerosBadgeModelControllerStore.address[chainId as Chains];
@@ -141,8 +145,6 @@ const verifyControllers = async (hre: HardhatRuntimeEnvironment) => {
       constructorArguments: [],
     });
   }
-
-  await tenderlyVerifyControllers(hre);
 };
 
 const verifyMainContracts = async (hre: HardhatRuntimeEnvironment) => {
@@ -188,8 +190,6 @@ const verifyMainContracts = async (hre: HardhatRuntimeEnvironment) => {
     address: theBadgeModels,
     constructorArguments: [],
   });
-
-  await tenderlyVerifyMainContracts(hre);
 };
 
 async function main() {
@@ -201,9 +201,11 @@ async function main() {
 
   console.log("Verifying main contracts...");
   await verifyMainContracts(hre);
+  await tenderlyVerifyMainContracts(hre);
 
   console.log("Verifying controllers...");
   await verifyControllers(hre);
+  await tenderlyVerifyControllers(hre);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

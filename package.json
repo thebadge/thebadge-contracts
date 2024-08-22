@@ -1,13 +1,13 @@
 {
   "name": "hardhat-project",
   "license": "BUSL-1.1",
-  "version": "2.3.5",
+  "version": "2.3.6",
   "scripts": {
     "forge": "forge",
     "build": "forge build",
     "clean": "forge clean",
-    "test": "yarn forge test -vvv --via-ir --fork-url https://rpc.ankr.com/eth_sepolia --fork-block-number 3044182",
-    "test:all": "yarn forge test -vv --fork-url $(grep ALCHEMY_ENDPOINT_URL .env | cut -d '=' -f2) --fork-block-number 3044182",
+    "test": "FOUNDRY_PROFILE=test forge test -vvv --fork-url https://rpc.ankr.com/eth_sepolia --fork-block-number 4644183",
+    "test:all": "FOUNDRY_PROFILE=test forge test -vv --via-ir --fork-url $(grep ALCHEMY_ENDPOINT_URL .env | cut -d '=' -f2) --fork-block-number 4644183",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json \"src/**/*.sol\"",
     "lint:ts": "eslint --config ./.eslintrc.js --ignore-path ./.eslintignore --ext .js,.ts .",
@@ -29,7 +29,13 @@
     "verify:polygon": "hardhat run --network polygon ./script/03_verify.ts",
     "deploy:mumbai": "hardhat run --network mumbai ./script/01_deploy.ts",
     "upgrade:mumbai": "hardhat run --network mumbai ./script/02_upgrade.ts",
-    "verify:mumbai": "hardhat run --network mumbai ./script/03_verify.ts"
+    "verify:mumbai": "hardhat run --network mumbai ./script/03_verify.ts",
+    "deploy:avax": "hardhat run --network snowtrace ./script/01_deploy.ts",
+    "upgrade:avax": "hardhat run --network snowtrace ./script/02_upgrade.ts",
+    "verify:avax": "hardhat run --network snowtrace ./script/03_verify.ts",
+    "deploy:opt": "hardhat run --network optimism ./script/01_deploy.ts",
+    "upgrade:opt": "hardhat run --network optimism ./script/02_upgrade.ts",
+    "verify:opt": "hardhat run --network optimism ./script/03_verify.ts"
   },
   "dependencies": {
     "@kleros/erc-792": "^8.0.0",

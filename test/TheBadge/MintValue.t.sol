@@ -2,12 +2,12 @@
 pragma solidity ^0.8.20;
 
 import { Config } from "./Config.sol";
-import { TheBadgeStore } from "../../src/contracts/thebadge/TheBadgeStore.sol";
+import { TheBadgeStore } from "contracts/thebadge/TheBadgeStore.sol";
 import { IBadgeModelController } from "../../src/interfaces/IBadgeModelController.sol";
-import { KlerosBadgeModelController } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelController.sol";
-import { KlerosBadgeModelControllerStore } from "../../../src/contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
-import { TpBadgeModelController } from "../../../src/contracts/badgeModelControllers/TpBadgeModelController.sol";
-import { TpBadgeModelControllerStore } from "../../../src/contracts/badgeModelControllers/TpBadgeModelControllerStore.sol";
+import { KlerosBadgeModelController } from "contracts/badgeModelControllers/KlerosBadgeModelController.sol";
+import { KlerosBadgeModelControllerStore } from "contracts/badgeModelControllers/KlerosBadgeModelControllerStore.sol";
+import { TpBadgeModelController } from "contracts/badgeModelControllers/TpBadgeModelController.sol";
+import { TpBadgeModelControllerStore } from "contracts/badgeModelControllers/TpBadgeModelControllerStore.sol";
 
 contract MintValue is Config {
     function testWorksKlerosWithoutMintCreatorFee() public {

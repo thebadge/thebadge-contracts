@@ -1,6 +1,21 @@
-[profile.default]
+[profile.default] # This is the profile for normal building & deployment, takes a lot of time to compile
 src = 'src'
 out = 'out'
 libs = ['lib']
+viaIR = true
+cache_path = "forge-cache"
+solc_version = '0.8.20'
+optimizer = true
+optimizer_runs = 100
+
+[profile.test] # This is an optimized profile for running tests, compiles are faster but can't be used for deployment
+src = 'src'
+out = 'out'
+libs = ['lib']
+viaIR = true
+cache_path = "forge-cache"
+solc_version = '0.8.20'
+optimizer = true
+optimizer_runs = 100
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
